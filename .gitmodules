@@ -1,0 +1,18 @@
+[submodule "external/lua/lua-5.4.7/assets/fonts/JetBrainsMono"]
+	path = external/lua/lua-5.4.7/assets/fonts/JetBrainsMono
+	url = https://github.com/JetBrains/JetBrainsMono
+[submodule "external/lua/lua-5.4.7/assets/fonts/lexend"]
+	path = external/lua/lua-5.4.7/assets/fonts/lexend
+	url = https://github.com/googlefonts/lexend
+[submodule "external/clay"]
+	path = external/clay
+	url = https://github.com/nicbarker/clay
+[submodule "external/lua/lua-5.4.7"]
+	path = external/lua/lua-5.4.7
+	url = https://github.com/lua/lua
+[submodule "assets/fonts/JetBrainsMono"]
+	path = assets/fonts/JetBrainsMono
+	url = https://github.com/JetBrains/JetBrainsMono
+[submodule "assets/fonts/lexend"]
+	path = assets/fonts/lexend
+	url = https://github.com/googlefonts/lexend
