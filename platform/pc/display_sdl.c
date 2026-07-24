@@ -60,6 +60,7 @@ bool display_init(Display *display, CyberwatchData *data) {
 }
 
 void display_shutdown(Display *display) {
+    printf("shutting down SDL...\n");
     SdlBackend *backend = display->backend;
     if (!backend) return;
 
@@ -73,31 +74,9 @@ void display_shutdown(Display *display) {
     display->backend = NULL;
 
     TTF_Quit();
+    printf("SDL shutdown\n");
 }
 
-bool display_poll_events(Display *display, bool *running) {
-    SDL_PumpEvents();
-    int count = SDL_PeepEvents(NULL, 0, SDL_PEEKEVENT, SDL_EVENT_FIRST, SDL_EVENT_LAST);
-    if (count <= 0) {
-        return true; 
-    }
-    SDL_Event *events = malloc(sizeof(SDL_Event) * count);
-    if (!events) {
-        return false;
-    }
-    int retrieved = SDL_PeepEvents(events, count, SDL_PEEKEVENT, SDL_EVENT_FIRST, SDL_EVENT_LAST);
-    for (int i = 0; i < retrieved; i++) {
-        if (events[i].type == SDL_EVENT_QUIT) {
-            *running = false;
-        }
-        if (events[i].type == SDL_EVENT_WINDOW_RESIZED) {
-            display->width = events[i].window.data1;
-            display->height = events[i].window.data2;
-        }
-    }
-    free(events);
-    return true;
-}
 
 DisplaySize display_get_size(Display *display) {
     return (DisplaySize) { display->width, display->height };
@@ -187,4 +166,22 @@ Clay_Dimensions display_measure_text(Clay_StringSlice text, Clay_TextElementConf
     TTF_SetFontSize(font, config->fontSize);
     TTF_GetStringSize(font, text.chars, text.length, &width, &height);
     return (Clay_Dimensions) { (float) width, (float) height };
+}
+
+float get_delta(void) {
+    static Uint64 lastTime = 0;
+    static Uint64 frequency = 0;
+    if (frequency == 0) {
+        frequency = SDL_GetPerformanceFrequency();
+        lastTime = SDL_GetPerformanceCounter();
+        return 0.0;
+    }
+    Uint64 currentTime = SDL_GetPerformanceCounter();
+    Uint64 elapsedTicks = currentTime - lastTime;
+    double deltaTime = (double)elapsedTicks / (double)frequency;
+    if (deltaTime > 0.1) {
+        deltaTime = 0.1;
+    }
+    lastTime = currentTime;
+    return deltaTime;
 }

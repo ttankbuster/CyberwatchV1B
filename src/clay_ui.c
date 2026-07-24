@@ -88,6 +88,7 @@ void read_time_date(CyberwatchData* data){
 }
 
 Clay_RenderCommandArray clay_cyberwatch(CyberwatchData* data, int width, int height, bool show_debug) {
+    float deltaTime = get_delta();
     int debugOpacity;
     if (show_debug){
         debugOpacity = 255;
@@ -194,9 +195,10 @@ Clay_RenderCommandArray clay_cyberwatch(CyberwatchData* data, int width, int hei
         }) {}
     }
 
-    return Clay_EndLayout();
+    return Clay_EndLayout(deltaTime);
 }
 Clay_RenderCommandArray clay_battery_only(BatteryData *battery, int width, int height) {
+    float deltaTime = get_delta();
     int debugOpacity = 255;
     Clay_Dimensions batteryDimensions = (Clay_Dimensions) { (float) width/1.5, (float) height/1.5 };
     Clay_Sizing expand = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) };
@@ -210,7 +212,7 @@ Clay_RenderCommandArray clay_battery_only(BatteryData *battery, int width, int h
     }) {
         showBattery(*battery, batteryDimensions);
     }
-    return Clay_EndLayout();
+    return Clay_EndLayout(deltaTime);
 }
 
 

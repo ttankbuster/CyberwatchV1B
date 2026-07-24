@@ -24,20 +24,20 @@ int main(int argc, char **argv) {
 
     DisplaySize initialSize = display_get_size(&display);
     clay_ui_init(MAXIMUM_ELEMENTS, display_measure_text, &display, initialSize.width, initialSize.height);
-
+    
     if (!cyan_init(&cyan, "cyan/apps/hello_cyan/hello_cyan.lua")) {
         printf("Failed to initialise Cyan\n");
         display_shutdown(&display);
         return 1;
     }
+    cyan_index_apps(&cyan, &display, "cyan/apps/");
 
     printf("setup complete: starting.\n");
     bool running = true;
     while (running) {
-        update_data(&data);
-        cyan_dispatch_events(&cyan, &data.eventQueue);
+        update_data(&data, &display ,&running); // update_data(CyberwatchData *data, Display *display, bool *running)
 
-        display_poll_events(&display, &running);
+        cyan_dispatch_events(&cyan, &data.eventQueue);
 
         DisplaySize size = display_get_size(&display);
         Clay_RenderCommandArray commands = clay_cyberwatch(&data, size.width, size.height, true);
@@ -47,7 +47,6 @@ int main(int argc, char **argv) {
         display_present(&display);
     }
 
-    printf("SDL - shutdown\n");
     cyan_shutdown(&cyan);
     display_shutdown(&display);
     return 0;

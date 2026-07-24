@@ -4,6 +4,8 @@
 #include <time.h>
 #include <stdbool.h>
 
+typedef struct Display Display;
+
 #define MAX_EVENTS 32
 
 typedef struct {
@@ -41,7 +43,18 @@ typedef struct {
     EventQueue eventQueue;
 } CyberwatchData;
 
-void update_data(CyberwatchData* data);
+#define MAX_FOLDERS 32
+#define MAX_FILE_NAME 64
+#define MAX_FILE_PATH 256
+
+typedef struct {
+    char names[MAX_FOLDERS][MAX_FILE_NAME];
+    int count;
+} FolderList;
+
+FolderList scan_folder(char *path);
+
+void update_data(CyberwatchData *data, Display *display, bool *running);
 
 void platform_resolve_path(const char *relativePath, char *outBuffer, size_t bufferSize);
 

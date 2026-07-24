@@ -24,7 +24,6 @@ typedef enum {
 bool display_init(Display *display, CyberwatchData *data);
 void display_shutdown(Display *display);
 
-bool display_poll_events(Display *display, bool *running);
 DisplaySize display_get_size(Display *display);
 
 void display_clear(Display *display, Clay_Color colour);
@@ -35,6 +34,7 @@ void display_draw_image(Display *display, Clay_BoundingBox box, Clay_ImageRender
 void display_set_clip(Display *display, Clay_BoundingBox box);
 void display_clear_clip(Display *display);
 void display_present(Display *display);
+float get_delta(void);
 
 Clay_Dimensions display_measure_text(Clay_StringSlice text, Clay_TextElementConfig *config, void *userData);
 

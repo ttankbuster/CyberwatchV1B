@@ -2,21 +2,24 @@
 #define CYAN_H
 
 #include <stdbool.h>
-#include "lua.h"
-#include "lualib.h"
-#include "lauxlib.h"
+#include "../external/lua/lua-5.4.7/lua.h"
+#include "../external/lua/lua-5.4.7/lualib.h"
+#include "../external/lua/lua-5.4.7/lauxlib.h"
 #include "display.h"
 #include "data.h"
 #include "clay.h"
 
+#define MAX_APPS 32
+
 typedef struct {
-    char name[32];
-    char author[32];
-    char version[16];
-    char script[64];
-    char icon[64];
+    char name[MAX_FILE_NAME];   // folder name, may be overridden by manifest
+    char path[MAX_FILE_NAME];   // relative path to the app's folder
+    char icon[MAX_FILE_NAME];   // relative path to icon asset, loaded later
+    char entry[MAX_FILE_NAME];  // relative path to the entry script
     void *iconHandle;
 } CyanApp;
+
+
 
 typedef enum {
     CYAN_MODE_HOME,
@@ -27,7 +30,7 @@ typedef enum {
 typedef struct {
     CyanMode mode;
     int selectedApp;
-    CyanApp apps[16];
+    CyanApp apps[MAX_APPS];
     int appCount;
     lua_State *lua;
 } Cyan;

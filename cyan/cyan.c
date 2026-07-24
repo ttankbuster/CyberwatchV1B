@@ -42,6 +42,67 @@ static void push_event_constants(lua_State *L) {
     lua_setglobal(L, "Event");
 }
 
+static bool load_app_manifest(CyanApp *app) {
+    char manifestPath[MAX_FILE_PATH];
+    snprintf(manifestPath, sizeof(manifestPath), "%s/.cyan_app.lua", app->path);
+
+    char resolvedPath[512];
+    platform_resolve_path(manifestPath, resolvedPath, sizeof(resolvedPath));
+
+    lua_State *L = luaL_newstate();
+    if (!L) return false;
+
+    if (luaL_dofile(L, resolvedPath) != LUA_OK) {
+        fprintf(stderr, "Cyan: failed to load manifest '%s': %s\n",
+                resolvedPath, lua_tostring(L, -1));
+        lua_close(L);
+        return false;
+    }
+
+    if (!lua_istable(L, -1)) {
+        fprintf(stderr, "Cyan: manifest '%s' did not return a table\n", resolvedPath);
+        lua_close(L);
+        return false;
+    }
+
+    #define READ_STRING_FIELD(field, dest) \
+        lua_getfield(L, -1, field); \
+        if (lua_isstring(L, -1)) { \
+            snprintf(dest, sizeof(dest), "%s", lua_tostring(L, -1)); \
+        } \
+        lua_pop(L, 1);
+
+    READ_STRING_FIELD("name", app->name)   // overrides folder name if manifest sets one
+    READ_STRING_FIELD("icon", app->icon)
+    READ_STRING_FIELD("entry", app->entry)
+
+    #undef READ_STRING_FIELD
+
+    lua_close(L);
+    return true;
+}
+
+void cyan_index_apps(Cyan *cyan, Display *display, char *path) {
+    FolderList folders = scan_folder(path);
+
+    cyan->appCount = 0;
+    for (int i = 0; i < folders.count && cyan->appCount < MAX_APPS; i++) {
+        CyanApp app = {0};
+        snprintf(app.name, MAX_FILE_PATH, "%s", folders.names[i]);
+        snprintf(app.path, MAX_FILE_PATH, "%s/%s", path, folders.names[i]);
+
+        if (load_app_manifest(&app)) {
+            cyan->apps[cyan->appCount] = app;
+            cyan->appCount++;
+        } else {
+            fprintf(stderr, "Cyan: skipping '%s' — no valid .cyan_app.lua\n", folders.names[i]);
+        }
+    }
+
+    printf("Cyan: indexed %d app(s)\n", cyan->appCount);
+}
+
+
 bool cyan_init(Cyan *cyan, const char *appScriptPath) {
     char resolvedPath[512];
     platform_resolve_path(appScriptPath, resolvedPath, sizeof(resolvedPath));
