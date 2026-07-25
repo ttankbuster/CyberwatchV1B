@@ -5,8 +5,8 @@
 #include "../external/lua/lua-5.4.7/lua.h"
 #include "../external/lua/lua-5.4.7/lualib.h"
 #include "../external/lua/lua-5.4.7/lauxlib.h"
-#include "display.h"
-#include "data.h"
+#include "../../src/display.h"
+#include "../../src/data.h"
 #include "clay.h"
 
 #define MAX_APPS 32

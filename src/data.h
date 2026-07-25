@@ -4,9 +4,10 @@
 #include <time.h>
 #include <stdbool.h>
 
+#define MAX_EVENTS 32
+
 typedef struct Display Display;
 
-#define MAX_EVENTS 32
 
 typedef struct {
     float charge;
@@ -35,7 +36,7 @@ typedef struct {
     int len;
 } EventQueue;
 
-typedef struct {
+typedef struct CyberwatchData {
     BatteryData battery;
     struct tm time;
     char timeChars[6];

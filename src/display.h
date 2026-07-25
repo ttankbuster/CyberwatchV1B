@@ -3,10 +3,11 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "data.h"
 #include "clay.h"
 
-typedef struct {
+typedef struct CyberwatchData CyberwatchData;
+
+typedef struct Display {
     int width;
     int height;
     void *backend;

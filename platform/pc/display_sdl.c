@@ -1,4 +1,5 @@
 //display.c
+#include "../../src/data.h"
 #include "../../src/display.h"
 
 #include <stdlib.h>
