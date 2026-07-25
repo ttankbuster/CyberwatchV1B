@@ -1,2 +1,2 @@
 # CyberwatchV1B
-use `git clone --recurse-submodules` for installation.
+use `git clone --recurse-submodules https://github.com/ttankbuster/CyberwatchV1B.git` for installation.
