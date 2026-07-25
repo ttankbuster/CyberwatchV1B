@@ -25,12 +25,11 @@ int main(int argc, char **argv) {
     DisplaySize initialSize = display_get_size(&display);
     clay_ui_init(MAXIMUM_ELEMENTS, display_measure_text, &display, initialSize.width, initialSize.height);
     
-    if (!cyan_init(&cyan, "cyan/apps/hello_cyan/hello_cyan.lua")) {
+    if (!cyan_init(&cyan)) {
         printf("Failed to initialise Cyan\n");
         display_shutdown(&display);
         return 1;
     }
-    cyan_index_apps(&cyan, &display, "cyan/apps/");
 
     printf("setup complete: starting.\n");
     bool running = true;
@@ -40,8 +39,8 @@ int main(int argc, char **argv) {
         cyan_dispatch_events(&cyan, &data.eventQueue);
 
         DisplaySize size = display_get_size(&display);
-        Clay_RenderCommandArray commands = clay_cyberwatch(&data, size.width, size.height, true);
-
+        // Clay_RenderCommandArray commands = clay_cyberwatch(&data, size.width, size.height, true);
+        Clay_RenderCommandArray commands = clay_cyan(&data, &cyan, size.width, size.height, false);
         display_clear(&display, (Clay_Color) {0, 0, 0, 255});
         clay_render(&display, &commands, false);
         display_present(&display);

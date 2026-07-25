@@ -58,5 +58,4 @@ FolderList scan_folder(char *path);
 void update_data(CyberwatchData *data, Display *display, bool *running);
 
 void platform_resolve_path(const char *relativePath, char *outBuffer, size_t bufferSize);
-
 #endif

@@ -16,10 +16,6 @@ static int cyan_print(lua_State *L) {
     return 0;
 }
 
-// Registers a global "Event" table so app scripts can write
-// `if type == Event.BUTTON1_DOWN then ... end` rather than magic numbers.
-// Keep this list in sync with the EventType enum in data.h by hand for now —
-// worth code-generating later once there are more event types.
 static void push_event_constants(lua_State *L) {
     lua_newtable(L);
 
@@ -44,6 +40,7 @@ static void push_event_constants(lua_State *L) {
 
 static bool load_app_manifest(CyanApp *app) {
     char manifestPath[MAX_FILE_PATH];
+    // printf("Cyan: loading manifest for '%s'\n", app->path);
     snprintf(manifestPath, sizeof(manifestPath), "%s/.cyan_app.lua", app->path);
 
     char resolvedPath[512];
@@ -53,8 +50,7 @@ static bool load_app_manifest(CyanApp *app) {
     if (!L) return false;
 
     if (luaL_dofile(L, resolvedPath) != LUA_OK) {
-        fprintf(stderr, "Cyan: failed to load manifest '%s': %s\n",
-                resolvedPath, lua_tostring(L, -1));
+        fprintf(stderr, "Cyan: failed to load manifest '%s': %s\n", resolvedPath, lua_tostring(L, -1));
         lua_close(L);
         return false;
     }
@@ -74,7 +70,7 @@ static bool load_app_manifest(CyanApp *app) {
 
     READ_STRING_FIELD("name", app->name)   // overrides folder name if manifest sets one
     READ_STRING_FIELD("icon", app->icon)
-    READ_STRING_FIELD("entry", app->entry)
+    READ_STRING_FIELD("script", app->script)
 
     #undef READ_STRING_FIELD
 
@@ -82,7 +78,7 @@ static bool load_app_manifest(CyanApp *app) {
     return true;
 }
 
-void cyan_index_apps(Cyan *cyan, Display *display, char *path) {
+void cyan_index_apps(Cyan *cyan, char *path) {
     FolderList folders = scan_folder(path);
 
     cyan->appCount = 0;
@@ -94,29 +90,26 @@ void cyan_index_apps(Cyan *cyan, Display *display, char *path) {
         if (load_app_manifest(&app)) {
             cyan->apps[cyan->appCount] = app;
             cyan->appCount++;
-        } else {
-            fprintf(stderr, "Cyan: skipping '%s' — no valid .cyan_app.lua\n", folders.names[i]);
-        }
+        } /* else {
+            fprintf(stderr, "Cyan: skipping '%s', no valid .cyan_app.lua\n", folders.names[i]);
+        } */
     }
 
     printf("Cyan: indexed %d app(s)\n", cyan->appCount);
+    for (int i = 0; i < cyan->appCount; i++) {
+        printf("  %d: %s (script: %s, icon: %s, path: %s)\n", i, cyan->apps[i].name, cyan->apps[i].script, cyan->apps[i].icon, cyan->apps[i].path   );
+    }
 }
 
 
-bool cyan_init(Cyan *cyan, const char *appScriptPath) {
-    char resolvedPath[512];
-    platform_resolve_path(appScriptPath, resolvedPath, sizeof(resolvedPath));
-
-    cyan->mode = CYAN_MODE_RUNNING_APP;
+bool cyan_init(Cyan *cyan) {
+    cyan->mode = CYAN_MODE_LOADING;
     cyan->selectedApp = -1;
     cyan->appCount = 0;
 
     cyan->lua = luaL_newstate();
     if (!cyan->lua) return false;
     lua_State *L = cyan->lua;
-
-    // Deliberately minimal, not luaL_openlibs — apps are sandboxed, they
-    // don't get filesystem/os access unless explicitly granted later.
     luaL_requiref(L, "_G", luaopen_base, 1);
     lua_pop(L, 1);
 
@@ -128,24 +121,11 @@ bool cyan_init(Cyan *cyan, const char *appScriptPath) {
     lua_gc(L, LUA_GCSETSTEPMUL, 300);
     lua_gc(L, LUA_GCSETPAUSE, 100);
 
-    // Runs the script's top-level code once — this is where the app
-    // defines its on_event() (and later on_draw(), etc.) functions.
-    // It must NOT block (no while-true loops in the script itself);
-    // the actual run loop lives in C, driven by cyan_dispatch_events.
-    if (luaL_dofile(L, resolvedPath) != LUA_OK) {
-        fprintf(stderr, "Cyan: failed to load '%s': %s\n", resolvedPath, lua_tostring(L, -1));
-        lua_pop(L, 1);
-        lua_close(L);
-        cyan->lua = NULL;
-        return false;
-    }
+    cyan_index_apps(cyan, "cyan/apps");
 
     return true;
 }
 
-// Calls the app's global on_event(type) for every event
-// queued this frame. Missing on_event is fine — treated as "app doesn't
-// care about input," not an error.
 void cyan_dispatch_events(Cyan *cyan, EventQueue *queue) {
     if (!cyan->lua) return;
     lua_State *L = cyan->lua;
@@ -156,7 +136,7 @@ void cyan_dispatch_events(Cyan *cyan, EventQueue *queue) {
         lua_getglobal(L, "on_event");
         if (!lua_isfunction(L, -1)) {
             lua_pop(L, 1);
-            continue; // app hasn't defined a handler — not an error
+            continue;
         }
 
         lua_pushinteger(L, ev->type);
@@ -167,7 +147,7 @@ void cyan_dispatch_events(Cyan *cyan, EventQueue *queue) {
         }
     }
 
-    lua_gc(L, LUA_GCSTEP, 0); // incremental collection, not a full GC every frame
+    lua_gc(L, LUA_GCSTEP, 0);
 }
 
 void cyan_shutdown(Cyan *cyan) {

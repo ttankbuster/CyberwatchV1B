@@ -16,18 +16,20 @@ typedef struct {
     char path[MAX_FILE_NAME];   // relative path to the app's folder
     char icon[MAX_FILE_NAME];   // relative path to icon asset, loaded later
     char entry[MAX_FILE_NAME];  // relative path to the entry script
+    char script[MAX_FILE_NAME]; // optional script value from manifest
     void *iconHandle;
 } CyanApp;
 
 
 
 typedef enum {
-    CYAN_MODE_HOME,
+    CYAN_MODE_LOADING,
+    CYAN_MODE_READY,
     CYAN_MODE_APP_MENU,
     CYAN_MODE_RUNNING_APP,
 } CyanMode;
 
-typedef struct {
+typedef struct Cyan {
     CyanMode mode;
     int selectedApp;
     CyanApp apps[MAX_APPS];
@@ -35,8 +37,8 @@ typedef struct {
     lua_State *lua;
 } Cyan;
 
-void cyan_index_apps(Cyan* cyan, Display* display, char* path);
-bool cyan_init(Cyan *cyan, const char *appScriptPath);
+void cyan_index_apps(Cyan* cyan, char* path);
+bool cyan_init(Cyan *cyan);
 void cyan_dispatch_events(Cyan *cyan, EventQueue *queue);
 void cyan_shutdown(Cyan *cyan);
 

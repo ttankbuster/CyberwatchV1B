@@ -1,7 +1,7 @@
 //clay_ui.c
 #define CLAY_IMPLEMENTATION
 #include "clay_ui.h"
-
+#include "../cyan/cyan.h"
 // layout
 #include <stdint.h>
 #include <stdio.h>
@@ -214,7 +214,53 @@ Clay_RenderCommandArray clay_battery_only(BatteryData *battery, int width, int h
     }
     return Clay_EndLayout(deltaTime);
 }
+Clay_RenderCommandArray clay_cyan(CyberwatchData* data, Cyan *cyan,int width, int height, bool show_debug) {
+    float deltaTime = get_delta();
+    int debugOpacity;
+    if (show_debug){
+        debugOpacity = 255;
+    } else {
+        debugOpacity = 0;
+    }
 
+    Clay_SetLayoutDimensions((Clay_Dimensions) { (float) width, (float) height });
+    Clay_BeginLayout();
+
+    CLAY(CLAY_ID("CyanDisplay"), {
+        .layout = {
+            .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER },
+            .sizing = { .width = CLAY_SIZING_GROW(), .height = CLAY_SIZING_GROW() }
+        }
+    }) {
+        CLAY(CLAY_ID("CyanApps"), {
+            .backgroundColor = BG_COLOR,
+            .layout = { .sizing = { .width = CLAY_SIZING_GROW(), .height = CLAY_SIZING_GROW() } }
+        }) {
+            for (int i = 0; i < cyan->appCount; i++) {
+                CyanApp *app = &cyan->apps[i];
+                CLAY(CLAY_IDI("app", i), {
+                    .backgroundColor = {48,32,24,debugOpacity},
+                    .layout = { .sizing = { .width = CLAY_SIZING_GROW(), .height = CLAY_SIZING_GROW() } }
+                }) {
+                    Clay_String appNameString = {
+                        .isStaticallyAllocated = false,
+                        .length = (int32_t) strlen(app->name),
+                        .chars = app->name,
+                    };
+                    CLAY_TEXT(appNameString, 
+                        CLAY_TEXT_CONFIG({
+                            .fontId = FONT_INFO,
+                            .fontSize = 42,
+                            .textColor = INFO_COLOUR
+                        })
+                    );
+                }
+            }
+        }
+    }
+
+    return Clay_EndLayout(deltaTime);
+}
 
 
 // render
