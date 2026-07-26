@@ -16,6 +16,7 @@ typedef struct {
 
 typedef enum {
     EVENT_NONE,
+    EVENT_DISPLAY_ALTERED,
     EVENT_BUTTON1_UP,
     EVENT_BUTTON1_DOWN,
     EVENT_BUTTON2_UP,
@@ -36,12 +37,19 @@ typedef struct {
     int len;
 } EventQueue;
 
+typedef enum {
+    CYW_HOME,
+    CYW_APP_RUNNING,
+    CYW_CATALOGUE,
+} CyberwatchState;
+
 typedef struct CyberwatchData {
     BatteryData battery;
     struct tm time;
     char timeChars[6];
     char dateChars[13];
     EventQueue eventQueue;
+    CyberwatchState state;
 } CyberwatchData;
 
 #define MAX_FOLDERS 32

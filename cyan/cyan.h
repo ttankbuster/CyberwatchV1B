@@ -5,11 +5,14 @@
 #include "../external/lua/lua-5.4.7/lua.h"
 #include "../external/lua/lua-5.4.7/lualib.h"
 #include "../external/lua/lua-5.4.7/lauxlib.h"
-#include "../../src/display.h"
-#include "../../src/data.h"
-#include "clay.h"
+#include "../src/data.h"
+#include "../src/display.h"
+#include "surface.h"
 
 #define MAX_APPS 32
+
+typedef struct Display Display;
+
 
 typedef struct {
     char name[MAX_FILE_NAME];   // folder name, may be overridden by manifest
@@ -21,24 +24,20 @@ typedef struct {
 } CyanApp;
 
 
-
-typedef enum {
-    CYAN_MODE_LOADING,
-    CYAN_MODE_READY,
-    CYAN_MODE_APP_MENU,
-    CYAN_MODE_RUNNING_APP,
-} CyanMode;
-
 typedef struct Cyan {
-    CyanMode mode;
     int selectedApp;
     CyanApp apps[MAX_APPS];
     int appCount;
-    lua_State *lua;
+    lua_State *appLua;
+    Surface surface;
 } Cyan;
+
 
 void cyan_index_apps(Cyan* cyan, char* path);
 bool cyan_init(Cyan *cyan);
+bool cyan_launch_app(Cyan *cyan, int id, Display *display);
+void cyan_unload_app(Cyan *cyan);
+void cyan_run_frame(Cyan *cyan, Display *display, float dt);
 void cyan_dispatch_events(Cyan *cyan, EventQueue *queue);
 void cyan_shutdown(Cyan *cyan);
 

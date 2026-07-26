@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "clay.h"
+#include "../external/clay/clay.h"
 
 typedef struct CyberwatchData CyberwatchData;
 

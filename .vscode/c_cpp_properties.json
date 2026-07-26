@@ -8,27 +8,27 @@
         {
             "name": "PlatformIO",
             "includePath": [
-                "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B",
-                "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B/src",
-                "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B/cyan",
-                "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B/external/clay",
-                "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B/external/lua/lua-5.4.7",
-                "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B/external/SDL3/x86_64-w64-mingw32/include",
-                "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B/external/SDL_ttf/x86_64-w64-mingw32/include",
-                "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B/external/SDL3_image/x86_64-w64-mingw32/include",
+                "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B",
+                "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B/src",
+                "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B/cyan",
+                "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B/external/clay",
+                "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B/external/lua/lua-5.4.7",
+                "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B/external/SDL3/x86_64-w64-mingw32/include",
+                "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B/external/SDL_ttf/x86_64-w64-mingw32/include",
+                "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B/external/SDL3_image/x86_64-w64-mingw32/include",
                 ""
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
-                    "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B",
-                    "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B/src",
-                    "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B/cyan",
-                    "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B/external/clay",
-                    "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B/external/lua/lua-5.4.7",
-                    "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B/external/SDL3/x86_64-w64-mingw32/include",
-                    "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B/external/SDL_ttf/x86_64-w64-mingw32/include",
-                    "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B/external/SDL3_image/x86_64-w64-mingw32/include",
+                    "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B",
+                    "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B/src",
+                    "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B/cyan",
+                    "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B/external/clay",
+                    "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B/external/lua/lua-5.4.7",
+                    "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B/external/SDL3/x86_64-w64-mingw32/include",
+                    "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B/external/SDL_ttf/x86_64-w64-mingw32/include",
+                    "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B/external/SDL3_image/x86_64-w64-mingw32/include",
                     ""
                 ]
             },
@@ -37,7 +37,7 @@
                 "SDL_MAIN_HANDLED",
                 ""
             ],
-            "compilerPath": "C:/gcc/bin/gcc.exe",
+            "compilerPath": "C:/msys64/mingw64/bin/gcc.exe",
             "compilerArgs": [
                 ""
             ]

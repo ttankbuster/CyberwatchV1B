@@ -15,7 +15,8 @@ bool clay_ui_init(uint32_t max_elems, Clay_Dimensions (*measureTextFunction)(Cla
 void clay_render(Display *display, Clay_RenderCommandArray *commands, bool debug_out);
 Clay_RenderCommandArray clay_cyberwatch(CyberwatchData* data, int width, int height, bool show_debug);
 Clay_RenderCommandArray clay_battery_only(BatteryData *battery, int width, int height);
-Clay_RenderCommandArray clay_cyan(CyberwatchData* data, Cyan *cyan,int width, int height, bool show_debug);
+Clay_RenderCommandArray clay_cyan_catalogue(CyberwatchData* data, Cyan *cyan,int width, int height, bool show_debug);
+Clay_RenderCommandArray clay_cyan_app(CyberwatchData* data, Cyan *cyan, int width, int height, bool show_debug, bool show_header);
 
 
 #endif

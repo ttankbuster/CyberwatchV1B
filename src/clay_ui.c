@@ -2,7 +2,6 @@
 #define CLAY_IMPLEMENTATION
 #include "clay_ui.h"
 #include "../cyan/cyan.h"
-// layout
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,8 +36,6 @@ bool clay_ui_init(uint32_t max_elems, Clay_Dimensions (*measureTextFunction)(Cla
     Clay_SetMaxElementCount(max_elems);
     uint64_t clayRequiredMemory = Clay_MinMemorySize();
     printf("Clay memory requirement: %" PRIu64 " bytes\n", clayRequiredMemory);
-    // Serial.println("Clay memory requirement:");
-    // Serial.print(clayRequiredMemory);
     void *memory = malloc(clayRequiredMemory);
     if (!memory) {
         return false;
@@ -87,40 +84,111 @@ void read_time_date(CyberwatchData* data){
     snprintf(data->dateChars, sizeof(data->dateChars),"%02d/%02d/%02d %.3s",data->time.tm_mday,data->time.tm_mon,data->time.tm_year%100, WEEKDAYS[data->time.tm_wday]);
 }
 
-Clay_RenderCommandArray clay_cyberwatch(CyberwatchData* data, int width, int height, bool show_debug) {
-    float deltaTime = get_delta();
+typedef struct {
+    CyberwatchData *data;
     int debugOpacity;
-    if (show_debug){
-        debugOpacity = 255;
-    } else {
-        debugOpacity = 0;
+} FrameContext;
+  
+static void widget_temperature(FrameContext *ctx, Clay_Sizing sizing) {
+    CLAY(CLAY_ID("TemperatureDisplay"), {
+        .backgroundColor = {100,32,24,ctx->debugOpacity},
+        .layout = {
+            .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER },
+            .sizing = sizing
+        }
+    }) {
+        CLAY_TEXT(CLAY_STRING("14*c"), CLAY_TEXT_CONFIG({
+            .fontId = FONT_CLOCK,
+            .fontSize = 42,
+            .textColor = INFO_COLOUR
+        }));
     }
-
-    read_time_date(data);
-    Clay_String timeString = {
-        .chars = data->timeChars,
-        .length = strlen(data->timeChars),
-        .isStaticallyAllocated = false,
-    };
-
-    Clay_String dateString = {
-        .chars = data->dateChars,
-        .length = strlen(data->dateChars),
-        .isStaticallyAllocated = false,
-    };
-
-    int headerHeight = (int) (height * 0.155f);
-    int footerHeight = (int) (height * 0.151f);
-
+}
+ 
+static void widget_battery(FrameContext *ctx, Clay_Sizing sizing, Clay_Dimensions iconDimensions) {
+    CLAY(CLAY_ID("BatteryDisplayContext"), {
+        .backgroundColor = {48,100,24, ctx->debugOpacity},
+        .layout = {
+            .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER },
+            .sizing = sizing
+        }
+    }) {
+        showBattery(ctx->data->battery, iconDimensions);
+    }
+}
+ 
+static void render_header_bar(FrameContext *ctx, int headerHeight) {
     float batteryHeight = headerHeight * 0.45f;
     float batteryWidth = batteryHeight * (33.0f / 16.0f);
     Clay_Dimensions batteryDimensions = (Clay_Dimensions) { batteryWidth, batteryHeight };
-
+    Clay_Sizing widgetSizing = { .height = CLAY_SIZING_FIXED(headerHeight), .width = CLAY_SIZING_GROW() };
+ 
+    CLAY(CLAY_ID("HeaderBar"), {
+        .layout = { .sizing = { .height = CLAY_SIZING_FIXED(headerHeight), .width = CLAY_SIZING_GROW() } }
+    }) {
+        widget_temperature(ctx, widgetSizing);
+        widget_battery(ctx, widgetSizing, batteryDimensions);
+    }
+}
+  
+static void render_time(FrameContext *ctx, Clay_String timeString, Clay_String dateString) {
     Clay_Sizing expand = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) };
+ 
+    CLAY(CLAY_ID("Main"), {
+        .layout = { .layoutDirection = CLAY_TOP_TO_BOTTOM, .sizing = expand }
+    }) {
+        CLAY(CLAY_ID("TopMain"), {
+            .backgroundColor = {20,46,65,ctx->debugOpacity},
+            .layout = {
+                .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER },
+                .sizing = { .width = CLAY_SIZING_GROW(), .height = CLAY_SIZING_PERCENT(0.6f) }
+            }
+        }) {
+            CLAY_TEXT(timeString, CLAY_TEXT_CONFIG({
+                .fontId = FONT_CLOCK,
+                .fontSize = 195,
+                .textColor = CLOCK_COLOUR
+            }));
+        }
+ 
+        CLAY(CLAY_ID("BottomMain"), {
+            .backgroundColor = {23,56,65,ctx->debugOpacity},
+            .layout = {
+                .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER },
+                .sizing = expand
+            }
+        }) {
+            CLAY_TEXT(dateString, CLAY_TEXT_CONFIG({
+                .fontId = FONT_INFO,
+                .fontSize = 80,
+                .textColor = SECONDARY_COLOUR
+            }));
+        }
+    }
+}
+ 
+ static void render_footer(FrameContext *ctx, int footerHeight) {
+    CLAY(CLAY_ID("Footer"), {
+        .backgroundColor = {47,24,24,ctx->debugOpacity},
+        .layout = { .sizing = { .height = CLAY_SIZING_FIXED(footerHeight), .width = CLAY_SIZING_GROW() } }
+    }) {}
+}
 
+Clay_RenderCommandArray clay_cyberwatch(CyberwatchData* data, int width, int height, bool show_debug) {
+    float deltaTime = get_delta();
+    FrameContext ctx = { .data = data, .debugOpacity = show_debug ? 255 : 0 };
+ 
+    read_time_date(data);
+    Clay_String timeString = { .chars = data->timeChars, .length = strlen(data->timeChars), .isStaticallyAllocated = false };
+    Clay_String dateString = { .chars = data->dateChars, .length = strlen(data->dateChars), .isStaticallyAllocated = false };
+ 
+    int headerHeight = (int) (height * 0.155f);
+    int footerHeight = (int) (height * 0.151f);
+    Clay_Sizing expand = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) };
+ 
     Clay_SetLayoutDimensions((Clay_Dimensions) { (float) width, (float) height });
     Clay_BeginLayout();
-
+ 
     CLAY(CLAY_ID("Display"), {
         .layout = {
             .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER },
@@ -128,75 +196,15 @@ Clay_RenderCommandArray clay_cyberwatch(CyberwatchData* data, int width, int hei
             .sizing = expand
         }
     }) {
-        CLAY(CLAY_ID("HeaderBar"), {
-            // .backgroundColor = {48,32,24,debugOpacity},
-            .layout = { .sizing = { .height = CLAY_SIZING_FIXED(headerHeight), .width = CLAY_SIZING_GROW() } }
-        }) {
-            CLAY(CLAY_ID("TemperatureDisplay"), {
-                .backgroundColor = {100,32,24,debugOpacity},
-                .layout = {
-                    .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER },
-                    .sizing = { .height = CLAY_SIZING_FIXED(headerHeight), .width = CLAY_SIZING_GROW() }
-                }
-            }) {
-                CLAY_TEXT(CLAY_STRING("14*c"), CLAY_TEXT_CONFIG({
-                    .fontId = FONT_CLOCK,
-                    .fontSize = 42,
-                    .textColor = INFO_COLOUR
-                }));
-            }
-
-            CLAY(CLAY_ID("BatteryDisplayContext"), {
-                .backgroundColor = {48,100,24, debugOpacity},
-                .layout = {
-                    .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER },
-                    .sizing = expand
-                }
-            }) {
-                showBattery(data->battery, batteryDimensions);
-            }
-        }
-
-        CLAY(CLAY_ID("Main"), {
-            .layout = { .layoutDirection = CLAY_TOP_TO_BOTTOM, .sizing = expand }
-        }) {
-            CLAY(CLAY_ID("TopMain"), {
-                .backgroundColor = {20,46,65,debugOpacity},
-                .layout = {
-                    .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER },
-                    .sizing = { .width = CLAY_SIZING_GROW(), .height = CLAY_SIZING_PERCENT(0.6f) }
-                }
-            }) {
-                CLAY_TEXT(timeString, CLAY_TEXT_CONFIG({
-                    .fontId = FONT_CLOCK,
-                    .fontSize = 195,
-                    .textColor = CLOCK_COLOUR
-                }));
-            }
-
-            CLAY(CLAY_ID("BottomMain"), {
-                .backgroundColor = {23,56,65,debugOpacity},
-                .layout = {
-                    .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER },
-                    .sizing = expand
-                }
-            }) {
-                CLAY_TEXT(dateString, CLAY_TEXT_CONFIG({
-                    .fontId = FONT_INFO,
-                    .fontSize = 80,
-                    .textColor = SECONDARY_COLOUR
-                }));
-            }
-        }
-
-        CLAY(CLAY_ID("Footer"), {
-            .backgroundColor = {47,24,24,debugOpacity},
-            .layout = { .sizing = { .height = CLAY_SIZING_FIXED(footerHeight), .width = CLAY_SIZING_GROW() } }
-        }) {}
+        render_header_bar(&ctx, headerHeight);
+        render_time(&ctx, timeString, dateString);
+        render_footer(&ctx, footerHeight);
     }
-
+ 
     return Clay_EndLayout(deltaTime);
 }
+
+
 Clay_RenderCommandArray clay_battery_only(BatteryData *battery, int width, int height) {
     float deltaTime = get_delta();
     int debugOpacity = 255;
@@ -214,7 +222,7 @@ Clay_RenderCommandArray clay_battery_only(BatteryData *battery, int width, int h
     }
     return Clay_EndLayout(deltaTime);
 }
-Clay_RenderCommandArray clay_cyan(CyberwatchData* data, Cyan *cyan,int width, int height, bool show_debug) {
+Clay_RenderCommandArray clay_cyan_catalogue(CyberwatchData* data, Cyan *cyan,int width, int height, bool show_debug) {
     float deltaTime = get_delta();
     int debugOpacity;
     if (show_debug){
@@ -261,9 +269,36 @@ Clay_RenderCommandArray clay_cyan(CyberwatchData* data, Cyan *cyan,int width, in
 
     return Clay_EndLayout(deltaTime);
 }
+Clay_RenderCommandArray clay_cyan_app(CyberwatchData* data, Cyan *cyan, int width, int height, bool show_debug, bool show_header) {
+    float deltaTime = get_delta();
+    FrameContext ctx = { .data = data, .debugOpacity = show_debug ? 255 : 0 };
+
+    int headerHeight = show_header ? (int) (height * 0.155f) : 0;
+
+    Clay_SetLayoutDimensions((Clay_Dimensions) { (float) width, (float) height });
+    Clay_BeginLayout();
+
+    CLAY(CLAY_ID("CyanDisplay"), {
+        .layout = {
+            .layoutDirection = CLAY_TOP_TO_BOTTOM,
+            .sizing = { .width = CLAY_SIZING_GROW(), .height = CLAY_SIZING_GROW() }
+        }
+    }) {
+        if (show_header) {
+            render_header_bar(&ctx, headerHeight);
+        }
+
+        CLAY(CLAY_ID("AppContent"), {
+            .layout = { .sizing = { .width = CLAY_SIZING_GROW(), .height = CLAY_SIZING_GROW() } }
+        }) {}
+    }
+
+    return Clay_EndLayout(deltaTime);
+}
 
 
-// render
+
+
 #define MAX_OVERLAY_STACK 16
 
 static Clay_Color overlayStack[MAX_OVERLAY_STACK];
@@ -332,21 +367,6 @@ void clay_render(Display *display, Clay_RenderCommandArray *commands, bool debug
             case CLAY_RENDER_COMMAND_TYPE_SCISSOR_END:
                 display_clear_clip(display);
                 break;
-
-            // case CLAY_RENDER_COMMAND_TYPE_OVERLAY_COLOR_START:
-            //     // NOTE: verify this field name against your clay.h — some Clay
-            //     // versions expose the overlay colour via a different renderData
-            //     // member than rectangle.backgroundColor.
-            //     if (overlayStackDepth < MAX_OVERLAY_STACK) {
-            //         overlayStack[overlayStackDepth++] = cmd->renderData.rectangle.backgroundColor;
-            //     }
-            //     break;
-
-            // case CLAY_RENDER_COMMAND_TYPE_OVERLAY_COLOR_END:
-            //     if (overlayStackDepth > 0) {
-            //         overlayStackDepth--;
-            //     }
-            //     break;
 
             case CLAY_RENDER_COMMAND_TYPE_CUSTOM:
                 break;

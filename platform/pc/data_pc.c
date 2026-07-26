@@ -13,6 +13,7 @@
 static void append_event(EventQueue* queue, Event event){
     if (queue->len+1 < MAX_EVENTS){
         queue->events[queue->len] = event;
+        queue->len += 1;
     } else {
         printf("EVENT OVERWHELM: SKIPPING\n");
     }
@@ -34,10 +35,12 @@ static void update_events(CyberwatchData *data, Display *display, bool *running,
                 if (display) {
                     display->width = sdl_event.window.data1;
                     display->height = sdl_event.window.data2;
+
+                    event.type = EVENT_DISPLAY_ALTERED;
+                    append_event(&data->eventQueue, event);
                 }
                 if (debug) {
-                    printf("[EVENT] SDL_EVENT_WINDOW_RESIZED: %d x %d\n",
-                           sdl_event.window.data1, sdl_event.window.data2);
+                    printf("[EVENT] SDL_EVENT_WINDOW_RESIZED: %d x %d\n", sdl_event.window.data1, sdl_event.window.data2);
                 }
                 break;
 
@@ -56,8 +59,7 @@ static void update_events(CyberwatchData *data, Display *display, bool *running,
                         append_event(&data->eventQueue, event);
                     }
                     if (debug) {
-                        printf("[EVENT] SDL_EVENT_KEY_DOWN: Key: %u | key: %d\n",
-                               sdl_event.key.key, sdl_event.key.key);
+                        printf("[EVENT] SDL_EVENT_KEY_DOWN: Key: %u | key: %d\n", sdl_event.key.key, sdl_event.key.key);
                     }
                 }
                 break;
@@ -74,8 +76,7 @@ static void update_events(CyberwatchData *data, Display *display, bool *running,
                     append_event(&data->eventQueue, event);
                 }
                 if (debug) {
-                    printf("[EVENT] SDL_EVENT_KEY_UP: Key: %u | key: %d\n",
-                           sdl_event.key.key, sdl_event.key.key);
+                    printf("[EVENT] SDL_EVENT_KEY_UP: Key: %u | key: %d\n", sdl_event.key.key, sdl_event.key.key);
                 }
                 break;
 
