@@ -170,8 +170,16 @@ static void render_time(FrameContext *ctx, Clay_String timeString, Clay_String d
  static void render_footer(FrameContext *ctx, int footerHeight) {
     CLAY(CLAY_ID("Footer"), {
         .backgroundColor = {47,24,24,ctx->debugOpacity},
-        .layout = { .sizing = { .height = CLAY_SIZING_FIXED(footerHeight), .width = CLAY_SIZING_GROW() } }
-    }) {}
+        .layout = { .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER }, .childGap = 20, .layoutDirection = CLAY_LEFT_TO_RIGHT, .sizing = { .height = CLAY_SIZING_FIXED(footerHeight), .width = CLAY_SIZING_GROW() } }
+    }) {
+        for (int i = 0; i < ctx->data->tabCount; i++) {
+            CLAY(CLAY_IDI("Tab", i), {
+                // .backgroundColor = {0,32,100,255},
+                .layout = { .sizing = { .width = CLAY_SIZING_FIXED(100), .height = CLAY_SIZING_FIXED(100) } },
+                .image = { .imageData = ctx->data->tabIcons[i] },
+            }) {}
+        }
+    }
 }
 
 Clay_RenderCommandArray clay_cyberwatch(CyberwatchData* data, int width, int height, bool show_debug) {

@@ -48,7 +48,6 @@ int main(int argc, char **argv) {
 
     clock_t lastTime = clock();
     bool running = true;
-    data.state = CYW_HOME;
     while (running) {
         clock_t now = clock();
         float dt = (float) (now - lastTime) / CLOCKS_PER_SEC;

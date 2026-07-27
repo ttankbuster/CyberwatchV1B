@@ -59,6 +59,13 @@ bool display_init(Display *display, CyberwatchData *data) {
     platform_resolve_path("assets\\icons\\battery.png", batteryIconPath, sizeof(batteryIconPath));
     data->battery.icon = IMG_LoadTexture(backend->renderer, batteryIconPath);
     printf("battery icon: %s\n", batteryIconPath);
+
+    data->tabCount = 3;
+    data->tabIndex = 0;
+    data->state = CYW_HOME;
+    data->tabIcons[0] = IMG_LoadTexture(backend->renderer, "assets\\icons\\empty_tab.png");
+    data->tabIcons[1] = IMG_LoadTexture(backend->renderer, "assets\\icons\\watch_tab.png");
+    data->tabIcons[2] = IMG_LoadTexture(backend->renderer, "assets\\icons\\timer_tab.png");
     return true;
 }
 

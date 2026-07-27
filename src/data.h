@@ -50,6 +50,9 @@ typedef struct CyberwatchData {
     char dateChars[13];
     EventQueue eventQueue;
     CyberwatchState state;
+    int tabIndex;
+    int tabCount;
+    void* tabIcons[3];
 } CyberwatchData;
 
 #define MAX_FOLDERS 32
