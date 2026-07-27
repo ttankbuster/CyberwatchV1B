@@ -13,6 +13,18 @@ CyberwatchData data;
 Display display;
 Cyan cyan;
 
+
+bool launch_app(){
+    if (cyan_launch_app(&cyan, 1 , &display)) {
+        data.state = CYW_APP_RUNNING;
+        return true;
+    } else {
+        printf("Failed to launch app 1 - falling back to catalogue\n");
+        data.state = CYW_CATALOGUE;
+        return false;
+    }
+}
+
 int main(int argc, char **argv) {
     (void) argc;
     (void) argv;
@@ -34,15 +46,9 @@ int main(int argc, char **argv) {
 
     printf("setup complete: starting.\n");
 
-    if (cyan_launch_app(&cyan, 1 , &display)) {
-        data.state = CYW_APP_RUNNING;
-    } else {
-        printf("Failed to launch app 1 - falling back to catalogue\n");
-        data.state = CYW_CATALOGUE;
-    }
-
     clock_t lastTime = clock();
     bool running = true;
+    data.state = CYW_HOME;
     while (running) {
         clock_t now = clock();
         float dt = (float) (now - lastTime) / CLOCKS_PER_SEC;

@@ -36,8 +36,8 @@ static TTF_Font *_loadFontRelative(const char *relativePath, int pointSize) {
 bool display_init(Display *display, CyberwatchData *data) {
 
     SdlBackend *backend = calloc(1, sizeof(SdlBackend));
-    display->width = 500;
-    display->height = 500;
+    display->width = 240*3;
+    display->height = 280*3;
     if (!backend) return false;
     display->backend = backend;
     
@@ -55,8 +55,10 @@ bool display_init(Display *display, CyberwatchData *data) {
     if (!backend->fonts[0] || !backend->fonts[1]) return false;
     
     data->battery = (BatteryData){.charge=1.0f};
-    data->battery.icon = IMG_LoadTexture(backend->renderer, "assets/icons/batteryOutline.png");
-
+    char batteryIconPath[MAX_FILE_PATH];
+    platform_resolve_path("assets\\icons\\battery.png", batteryIconPath, sizeof(batteryIconPath));
+    data->battery.icon = IMG_LoadTexture(backend->renderer, batteryIconPath);
+    printf("battery icon: %s\n", batteryIconPath);
     return true;
 }
 

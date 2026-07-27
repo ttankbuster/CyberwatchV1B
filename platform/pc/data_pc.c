@@ -99,7 +99,7 @@ static void update_events(CyberwatchData *data, Display *display, bool *running,
 
 void platform_resolve_path(const char *relativePath, char *outBuffer, size_t bufferSize) {
     const char *basePath = SDL_GetBasePath();
-    SDL_snprintf(outBuffer, bufferSize, "%s../../%s", basePath ? basePath : "", relativePath);
+    SDL_snprintf(outBuffer, bufferSize, "%s..\\..\\%s", basePath ? basePath : "", relativePath);
 }
 
 void update_data(CyberwatchData *data, Display *display, bool *running) {
