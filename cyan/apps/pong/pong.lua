@@ -12,7 +12,7 @@ local paddleWidth = 6
 local paddleHeight = 0
 local paddleMargin = 10
 local paddleSpeed = 10
-local aiSpeed = 110
+local aiSpeed = 124
 
 local p1score = 0
 local p2score = 0
@@ -26,7 +26,7 @@ local function clampPaddle(y)
 end
 
 local function resetLayout()
-    paddleHeight = draw.height() * 0.3
+    paddleHeight = draw.height() * 0.2
     paddleYp1 = clampPaddle((draw.height() - paddleHeight) / 2)
     paddleYp2 = clampPaddle((draw.height() - paddleHeight) / 2)
     ballX = draw.width() / 2

@@ -169,20 +169,3 @@ Clay_Dimensions display_measure_text(Clay_StringSlice text, Clay_TextElementConf
     return (Clay_Dimensions) { (float) width, (float) height };
 }
 
-float get_delta(void) {
-    static Uint64 lastTime = 0;
-    static Uint64 frequency = 0;
-    if (frequency == 0) {
-        frequency = SDL_GetPerformanceFrequency();
-        lastTime = SDL_GetPerformanceCounter();
-        return 0.0;
-    }
-    Uint64 currentTime = SDL_GetPerformanceCounter();
-    Uint64 elapsedTicks = currentTime - lastTime;
-    double deltaTime = (double)elapsedTicks / (double)frequency;
-    if (deltaTime > 0.1) {
-        deltaTime = 0.1;
-    }
-    lastTime = currentTime;
-    return deltaTime;
-}

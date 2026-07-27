@@ -35,7 +35,7 @@ void display_draw_image(Display *display, Clay_BoundingBox box, Clay_ImageRender
 void display_set_clip(Display *display, Clay_BoundingBox box);
 void display_clear_clip(Display *display);
 void display_present(Display *display);
-float get_delta(void);
+
 
 Clay_Dimensions display_measure_text(Clay_StringSlice text, Clay_TextElementConfig *config, void *userData);
 

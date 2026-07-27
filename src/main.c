@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
                 commands = clay_cyberwatch(&data, size.width, size.height, true);
                 break;
             case CYW_APP_RUNNING:
-                commands = clay_cyan_app(&data, &cyan, size.width, size.height, false, true);
+                commands = clay_cyan_app(&data, &cyan, size.width, size.height, false, false);
                 break;
             case CYW_CATALOGUE:
                 commands = clay_cyan_catalogue(&data, &cyan, size.width, size.height, false);
