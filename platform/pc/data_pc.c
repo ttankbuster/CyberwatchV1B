@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <SDL3/SDL.h>
+#include <SDL3_image/SDL_image.h>
 #include "../../src/data.h"
 #include "../../src/display.h"
 #include <string.h>
@@ -9,6 +10,10 @@
 #include <sys/stat.h>
 #include <dirent.h>
 
+typedef struct {
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+} PCDisplayBackend;
 
 static void append_event(EventQueue* queue, Event event){
     if (queue->len+1 < MAX_EVENTS){
@@ -122,7 +127,29 @@ char* platform_resolve_path(char *relativePath) {
     return resolvedPath;
 }
 
+bool load_image(Display *display, const char *path, void *outHandle){
+    if (outHandle == NULL) {
+        printf("load_image: outHandle is NULL\n");
+        return false;
+    }
+    if (display == NULL || display->backend == NULL) {
+        printf("load_image: invalid display backend\n");
+        return false;
+    }
 
+    PCDisplayBackend *backend = (PCDisplayBackend *)display->backend;
+    char resolvedPath[1024];
+    platform_store_resolved_path(path, resolvedPath, sizeof(resolvedPath));
+
+    SDL_Texture *texture = IMG_LoadTexture(backend->renderer, resolvedPath);
+    if (texture == NULL) {
+        printf("load_image: failed to load '%s': %s\n", resolvedPath, SDL_GetError());
+        return false;
+    }
+
+    *(SDL_Texture **)outHandle = texture;
+    return true;
+}
 
 void update_data(CyberwatchData *data, Display *display, bool *running) {
     data->eventQueue.len = 0;

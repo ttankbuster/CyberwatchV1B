@@ -33,8 +33,8 @@ typedef struct Cyan {
 } Cyan;
 
 
-void cyan_index_apps(Cyan* cyan, char* path);
-bool cyan_init(Cyan *cyan);
+void cyan_index_apps(Cyan* cyan, char* path, Display *display);
+bool cyan_init(Cyan *cyan, Display *display);
 bool cyan_launch_app(Cyan *cyan, int id, Display *display);
 void cyan_unload_app(Cyan *cyan);
 void cyan_run_frame(Cyan *cyan, Display *display, float dt);

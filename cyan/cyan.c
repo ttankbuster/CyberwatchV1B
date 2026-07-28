@@ -146,7 +146,27 @@ static bool load_app_manifest(CyanApp *app) {
     return true;
 }
 
-void cyan_index_apps(Cyan *cyan, char *path) {
+static bool load_app_icon(CyanApp *app, Display *display) {
+    if (app->icon[0] == '\0') {
+        return true;
+    }
+
+    char iconPath[MAX_FILE_PATH];
+    snprintf(iconPath, sizeof(iconPath), "%s/%s", app->path, app->icon);
+    if (load_image(display, iconPath, &app->iconHandle)) {
+        return true;
+    }
+
+    fprintf(stderr, "Cyan: failed to load icon '%s', using fallback\n", iconPath);
+    if (load_image(display, "assets/icons/test.png", &app->iconHandle)) {
+        return true;
+    }
+
+    fprintf(stderr, "Cyan: failed to load fallback icon\n");
+    return false;
+}
+
+void cyan_index_apps(Cyan *cyan, char *path, Display *display) {
     FolderList folders = scan_folder(path);
 
     cyan->appCount = 0;
@@ -156,6 +176,7 @@ void cyan_index_apps(Cyan *cyan, char *path) {
         snprintf(app.path, MAX_FILE_PATH, "%s/%s", path, folders.names[i]);
 
         if (load_app_manifest(&app)) {
+            load_app_icon(&app, display);
             cyan->apps[cyan->appCount] = app;
             cyan->appCount++;
         }
@@ -163,17 +184,16 @@ void cyan_index_apps(Cyan *cyan, char *path) {
 
     printf("Cyan: indexed %d app(s)\n", cyan->appCount);
     for (int i = 0; i < cyan->appCount; i++) {
-        printf("  %d: %s (script: %s, icon: %s, path: %s)\n",
-            i, cyan->apps[i].name, cyan->apps[i].script, cyan->apps[i].icon, cyan->apps[i].path);
+        printf("  %d: %s (script: %s, icon: %s, path: %s)\n", i, cyan->apps[i].name, cyan->apps[i].script, cyan->apps[i].icon, cyan->apps[i].path);
     }
 }
 
-bool cyan_init(Cyan *cyan) {
+bool cyan_init(Cyan *cyan, Display *display) {
     cyan->selectedApp = -1;
     cyan->appCount = 0;
     cyan->appLua = NULL;
 
-    cyan_index_apps(cyan, "cyan/apps");
+    cyan_index_apps(cyan, "cyan/apps", display);
 
     return true;
 }

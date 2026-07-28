@@ -1,30 +1,6 @@
 //clay_ui.c
 #define CLAY_IMPLEMENTATION
 #include "clay_ui.h"
-#include "../cyan/cyan.h"
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <inttypes.h>
-
-static const uint32_t FONT_CLOCK = 0;
-static const uint32_t FONT_INFO = 1;
-
-static const Clay_Color CLOCK_COLOUR = {215,125,69,255};
-static const Clay_Color INFO_COLOUR = {255,255,255,255};
-static const Clay_Color SECONDARY_COLOUR = {150,150,150,255};
-static const Clay_Color BG_COLOR = {4,15,24,255};
-const char* WEEKDAYS[] = {
-    "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"
-};
-
-typedef enum {
-    ELEMENT_CLASS_BG,
-    ELEMENT_CLASS_RECT,
-} CwElementClass;
-
-
 
 void handleClayErrors(Clay_ErrorData errorData) {
     if (errorData.errorText.chars) {
@@ -46,7 +22,7 @@ bool clay_ui_init(uint32_t max_elems, Clay_Dimensions (*measureTextFunction)(Cla
     return true;
 }
 
-void showBattery(BatteryData battery, Clay_Dimensions dimensions){
+void render_battery(BatteryData battery, Clay_Dimensions dimensions){
     int battery_outline = (int) (dimensions.width * 0.06f);
 
     CLAY(CLAY_ID("BatteryDisplay"), {
@@ -78,14 +54,54 @@ void showBattery(BatteryData battery, Clay_Dimensions dimensions){
     }
 }
 
-
 void read_time_date(CyberwatchData* data){
     snprintf(data->timeChars, sizeof(data->timeChars),"%02d:%02d",data->time.tm_hour,data->time.tm_min);
     snprintf(data->dateChars, sizeof(data->dateChars),"%02d/%02d/%02d %.3s",data->time.tm_mday,data->time.tm_mon,data->time.tm_year%100, WEEKDAYS[data->time.tm_wday]);
 }
 
+void read_stopwatch(CyberwatchData* data){
+    if (data->stopwatchActive) {
+        time_t now = time(NULL);
+        struct tm *now_tm = localtime(&now);
+        if (data->stopwatchLastUpdated.tm_year >= 70) {
+            time_t last = mktime(&data->stopwatchLastUpdated);
+            if (last != (time_t)-1 && now > last) {
+                int elapsed = (int)difftime(now, last);
+                int totalSeconds = data->stopwatchH * 3600 + data->stopwatchM * 60 + data->stopwatchS + elapsed;
+                data->stopwatchH = totalSeconds / 3600;
+                data->stopwatchM = (totalSeconds % 3600) / 60;
+                data->stopwatchS = totalSeconds % 60;
+            }
+        }
+        if (now_tm) {
+            data->stopwatchLastUpdated = *now_tm;
+        }
+    }
+    snprintf(data->stopwatchChars, sizeof(data->stopwatchChars), "%02d:%02d:%02d", data->stopwatchH, data->stopwatchM, data->stopwatchS);
+}
 
-static void widget_temperature(FrameContext *ctx, Clay_Sizing sizing) {
+void read_timer(CyberwatchData* data){
+    if (data->timerActive) {
+        time_t now = time(NULL);
+        struct tm *now_tm = localtime(&now);
+        if (data->timerLastUpdated.tm_year >= 70) {
+            time_t last = mktime(&data->timerLastUpdated);
+            if (last != (time_t)-1 && now > last) {
+                int elapsed = (int)difftime(now, last);
+                int totalSeconds = data->timerH * 3600 + data->timerM * 60 + data->timerS + elapsed;
+                data->timerH = totalSeconds / 3600;
+                data->timerM = (totalSeconds % 3600) / 60;
+                data->timerS = totalSeconds % 60;
+            }
+        }
+        if (now_tm) {
+            data->timerLastUpdated = *now_tm;
+        }
+    }
+    snprintf(data->timerChars, sizeof(data->timerChars), "%02d:%02d:%02d", data->timerH, data->timerM, data->timerS);
+}
+
+void widget_temperature(FrameContext *ctx, Clay_Sizing sizing) {
     CLAY(CLAY_ID("TemperatureDisplay"), {
         .backgroundColor = {100,32,24,ctx->debugOpacity},
         .layout = {
@@ -101,7 +117,7 @@ static void widget_temperature(FrameContext *ctx, Clay_Sizing sizing) {
     }
 }
  
-static void widget_battery(FrameContext *ctx, Clay_Sizing sizing, Clay_Dimensions iconDimensions) {
+void widget_battery(FrameContext *ctx, Clay_Sizing sizing, Clay_Dimensions iconDimensions) {
     CLAY(CLAY_ID("BatteryDisplayContext"), {
         .backgroundColor = {48,100,24, ctx->debugOpacity},
         .layout = {
@@ -109,11 +125,11 @@ static void widget_battery(FrameContext *ctx, Clay_Sizing sizing, Clay_Dimension
             .sizing = sizing
         }
     }) {
-        showBattery(ctx->data->battery, iconDimensions);
+        render_battery(ctx->data->battery, iconDimensions);
     }
 }
  
-static void render_header_bar(FrameContext *ctx, int headerHeight) {
+void render_header_bar(FrameContext *ctx, int headerHeight) {
     float batteryHeight = headerHeight * 0.45f;
     float batteryWidth = batteryHeight * (33.0f / 16.0f);
     Clay_Dimensions batteryDimensions = (Clay_Dimensions) { batteryWidth, batteryHeight };
@@ -127,8 +143,7 @@ static void render_header_bar(FrameContext *ctx, int headerHeight) {
     }
 }
   
-
- static void render_footer(FrameContext *ctx, int footerHeight) {
+void render_footer(FrameContext *ctx, int footerHeight) {
     CLAY(CLAY_ID("Footer"), {
         .backgroundColor = {47,24,24,ctx->debugOpacity},
         .layout = { .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER }, .childGap = 20, .layoutDirection = CLAY_LEFT_TO_RIGHT, .sizing = { .height = CLAY_SIZING_FIXED(footerHeight), .width = CLAY_SIZING_GROW() } }
@@ -138,56 +153,24 @@ static void render_header_bar(FrameContext *ctx, int headerHeight) {
         for (int i = 0; i < ctx->data->tabCount; i++) {
             if (i == tabIndex){
                 if (i < TAB_ICON_COUNT-2){ // TAB_ICON_COUNT-2 because the first two icons are always generic: empty and full
-                    CLAY(CLAY_IDI("Tab", i), {
+                    CLAY(CLAY_IDI("TabIcon", i), {
                         .layout = { .sizing = { .width = CLAY_SIZING_FIXED(tabIconSize), .height = CLAY_SIZING_FIXED(tabIconSize) } },
                         .image = { .imageData = ctx->data->tabIcons[i+2] },
                     }) {}
                 } else {
-                    CLAY(CLAY_IDI("Tab", i), {
+                    CLAY(CLAY_IDI("TabIcon", i), {
                         .layout = { .sizing = { .width = CLAY_SIZING_FIXED(tabIconSize), .height = CLAY_SIZING_FIXED(tabIconSize) } },
                         .image = { .imageData = ctx->data->tabIcons[1] },
                     }) {}
                 }
             } else {
-                CLAY(CLAY_IDI("Tab", i), {
+                CLAY(CLAY_IDI("TabIcon", i), {
                     .layout = { .sizing = { .width = CLAY_SIZING_FIXED(tabIconSize), .height = CLAY_SIZING_FIXED(tabIconSize) } },
                     .image = { .imageData = ctx->data->tabIcons[0] },
                 }) {}
             }
         }
     }
-}
-
-
-
-Clay_RenderCommandArray clay_timer(CyberwatchData* data, int width, int height, bool show_debug) {
-    float deltaTime = get_delta();
-    FrameContext ctx = { .data = data, .debugOpacity = show_debug ? 255 : 0 };
- 
-    read_time_date(data);
-    Clay_String timeString = { .chars = data->timeChars, .length = strlen(data->timeChars), .isStaticallyAllocated = false };
-    Clay_String dateString = { .chars = data->dateChars, .length = strlen(data->dateChars), .isStaticallyAllocated = false };
- 
-    int headerHeight = (int) (height * 0.155f);
-    int footerHeight = (int) (height * 0.151f);
-    Clay_Sizing expand = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) };
- 
-    Clay_SetLayoutDimensions((Clay_Dimensions) { (float) width, (float) height });
-    Clay_BeginLayout();
- 
-    CLAY(CLAY_ID("Display"), {
-        .layout = {
-            .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER },
-            .layoutDirection = CLAY_TOP_TO_BOTTOM,
-            .sizing = expand
-        }
-    }) {
-        render_header_bar(&ctx, headerHeight);
-        render_time(&ctx, timeString, dateString);
-        render_footer(&ctx, footerHeight);
-    }
- 
-    return Clay_EndLayout(deltaTime);
 }
 
 Clay_RenderCommandArray clay_battery_only(BatteryData *battery, int width, int height) {
@@ -203,118 +186,19 @@ Clay_RenderCommandArray clay_battery_only(BatteryData *battery, int width, int h
             .sizing = expand
         }
     }) {
-        showBattery(*battery, batteryDimensions);
+        render_battery(*battery, batteryDimensions);
     }
     return Clay_EndLayout(deltaTime);
 }
 
-Clay_RenderCommandArray render_cyan_catalogue(CyberwatchData* data, Cyan *cyan, bool show_debug) {
-    float deltaTime = get_delta();
-    int debugOpacity;
-    if (show_debug){
-        debugOpacity = 255;
-    } else {
-        debugOpacity = 0;
-    }
 
 
-    CLAY(CLAY_ID("CyanDisplay"), {
-        .layout = {
-            .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER },
-            .sizing = { .width = CLAY_SIZING_GROW(), .height = CLAY_SIZING_GROW() }
-        }
-    }) {
-        CLAY(CLAY_ID("CyanApps"), {
-            .backgroundColor = BG_COLOR,
-            .layout = { .sizing = { .width = CLAY_SIZING_GROW(), .height = CLAY_SIZING_GROW() } }
-        }) {
-            for (int i = 0; i < cyan->appCount; i++) {
-                CyanApp *app = &cyan->apps[i];
-                CLAY(CLAY_IDI("app", i), {
-                    .backgroundColor = {48,32,24,debugOpacity},
-                    .layout = { .sizing = { .width = CLAY_SIZING_GROW(), .height = CLAY_SIZING_GROW() } }
-                }) {
-                    Clay_String appNameString = {
-                        .isStaticallyAllocated = false,
-                        .length = (int32_t) strlen(app->name),
-                        .chars = app->name,
-                    };
-                    CLAY_TEXT(appNameString, 
-                        CLAY_TEXT_CONFIG({
-                            .fontId = FONT_INFO,
-                            .fontSize = 42,
-                            .textColor = INFO_COLOUR
-                        })
-                    );
-                }
-            }
-        }
-    }
-}
-
-Clay_RenderCommandArray clay_cyan_catalogue(CyberwatchData* data, Cyan *cyan,int width, int height, bool show_debug) {
-    float deltaTime = get_delta();
-    FrameContext ctx = { .data = data, .debugOpacity = show_debug ? 255 : 0 };
- 
-    read_time_date(data);
-    Clay_String timeString = { .chars = data->timeChars, .length = strlen(data->timeChars), .isStaticallyAllocated = false };
-    Clay_String dateString = { .chars = data->dateChars, .length = strlen(data->dateChars), .isStaticallyAllocated = false };
- 
-    int headerHeight = (int) (height * 0.155f);
-    int footerHeight = (int) (height * 0.151f);
-    Clay_Sizing expand = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) };
- 
-    Clay_SetLayoutDimensions((Clay_Dimensions) { (float) width, (float) height });
-    Clay_BeginLayout();
- 
-    CLAY(CLAY_ID("Display"), {
-        .layout = {
-            .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER },
-            .layoutDirection = CLAY_TOP_TO_BOTTOM,
-            .sizing = expand
-        }
-    }) {
-        render_header_bar(&ctx, headerHeight);
-        render_cyan_catalogue(ctx.data, cyan, show_debug);
-        render_footer(&ctx, footerHeight);
-    }
- 
-    return Clay_EndLayout(deltaTime);
-}
-
-Clay_RenderCommandArray clay_cyan_app(CyberwatchData* data, Cyan *cyan, int width, int height, bool show_debug, bool show_header) {
-    float deltaTime = get_delta();
-    FrameContext ctx = { .data = data, .debugOpacity = show_debug ? 255 : 0 };
-
-    int headerHeight = show_header ? (int) (height * 0.155f) : 0;
-
-    Clay_SetLayoutDimensions((Clay_Dimensions) { (float) width, (float) height });
-    Clay_BeginLayout();
-
-    CLAY(CLAY_ID("CyanDisplay"), {
-        .layout = {
-            .layoutDirection = CLAY_TOP_TO_BOTTOM,
-            .sizing = { .width = CLAY_SIZING_GROW(), .height = CLAY_SIZING_GROW() }
-        }
-    }) {
-        if (show_header) {
-            render_header_bar(&ctx, headerHeight);
-        }
-
-        CLAY(CLAY_ID("AppContent"), {
-            .layout = { .sizing = { .width = CLAY_SIZING_GROW(), .height = CLAY_SIZING_GROW() } }
-        }) {}
-    }
-
-    return Clay_EndLayout(deltaTime);
-}
 
 
 #define MAX_OVERLAY_STACK 16
 
 static Clay_Color overlayStack[MAX_OVERLAY_STACK];
 static int overlayStackDepth = 0;
-
 
 static Clay_Color applyOverlay(Clay_Color colour) {
     if (overlayStackDepth == 0) return colour;

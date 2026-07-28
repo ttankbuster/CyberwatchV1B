@@ -26,7 +26,6 @@ bool launch_app(){
 }
 
 bool cycleTab(CyberwatchData *data){
-    printf("cycle");
     data->tabIndex = (data->tabIndex+1)%data->tabCount;
 }
 
@@ -43,14 +42,12 @@ int main(int argc, char **argv) {
     DisplaySize initialSize = display_get_size(&display);
     clay_ui_init(MAXIMUM_ELEMENTS, display_measure_text, &display, initialSize.width, initialSize.height);
 
-    if (!cyan_init(&cyan)) {
+    if (!cyan_init(&cyan, &display)) {
         printf("Failed to initialise Cyan\n");
         display_shutdown(&display);
         return 1;
     }
-
     printf("setup complete: starting.\n");
-    launch_app();
     clock_t lastTime = clock();
     bool running = true;
     while (running) {
@@ -73,8 +70,8 @@ int main(int argc, char **argv) {
             default:
                 switch (data.tabIndex) {
                     case 0: commands = clay_watchface(&data, size.width, size.height, true); break;
-                    case 1: commands = clay_cyan_catalogue(&data, &cyan, size.width, size.height, false); break;
-                    case 2: commands = clay_timer(&data, size.width, size.height, false); break; // not built yet
+                    case 1: commands = clay_cyan_catalogue(&data, &cyan, size.width, size.height, true); break;
+                    case 2: commands = clay_timer(&data, size.width, size.height, true); break; // not built yet
                     default: commands = clay_watchface(&data, size.width, size.height, true); break;
                 }
                 break;

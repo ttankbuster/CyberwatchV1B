@@ -54,6 +54,19 @@ typedef struct CyberwatchData {
     int tabIndex;
     int tabCount;
     void* tabIcons[TAB_ICON_COUNT];
+    void* tabData;
+    bool timerActive;
+    char timerChars[9]; // "00:00:00\0"
+    struct tm timerLastUpdated;
+    int timerH;
+    int timerM;
+    int timerS;
+    bool stopwatchActive;
+    char stopwatchChars[9]; // "00:00:00\0"
+    struct tm stopwatchLastUpdated;
+    int stopwatchH;
+    int stopwatchM;
+    int stopwatchS;
 } CyberwatchData;
 
 #define MAX_FOLDERS 32
@@ -72,6 +85,8 @@ bool has_event_type(EventQueue *queue, EventType type);
 
 void platform_store_resolved_path(const char *relativePath, char *outBuffer, size_t bufferSize);
 char* platform_resolve_path(char *relativePath);
+
+bool load_image(Display *display, const char *path, void *outHandle);
 
 float get_delta(void);
 #endif
