@@ -33,6 +33,7 @@ static TTF_Font *_loadFontRelative(const char *relativePath, int pointSize) {
     return font;
 }
 
+
 bool display_init(Display *display, CyberwatchData *data) {
 
     SdlBackend *backend = calloc(1, sizeof(SdlBackend));
@@ -56,16 +57,18 @@ bool display_init(Display *display, CyberwatchData *data) {
     
     data->battery = (BatteryData){.charge=1.0f};
     char batteryIconPath[MAX_FILE_PATH];
-    platform_resolve_path("assets\\icons\\battery.png", batteryIconPath, sizeof(batteryIconPath));
+    platform_store_resolved_path("assets\\icons\\battery.png", batteryIconPath, sizeof(batteryIconPath));
     data->battery.icon = IMG_LoadTexture(backend->renderer, batteryIconPath);
     printf("battery icon: %s\n", batteryIconPath);
 
     data->tabCount = 3;
     data->tabIndex = 0;
     data->state = CYW_HOME;
-    data->tabIcons[0] = IMG_LoadTexture(backend->renderer, "assets\\icons\\empty_tab.png");
-    data->tabIcons[1] = IMG_LoadTexture(backend->renderer, "assets\\icons\\watch_tab.png");
-    data->tabIcons[2] = IMG_LoadTexture(backend->renderer, "assets\\icons\\timer_tab.png");
+    data->tabIcons[0] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\empty_tab.png"));
+    data->tabIcons[1] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\full_tab.png"));
+    data->tabIcons[2] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\watch_tab.png"));
+    data->tabIcons[3] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\app_tab.png"));
+    data->tabIcons[4] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\timer_tab.png"));
     return true;
 }
 

@@ -8,5 +8,5 @@ external/SDL_ttf/
 external/SDL3_image/
 
 .vscode/.browse.c_cpp.db*
-.vscode/
+.vscode
 Thumbs.db

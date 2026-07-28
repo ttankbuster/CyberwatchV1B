@@ -40,9 +40,10 @@ typedef struct {
 typedef enum {
     CYW_HOME,
     CYW_APP_RUNNING,
-    CYW_CATALOGUE,
 } CyberwatchState;
 
+
+#define TAB_ICON_COUNT 5
 typedef struct CyberwatchData {
     BatteryData battery;
     struct tm time;
@@ -52,7 +53,7 @@ typedef struct CyberwatchData {
     CyberwatchState state;
     int tabIndex;
     int tabCount;
-    void* tabIcons[3];
+    void* tabIcons[TAB_ICON_COUNT];
 } CyberwatchData;
 
 #define MAX_FOLDERS 32
@@ -67,8 +68,10 @@ typedef struct {
 FolderList scan_folder(char *path);
 
 void update_data(CyberwatchData *data, Display *display, bool *running);
+bool has_event_type(EventQueue *queue, EventType type);
 
-void platform_resolve_path(const char *relativePath, char *outBuffer, size_t bufferSize);
+void platform_store_resolved_path(const char *relativePath, char *outBuffer, size_t bufferSize);
+char* platform_resolve_path(char *relativePath);
 
 float get_delta(void);
 #endif

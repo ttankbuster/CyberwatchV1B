@@ -97,10 +97,32 @@ static void update_events(CyberwatchData *data, Display *display, bool *running,
     }
 }
 
-void platform_resolve_path(const char *relativePath, char *outBuffer, size_t bufferSize) {
+bool has_event_type(EventQueue *queue, EventType type){
+    for (int i = 0; i < queue->len; i++) {
+        if (queue->events[i].type == type) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void platform_store_resolved_path(const char *relativePath, char *outBuffer, size_t bufferSize) {
     const char *basePath = SDL_GetBasePath();
     SDL_snprintf(outBuffer, bufferSize, "%s..\\..\\%s", basePath ? basePath : "", relativePath);
 }
+
+char* platform_resolve_path(char *relativePath) {
+    const char *basePath = SDL_GetBasePath();
+    size_t bufferSize = 512;
+    char *resolvedPath = (char*)SDL_malloc(bufferSize);
+    if (resolvedPath == NULL) {
+        return NULL;
+    }
+    SDL_snprintf(resolvedPath, bufferSize, "%s..\\..\\%s", basePath ? basePath : "", relativePath);
+    return resolvedPath;
+}
+
+
 
 void update_data(CyberwatchData *data, Display *display, bool *running) {
     data->eventQueue.len = 0;
@@ -117,7 +139,7 @@ FolderList scan_folder(char *path) {
     FolderList result = {0};
 
     char resolvedPath[512];
-    platform_resolve_path(path, resolvedPath, sizeof(resolvedPath));
+    platform_store_resolved_path(path, resolvedPath, sizeof(resolvedPath));
 
     DIR *dir = opendir(resolvedPath);
     if (dir == NULL) {

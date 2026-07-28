@@ -115,7 +115,7 @@ static bool load_app_manifest(CyanApp *app) {
     snprintf(manifestPath, sizeof(manifestPath), "%s/.cyan_app.lua", app->path);
 
     char resolvedPath[512];
-    platform_resolve_path(manifestPath, resolvedPath, sizeof(resolvedPath));
+    platform_store_resolved_path(manifestPath, resolvedPath, sizeof(resolvedPath));
 
     lua_State *L = luaL_newstate();
     if (!L) return false;
@@ -210,7 +210,7 @@ bool cyan_launch_app(Cyan *cyan, int id, Display *display) {
     char scriptRelPath[MAX_FILE_PATH];
     snprintf(scriptRelPath, sizeof(scriptRelPath), "%s/%s", app->path, app->script);
     char resolvedPath[512];
-    platform_resolve_path(scriptRelPath, resolvedPath, sizeof(resolvedPath));
+    platform_store_resolved_path(scriptRelPath, resolvedPath, sizeof(resolvedPath));
 
     if (luaL_dofile(L, resolvedPath) != LUA_OK) {
         fprintf(stderr, "Cyan: failed to load script '%s': %s\n", resolvedPath, lua_tostring(L, -1));
@@ -260,8 +260,8 @@ void cyan_run_frame(Cyan *cyan, Display *display, float dt) {
 }
 
 void cyan_dispatch_events(Cyan *cyan, EventQueue *queue) {
+    if (!cyan->appLua) printf("ERROR: no cyan app to dispatch events to.\n"); return;
     lua_State *L = cyan->appLua;
-
     for (int i = 0; i < queue->len; i++) {
         Event *ev = &queue->events[i];
         lua_getglobal(L, "on_event");

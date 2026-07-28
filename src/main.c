@@ -20,9 +20,14 @@ bool launch_app(){
         return true;
     } else {
         printf("Failed to launch app 1 - falling back to catalogue\n");
-        data.state = CYW_CATALOGUE;
+        data.state = CYW_HOME;
         return false;
     }
+}
+
+bool cycleTab(CyberwatchData *data){
+    printf("cycle");
+    data->tabIndex = (data->tabIndex+1)%data->tabCount;
 }
 
 int main(int argc, char **argv) {
@@ -45,7 +50,7 @@ int main(int argc, char **argv) {
     }
 
     printf("setup complete: starting.\n");
-
+    launch_app();
     clock_t lastTime = clock();
     bool running = true;
     while (running) {
@@ -54,21 +59,24 @@ int main(int argc, char **argv) {
         lastTime = now;
 
         update_data(&data, &display, &running);
+        if (has_event_type(&data.eventQueue, EVENT_BUTTON1_DOWN)){
+            cycleTab(&data);
+        }
         DisplaySize size = display_get_size(&display);
         Clay_RenderCommandArray commands;
-
         switch (data.state) {
-            case CYW_HOME:
-                commands = clay_cyberwatch(&data, size.width, size.height, true);
-                break;
             case CYW_APP_RUNNING:
                 commands = clay_cyan_app(&data, &cyan, size.width, size.height, false, false);
                 break;
-            case CYW_CATALOGUE:
-                commands = clay_cyan_catalogue(&data, &cyan, size.width, size.height, false);
-                break;
+
+            case CYW_HOME:
             default:
-                commands = clay_cyberwatch(&data, size.width, size.height, true);
+                switch (data.tabIndex) {
+                    case 0: commands = clay_watchface(&data, size.width, size.height, true); break;
+                    case 1: commands = clay_cyan_catalogue(&data, &cyan, size.width, size.height, false); break;
+                    case 2: commands = clay_timer(&data, size.width, size.height, false); break; // not built yet
+                    default: commands = clay_watchface(&data, size.width, size.height, true); break;
+                }
                 break;
         }
 
@@ -83,8 +91,8 @@ int main(int argc, char **argv) {
             }
         }
 
-        cyan_dispatch_events(&cyan, &data.eventQueue);
         if (data.state == CYW_APP_RUNNING) {
+            cyan_dispatch_events(&cyan, &data.eventQueue);
             cyan_run_frame(&cyan, &display, dt);
         }
 
