@@ -1,6 +1,7 @@
 //display.c
 #include "../../src/data.h"
 #include "../../src/display.h"
+#include "../../src/clay_ui.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -8,7 +9,7 @@
 #include <SDL3_ttf/SDL_ttf.h>
 #include <SDL3_image/SDL_image.h>   
 
-#define NUM_FONTS 2
+#define NUM_FONTS 4
 
 typedef struct {
     SDL_Window *window;
@@ -50,9 +51,11 @@ bool display_init(Display *display, CyberwatchData *data) {
     
     backend->textEngine = TTF_CreateRendererTextEngine(backend->renderer);
     if (!backend->textEngine) return false;
-    
-    backend->fonts[0] = _loadFontRelative("assets/fonts/Lexend_Deca/static/LexendDeca-Bold.ttf", 42);
-    backend->fonts[1] = _loadFontRelative("assets/fonts/Lexend_Deca/static/LexendDeca-Light.ttf", 80);
+
+    backend->fonts[FONT_LARGE] = _loadFontRelative("assets/fonts/Lexend_Deca/static/LexendDeca-Bold.ttf", 190);
+    backend->fonts[FONT_INFO] = _loadFontRelative("assets/fonts/Lexend_Deca/static/LexendDeca-Light.ttf", 80);
+    backend->fonts[FONT_MED] = _loadFontRelative("assets/fonts/Lexend_Deca/static/LexendDeca-Light.ttf", 60);
+    backend->fonts[FONT_SMALL] = _loadFontRelative("assets/fonts/Lexend_Deca/static/LexendDeca-Light.ttf", 20);
     if (!backend->fonts[0] || !backend->fonts[1]) return false;
     
     data->battery = (BatteryData){.charge=1.0f};
@@ -61,7 +64,7 @@ bool display_init(Display *display, CyberwatchData *data) {
     data->battery.icon = IMG_LoadTexture(backend->renderer, batteryIconPath);
     printf("battery icon: %s\n", batteryIconPath);
 
-    data->tabCount = 3;
+    data->tabCount = 4;
     data->tabIndex = 0;
     data->state = CYW_HOME;
     data->tabIcons[0] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\empty_tab.png"));
@@ -69,6 +72,8 @@ bool display_init(Display *display, CyberwatchData *data) {
     data->tabIcons[2] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\watch_tab.png"));
     data->tabIcons[3] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\app_tab.png"));
     data->tabIcons[4] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\timer_tab.png"));
+    data->tabIcons[5] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\stopwatch_tab.png"));
+
     return true;
 }
 

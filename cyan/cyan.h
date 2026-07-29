@@ -30,6 +30,9 @@ typedef struct Cyan {
     int appCount;
     lua_State *appLua;
     Surface surface;
+    int highlightedApp;     // which app the dial cursor is currently on
+    int catalogueScrollY;   // current scroll offset, managed manually (see above)
+    bool devmode;
 } Cyan;
 
 

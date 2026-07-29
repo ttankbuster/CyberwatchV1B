@@ -110,7 +110,7 @@ static void register_draw_api(lua_State *L, Surface *surface, Display *display) 
     lua_setglobal(L, "draw");
 }
 
-static bool load_app_manifest(CyanApp *app) {
+static bool load_app_manifest(CyanApp *app, bool load_dev) {
     char manifestPath[MAX_FILE_PATH];
     snprintf(manifestPath, sizeof(manifestPath), "%s/.cyan_app.lua", app->path);
 
@@ -135,12 +135,20 @@ static bool load_app_manifest(CyanApp *app) {
     #define READ_STRING_FIELD(field, dest) \
         lua_getfield(L, -1, field); \
         if (lua_isstring(L, -1)) { snprintf(dest, sizeof(dest), "%s", lua_tostring(L, -1)); } lua_pop(L, 1);
+    
+    #define READ_BOOL_FIELD(field, dest) \
+        lua_getfield(L, -1, field); \
+        if (lua_isboolean(L, -1)) { dest = lua_toboolean(L, -1); } lua_pop(L, 1);
 
+    bool dev = false;
+    READ_BOOL_FIELD("dev", dev)
+    if (dev && !load_dev) { lua_close(L); return false; }
     READ_STRING_FIELD("name", app->name)
     READ_STRING_FIELD("icon", app->icon)
-    READ_STRING_FIELD("script", app->script)
 
+    READ_STRING_FIELD("script", app->script)
     #undef READ_STRING_FIELD
+    #undef READ_BOOL_FIELD
 
     lua_close(L);
     return true;
@@ -175,7 +183,7 @@ void cyan_index_apps(Cyan *cyan, char *path, Display *display) {
         snprintf(app.name, MAX_FILE_PATH, "%s", folders.names[i]);
         snprintf(app.path, MAX_FILE_PATH, "%s/%s", path, folders.names[i]);
 
-        if (load_app_manifest(&app)) {
+        if (load_app_manifest(&app, cyan->devmode)) {
             load_app_icon(&app, display);
             cyan->apps[cyan->appCount] = app;
             cyan->appCount++;
@@ -192,7 +200,7 @@ bool cyan_init(Cyan *cyan, Display *display) {
     cyan->selectedApp = -1;
     cyan->appCount = 0;
     cyan->appLua = NULL;
-
+    cyan->devmode = true;
     cyan_index_apps(cyan, "cyan/apps", display);
 
     return true;
@@ -280,7 +288,10 @@ void cyan_run_frame(Cyan *cyan, Display *display, float dt) {
 }
 
 void cyan_dispatch_events(Cyan *cyan, EventQueue *queue) {
-    if (!cyan->appLua) printf("ERROR: no cyan app to dispatch events to.\n"); return;
+    if (!cyan->appLua) {
+        printf("ERROR: no cyan app to dispatch events to.\n"); 
+        return;
+    }
     lua_State *L = cyan->appLua;
     for (int i = 0; i < queue->len; i++) {
         Event *ev = &queue->events[i];

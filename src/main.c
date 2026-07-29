@@ -14,14 +14,56 @@ Display display;
 Cyan cyan;
 
 
-bool launch_app(){
-    if (cyan_launch_app(&cyan, 1 , &display)) {
+bool launch_app(int id){
+    if (cyan_launch_app(&cyan, id , &display)) {
         data.state = CYW_APP_RUNNING;
         return true;
     } else {
-        printf("Failed to launch app 1 - falling back to catalogue\n");
+        printf("Failed to launch app %i - falling back to catalogue\n", id);
         data.state = CYW_HOME;
         return false;
+    }
+}
+
+bool exit_app(Cyan *cyan){
+    cyan_unload_app(cyan);
+    data.state = CYW_HOME;
+    data.tabIndex = 1;
+    return true;
+}
+
+
+void check_shutdown(CyberwatchData *data, float dt, bool *running){
+    if (has_event_type(&data->eventQueue, EVENT_BUTTON1_DOWN)){
+        data->shutdownHold = true;
+    } if (has_event_type(&data->eventQueue, EVENT_BUTTON1_UP)){
+        data->shutdownHold = false;
+    }
+
+    if (data->shutdownHold) {
+        data->shutdownHoldTime += dt;
+        if (data->shutdownHoldTime > SHUTDOWN_HOLD_TIME_TRIGGER) {
+            *running = false;
+        }
+    }
+    else {
+        data->shutdownHoldTime -= dt * 4.0f;
+        if (data->shutdownHoldTime < 0.0f) {
+            data->shutdownHoldTime = 0.0f;
+        }
+    }
+
+    float visibleTime = data->shutdownHoldTime - SHUTDOWN_SHOW_PROGRESS;
+    if (visibleTime <= 0.0f) {
+        data->shutdownProgress = 0.0f;
+    } else {
+        data->shutdownProgress =
+            visibleTime /
+            (SHUTDOWN_HOLD_TIME_TRIGGER - SHUTDOWN_SHOW_PROGRESS);
+
+        if (data->shutdownProgress > 0.98f) {
+            data->shutdownProgress = 1.0f;
+        }
     }
 }
 
@@ -56,23 +98,32 @@ int main(int argc, char **argv) {
         lastTime = now;
 
         update_data(&data, &display, &running);
-        if (has_event_type(&data.eventQueue, EVENT_BUTTON1_DOWN)){
-            cycleTab(&data);
-        }
+        check_shutdown(&data, dt, &running);
+        // printf("SHUTDOWN HOLD TIME: %f\n",data.shutdownHoldTime);
         DisplaySize size = display_get_size(&display);
         Clay_RenderCommandArray commands;
         switch (data.state) {
             case CYW_APP_RUNNING:
+                if (has_event_type(&data.eventQueue, EVENT_BUTTON1_DOWN)){exit_app(&cyan);}
                 commands = clay_cyan_app(&data, &cyan, size.width, size.height, false, false);
                 break;
 
             case CYW_HOME:
             default:
+                if (has_event_type(&data.eventQueue, EVENT_BUTTON1_DOWN)){ cycleTab(&data);}
                 switch (data.tabIndex) {
-                    case 0: commands = clay_watchface(&data, size.width, size.height, true); break;
-                    case 1: commands = clay_cyan_catalogue(&data, &cyan, size.width, size.height, true); break;
-                    case 2: commands = clay_timer(&data, size.width, size.height, true); break; // not built yet
-                    default: commands = clay_watchface(&data, size.width, size.height, true); break;
+                    case 0: commands = clay_watchface(&data, size.width, size.height, false); break;
+                    case 1: 
+                        commands = clay_cyan_catalogue(&data, &cyan, size.width, size.height, false); 
+                        if (has_event_type(&data.eventQueue, EVENT_SCROLL_UP)){cyan_catalogue_move(&cyan, -1);}
+                        if (has_event_type(&data.eventQueue, EVENT_SCROLL_DOWN)){cyan_catalogue_move(&cyan, 1);}
+                        if (has_event_type(&data.eventQueue, EVENT_BUTTON3_DOWN)){launch_app(cyan.highlightedApp);}
+                        break;
+                    case 2: 
+                        commands = clay_timer(&data, size.width, size.height, false); break;
+                    case 3: 
+                        commands = clay_stopwatch(&data, size.width, size.height, false); break;
+                    default: commands = clay_watchface(&data, size.width, size.height, false); break;
                 }
                 break;
         }

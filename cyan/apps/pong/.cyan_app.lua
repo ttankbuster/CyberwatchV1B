@@ -3,6 +3,7 @@
 return {
     name = "Pong",
     script = "pong.lua",
-    icon = "icon.bmp"
+    icon = "icon.bmp",
+    dev = false
 }
 

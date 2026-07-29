@@ -84,6 +84,13 @@ static void update_events(CyberwatchData *data, Display *display, bool *running,
                     printf("[EVENT] SDL_EVENT_KEY_UP: Key: %u | key: %d\n", sdl_event.key.key, sdl_event.key.key);
                 }
                 break;
+            case SDL_EVENT_MOUSE_BUTTON_DOWN:
+                if (sdl_event.button.button == 2) {
+                    event.type = EVENT_BUTTON3_DOWN;
+                    append_event(&data->eventQueue, event);
+                }
+                if (debug) { printf("[EVENT] SDL_EVENT_MOUSE_BUTTON_DOWN: y: %i\n", sdl_event.button.button); }
+                break;
 
             case SDL_EVENT_MOUSE_WHEEL:
                 if (sdl_event.wheel.y > 0.0f) {

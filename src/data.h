@@ -43,7 +43,9 @@ typedef enum {
 } CyberwatchState;
 
 
-#define TAB_ICON_COUNT 5
+#define TAB_ICON_COUNT 6
+#define SHUTDOWN_HOLD_TIME_TRIGGER 1.5f // seconds
+#define SHUTDOWN_SHOW_PROGRESS 0.3f // time it starts to show shutdown bar
 typedef struct CyberwatchData {
     BatteryData battery;
     struct tm time;
@@ -59,14 +61,23 @@ typedef struct CyberwatchData {
     char timerChars[9]; // "00:00:00\0"
     struct tm timerLastUpdated;
     int timerH;
+    int timerHspinbox;
+    char timerHspinboxChars[6];
     int timerM;
+    int timerMspinbox;
+    char timerMspinboxChars[6];
     int timerS;
+    int timerSspinbox;
+    char timerSspinboxChars[6];
     bool stopwatchActive;
     char stopwatchChars[9]; // "00:00:00\0"
     struct tm stopwatchLastUpdated;
     int stopwatchH;
     int stopwatchM;
     int stopwatchS;
+    bool shutdownHold;
+    float shutdownHoldTime;
+    float shutdownProgress;
 } CyberwatchData;
 
 #define MAX_FOLDERS 32

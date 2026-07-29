@@ -1,8 +1,8 @@
 
 -- cyan/apps/pong/.cyan_app.lua
 return {
-    name = "Reader",
-    script = "reader.lua",
+    name = "RNG",
+    script = "RNG.lua",
     icon = "icon.bmp",
     dev = true
 }

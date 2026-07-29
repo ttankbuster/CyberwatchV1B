@@ -15,8 +15,8 @@ static void render_time(FrameContext *ctx, Clay_String timeString, Clay_String d
             }
         }) {
             CLAY_TEXT(timeString, CLAY_TEXT_CONFIG({
-                .fontId = FONT_CLOCK,
-                .fontSize = 195,
+                .fontId = FONT_LARGE,
+                .fontSize = 190,
                 .textColor = CLOCK_COLOUR
             }));
         }
@@ -40,14 +40,14 @@ static void render_time(FrameContext *ctx, Clay_String timeString, Clay_String d
 
 Clay_RenderCommandArray clay_watchface(CyberwatchData* data, int width, int height, bool show_debug) {
     float deltaTime = get_delta();
-    FrameContext ctx = { .data = data, .debugOpacity = show_debug ? 255 : 0 };
+    FrameContext ctx = { .data = data, .debugOpacity = show_debug ? 100 : 0 };
  
     read_time_date(data);
     Clay_String timeString = { .chars = data->timeChars, .length = strlen(data->timeChars), .isStaticallyAllocated = false };
     Clay_String dateString = { .chars = data->dateChars, .length = strlen(data->dateChars), .isStaticallyAllocated = false };
  
-    int headerHeight = (int) (height * 0.155f);
-    int footerHeight = (int) (height * 0.151f);
+    int headerHeight = (int) (height * 0.1f);
+    int footerHeight = (int) (height * 0.1f);
     Clay_Sizing expand = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) };
  
     Clay_SetLayoutDimensions((Clay_Dimensions) { (float) width, (float) height });
@@ -60,7 +60,7 @@ Clay_RenderCommandArray clay_watchface(CyberwatchData* data, int width, int heig
             .sizing = expand
         }
     }) {
-        render_header_bar(&ctx, headerHeight);
+        render_header_bar(&ctx, width, headerHeight);
         render_time(&ctx, timeString, dateString);
         render_footer(&ctx, footerHeight);
     }

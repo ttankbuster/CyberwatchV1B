@@ -3,10 +3,9 @@
 
 Clay_RenderCommandArray clay_cyan_app(CyberwatchData* data, Cyan *cyan, int width, int height, bool show_debug, bool show_header) {
     float deltaTime = get_delta();
-    FrameContext ctx = { .data = data, .debugOpacity = show_debug ? 255 : 0 };
+    FrameContext ctx = { .data = data, .debugOpacity = show_debug ? 100 : 0 };
 
-    int headerHeight = show_header ? (int) (height * 0.155f) : 0;
-
+    int headerHeight = show_header ? (int) (height * 0.1f) : 0;
     Clay_SetLayoutDimensions((Clay_Dimensions) { (float) width, (float) height });
     Clay_BeginLayout();
 
@@ -17,7 +16,7 @@ Clay_RenderCommandArray clay_cyan_app(CyberwatchData* data, Cyan *cyan, int widt
         }
     }) {
         if (show_header) {
-            render_header_bar(&ctx, headerHeight);
+            render_header_bar(&ctx, width, headerHeight);
         }
 
         CLAY(CLAY_ID("AppContent"), {
