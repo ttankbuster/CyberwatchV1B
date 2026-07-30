@@ -1,4 +1,4 @@
-//display.c
+//display_sdl.c
 #include "../../src/data.h"
 #include "../../src/display.h"
 #include "../../src/clay_ui.h"
@@ -57,22 +57,22 @@ bool display_init(Display *display, CyberwatchData *data) {
     backend->fonts[FONT_MED] = _loadFontRelative("assets/fonts/Lexend_Deca/static/LexendDeca-Light.ttf", 60);
     backend->fonts[FONT_SMALL] = _loadFontRelative("assets/fonts/Lexend_Deca/static/LexendDeca-Light.ttf", 20);
     if (!backend->fonts[0] || !backend->fonts[1]) return false;
-    
-    data->battery = (BatteryData){.charge=1.0f};
+
+
     char batteryIconPath[MAX_FILE_PATH];
     platform_store_resolved_path("assets\\icons\\battery.png", batteryIconPath, sizeof(batteryIconPath));
-    data->battery.icon = IMG_LoadTexture(backend->renderer, batteryIconPath);
+    data->batteryIcon = IMG_LoadTexture(backend->renderer, batteryIconPath);
     printf("battery icon: %s\n", batteryIconPath);
 
-    data->tabCount = 4;
-    data->tabIndex = 0;
+    data->tabs.tabCount = 4;
+    data->tabs.tabIndex = 0;
     data->state = CYW_HOME;
-    data->tabIcons[0] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\empty_tab.png"));
-    data->tabIcons[1] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\full_tab.png"));
-    data->tabIcons[2] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\watch_tab.png"));
-    data->tabIcons[3] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\app_tab.png"));
-    data->tabIcons[4] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\timer_tab.png"));
-    data->tabIcons[5] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\stopwatch_tab.png"));
+    data->tabs.tabIcons[0] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\empty_tab.png"));
+    data->tabs.tabIcons[1] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\full_tab.png"));
+    data->tabs.tabIcons[2] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\watch_tab.png"));
+    data->tabs.tabIcons[3] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\app_tab.png"));
+    data->tabs.tabIcons[4] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\timer_tab.png"));
+    data->tabs.tabIcons[5] = IMG_LoadTexture(backend->renderer, platform_resolve_path("assets\\icons\\stopwatch_tab.png"));
 
     return true;
 }
@@ -185,4 +185,3 @@ Clay_Dimensions display_measure_text(Clay_StringSlice text, Clay_TextElementConf
     TTF_GetStringSize(font, text.chars, text.length, &width, &height);
     return (Clay_Dimensions) { (float) width, (float) height };
 }
-

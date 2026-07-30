@@ -1,4 +1,3 @@
-//clay_ui.h
 #ifndef CLAY_UI_H
 #define CLAY_UI_H
 
@@ -14,14 +13,12 @@
 #include "display.h"
 #include "data.h"
 
-
-
 static const uint32_t FONT_LARGE = 0;
 static const uint32_t FONT_INFO = 1;
 static const uint32_t FONT_MED = 2;
 static const uint32_t FONT_SMALL = 3;
 
-static const Clay_Color CLOCK_COLOUR = {215,125,69,255};
+static const Clay_Color ACCENT_COLOUR = {215,125,69,255};
 static const Clay_Color INFO_COLOUR = {255,255,255,255};
 static const Clay_Color SECONDARY_COLOUR = {150,150,150,255};
 static const Clay_Color BG_COLOR = {4,15,24,255};
@@ -30,12 +27,6 @@ static const char* WEEKDAYS[] = {
 };
 
 typedef struct Cyan Cyan;
-
-typedef struct {
-    CyberwatchData *data;
-    int debugOpacity;
-} FrameContext;
-  
 
 void handleClayErrors(Clay_ErrorData errorData);
 bool clay_ui_init(uint32_t max_elems, Clay_Dimensions (*measureTextFunction)(Clay_StringSlice, Clay_TextElementConfig *, void *), void *measureTextUserData, int width, int height);
@@ -46,12 +37,12 @@ Clay_RenderCommandArray clay_timer(CyberwatchData* data, int width, int height, 
 Clay_RenderCommandArray clay_stopwatch(CyberwatchData* data, int width, int height, bool show_debug);
 
 Clay_RenderCommandArray clay_cyan_app(CyberwatchData* data, Cyan *cyan, int width, int height, bool show_debug, bool show_header);
-// Clay_RenderCommandArray clay_battery_only(BatteryData *battery, int width, int height);
 
-void render_footer(FrameContext *ctx, int footerHeight);
-void render_header_bar(FrameContext *ctx, int headerWidth,int headerHeight);
-void widget_temperature(FrameContext *ctx, Clay_Sizing sizing);
-void widget_battery(FrameContext *ctx, Clay_Sizing sizing, Clay_Dimensions iconDimensions);
+void render_footer(CyberwatchData *data, int debugOpacity, int footerHeight);
+void render_header_bar(CyberwatchData *data, int debugOpacity, int headerWidth, int headerHeight);
+void widget_temperature(CyberwatchData *data, int debugOpacity, Clay_Sizing sizing);
+void widget_battery(CyberwatchData *data, int debugOpacity, Clay_Sizing sizing, Clay_Dimensions iconDimensions);
+void render_battery(float chargePercent, void *icon, Clay_Dimensions dimensions);
 
 void read_time_date(CyberwatchData* data);
 void read_timer(CyberwatchData* data);

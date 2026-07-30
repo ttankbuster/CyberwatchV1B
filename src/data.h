@@ -1,18 +1,12 @@
-//data.h
 #ifndef DATA_H
 #define DATA_H
 #include <time.h>
 #include <stdbool.h>
+#include "services.h"
 
 #define MAX_EVENTS 32
 
 typedef struct Display Display;
-
-
-typedef struct {
-    float charge;
-    void *icon;
-} BatteryData;
 
 typedef enum {
     EVENT_NONE,
@@ -25,14 +19,13 @@ typedef enum {
     EVENT_BUTTON3_DOWN,
     EVENT_SCROLL_UP,
     EVENT_SCROLL_DOWN,
-
 } EventType;
 
 typedef struct {
     EventType type;
 } Event;
 
-typedef struct {
+typedef struct EventQueue {
     Event events[MAX_EVENTS];
     int len;
 } EventQueue;
@@ -42,42 +35,56 @@ typedef enum {
     CYW_APP_RUNNING,
 } CyberwatchState;
 
-
 #define TAB_ICON_COUNT 6
 #define SHUTDOWN_HOLD_TIME_TRIGGER 1.5f // seconds
-#define SHUTDOWN_SHOW_PROGRESS 0.3f // time it starts to show shutdown bar
-typedef struct CyberwatchData {
-    BatteryData battery;
+#define SHUTDOWN_SHOW_PROGRESS 0.3f     // time it starts to show shutdown bar
+#define TIMER_SELECTABLE_ELEMENT_COUNT 3
+typedef struct {
+    bool active;
+    char chars[10]; // "000:00:00\0"
+    struct tm lastUpdated;
+    int h, m, s;
+    int hSpinbox, mSpinbox, sSpinbox;
+    char hSpinboxChars[4], mSpinboxChars[3], sSpinboxChars[3];
+    int selectedElement;
+} TimerData;
+
+typedef struct {
+    bool active;
+    char chars[10]; // "000:00:00\0"
+    struct tm lastUpdated;
+    int h, m, s;
+} StopwatchData;
+
+typedef struct {
+    bool holding;
+    float holdTime;
+    float progress;
+} ShutdownData;
+
+typedef struct {
     struct tm time;
     char timeChars[6];
     char dateChars[13];
-    EventQueue eventQueue;
-    CyberwatchState state;
+} WatchfaceData;
+
+typedef struct {
     int tabIndex;
     int tabCount;
     void* tabIcons[TAB_ICON_COUNT];
     void* tabData;
-    bool timerActive;
-    char timerChars[9]; // "00:00:00\0"
-    struct tm timerLastUpdated;
-    int timerH;
-    int timerHspinbox;
-    char timerHspinboxChars[6];
-    int timerM;
-    int timerMspinbox;
-    char timerMspinboxChars[6];
-    int timerS;
-    int timerSspinbox;
-    char timerSspinboxChars[6];
-    bool stopwatchActive;
-    char stopwatchChars[9]; // "00:00:00\0"
-    struct tm stopwatchLastUpdated;
-    int stopwatchH;
-    int stopwatchM;
-    int stopwatchS;
-    bool shutdownHold;
-    float shutdownHoldTime;
-    float shutdownProgress;
+} TabData;
+
+typedef struct CyberwatchData {
+    CyberwatchState state;
+    ServiceRegistry services;
+    EventQueue eventQueue;
+    WatchfaceData watchface;
+    TabData tabs;
+    TimerData timer;
+    StopwatchData stopwatch;
+    ShutdownData shutdown;
+    void *batteryIcon;
 } CyberwatchData;
 
 #define MAX_FOLDERS 32
@@ -98,6 +105,14 @@ void platform_store_resolved_path(const char *relativePath, char *outBuffer, siz
 char* platform_resolve_path(char *relativePath);
 
 bool load_image(Display *display, const char *path, void *outHandle);
+
+void timer_init(CyberwatchData *data);
+void timer_cycle_element(CyberwatchData *data);
+void timer_toggle(CyberwatchData *data);
+void timer_spinbox_input(CyberwatchData *data, int difference);
+
+void stopwatch_toggle(CyberwatchData *data);
+void stopwatch_reset(CyberwatchData *data);
 
 float get_delta(void);
 #endif

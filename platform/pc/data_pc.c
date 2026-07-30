@@ -163,7 +163,7 @@ void update_data(CyberwatchData *data, Display *display, bool *running) {
     time_t raw_time = time(NULL);
     struct tm *local_ptr = localtime(&raw_time);
     if (local_ptr != NULL) {
-        data->time = *local_ptr;
+        data->watchface.time = *local_ptr;
     }
     update_events(data, display, running, false);
 }

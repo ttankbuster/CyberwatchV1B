@@ -1,39 +1,29 @@
-// C3 entry point — plain watchface only, no Cyan/Lua.
-// Deliberately excludes anything Cyan-related: not enough RAM headroom on
-// this chip yet, and there's no SD card for app storage regardless.
+//platform/esp32/main_esp32.cpp
 extern "C" {
-    #include "data.h"
-    #include "clay_ui.h"
-    #include "display.h"
+    #include "cyberwatch.h"
 }
 #include <Arduino.h>
 
-const uint32_t MAXIMUM_ELEMENTS = 50;
-CyberwatchData data;
-Display display;
+static unsigned long lastTime = 0;
 
 void setup() {
     Serial.begin(115200);
+    delay(2000);
 
-    if (!display_init(&display, &data)) {
-        Serial.println("Failed to initialise display");
+    if (!cyberwatch_init()) {
+        Serial.println("Failed to initialise Cyberwatch");
         while (1) delay(1000);
     }
+    Serial.println("[esp32] setup() complete");
 
-    DisplaySize initialSize = display_get_size(&display);
-    clay_ui_init(MAXIMUM_ELEMENTS, display_measure_text, &display, initialSize.width, initialSize.height);
-    Serial.println("[esp32] setup()");
+    lastTime = millis();
 }
 
 void loop() {
-    Serial.println("[esp32] loop[()");
+    unsigned long now = millis();
+    float dt = (float) (now - lastTime) / 1000.0f;
+    lastTime = now;
+
     bool running = true;
-    update_data(&data, &display, &running);
-
-    DisplaySize size = display_get_size(&display);
-    Clay_RenderCommandArray commands = clay_cyberwatch(&data, size.width, size.height, false);
-
-    display_clear(&display, (Clay_Color) {0, 0, 0, 255});
-    clay_render(&display, &commands, false);
-    display_present(&display);
+    cyberwatch_update(dt, &running);
 }

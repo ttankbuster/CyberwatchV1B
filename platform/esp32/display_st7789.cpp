@@ -2,38 +2,55 @@ extern "C" {
     #include "display.h"
     #include "../../assets/icons/battery_icon.h"
 }
+#include <Arduino.h>
 #include <Arduino_GFX_Library.h>
 //must be declared afterwards or gfxfont.h wont be loaded, which is a dependency
 #include "assets/fonts/GFX/FreeSans9pt7b.h"
 #include "assets/fonts/GFX/FreeSansBold18pt7b.h"
 #include "assets/fonts/GFX/FreeSansBold24pt7b.h"
 
-#if defined(CONFIG_IDF_TARGET_ESP32C3) // C
-    #define PIN_SCK  8
-    #define PIN_MOSI 10
-    #define PIN_CS   3
-    #define PIN_DC   5
-    #define PIN_RST  2
-#elif defined(CONFIG_IDF_TARGET_ESP32S3) // S
+#if defined(CONFIG_IDF_TARGET_ESP32C3)
+    #define PIN_SCK  D8
+    #define PIN_MOSI D10
+    #define PIN_CS   D1
+    #define PIN_DC   D3
+    #define PIN_RST  D0
+    #define PIN_BL   D6
+
+#elif defined(BOARD_XIAO_ESP32S3_PLUS)
+    #define PIN_SCK  D8
+    #define PIN_MOSI D10
+    #define PIN_CS   D1
+    #define PIN_DC   D3
+    #define PIN_RST  D0
+    #define PIN_BL   D6
+/*
+| VCC  | 3V3  |
+| GND  | GND  |
+| DIN  | D10  |
+| CLK  | D8   |
+| CS   | D1   |
+| DC   | D3   |
+| RST  | D0   |
+| BL   | D6   |
+*/
+
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
     #define PIN_SCK  6
     #define PIN_MOSI 7
     #define PIN_CS   4
     #define PIN_DC   5
     #define PIN_RST  8
+    #define PIN_BL   9
+
 #else
     #error "Unsupported target — add a pin block for this chip"
 #endif
 
 static Arduino_DataBus *bus = new Arduino_ESP32SPI(PIN_DC, PIN_CS, PIN_SCK, PIN_MOSI, GFX_NOT_DEFINED);
-// col/row offset of (0,20) matches the +20 Y offset your original st7789v2 library
-// applied in SetCursor() — this panel's visible area sits 20px into a larger GRAM.
 static Arduino_GFX *panel = new Arduino_ST7789(bus, PIN_RST, 0, true, 240, 280, 0, 20, 0, 20);
 static Arduino_Canvas *gfx = new Arduino_Canvas(240, 280, panel);
 
-// Bucket fontSize into one of three real GFXfont bitmap fonts. Not continuous
-// scaling — same caveat as before — but getTextBounds() below returns REAL
-// per-string pixel measurements for whichever font gets picked, so measure
-// and draw always agree exactly.
 static const GFXfont *selectFont(int fontSize) {
     if (fontSize >= 120) return &FreeSansBold24pt7b;
     if (fontSize >= 60)  return &FreeSansBold18pt7b;
@@ -44,6 +61,19 @@ extern "C" bool display_init(Display *display, CyberwatchData *data) {
     display->width = 240;
     display->height = 280;
     display->backend = NULL;
+
+    Serial.printf("[display] compiled pins: SCK=%d MOSI=%d CS=%d DC=%d RST=%d\n",
+        PIN_SCK, PIN_MOSI, PIN_CS, PIN_DC, PIN_RST);
+#ifdef PIN_BL
+    Serial.printf("[display] compiled BL=%d\n", PIN_BL);
+#else
+    Serial.println("[display] no PIN_BL defined for this branch");
+#endif
+
+#ifdef PIN_BL
+    pinMode(PIN_BL, OUTPUT);
+    digitalWrite(PIN_BL, HIGH);
+#endif
 
     if (!gfx->begin()) {
         Serial.println("Arduino_GFX begin() failed");
@@ -112,9 +142,6 @@ extern "C" void display_draw_text(Display *display, Clay_BoundingBox box, Clay_T
     int16_t x1, y1;
     uint16_t w, h;
     gfx->getTextBounds(buffer, 0, 0, &x1, &y1, &w, &h);
-    // y1 is the offset from the text's y-origin (baseline) up to the top of
-    // the glyphs — negative for fonts drawn above the baseline. Subtracting
-    // it moves the baseline down so the glyphs actually start at box.y.
     gfx->setCursor((int) box.x, (int) box.y - y1);
     gfx->print(buffer);
 }
@@ -128,8 +155,6 @@ extern "C" void display_draw_image(Display *display, Clay_BoundingBox box, Clay_
 
 extern "C" void display_set_clip(Display *display, Clay_BoundingBox box) {
     (void) display;
-    // Arduino_GFX has no built-in scissor/viewport clip; software clipping
-    // would need to be layered here manually if scroll containers get used.
 }
 
 extern "C" void display_clear_clip(Display *display) {
