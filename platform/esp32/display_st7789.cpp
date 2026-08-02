@@ -4,12 +4,14 @@ extern "C" {
 }
 #include <Arduino.h>
 #include <Arduino_GFX_Library.h>
+#include "esp32_hardware.h"
 //must be declared afterwards or gfxfont.h wont be loaded, which is a dependency
 #include "assets/fonts/GFX/FreeSans9pt7b.h"
 #include "assets/fonts/GFX/FreeSansBold18pt7b.h"
 #include "assets/fonts/GFX/FreeSansBold24pt7b.h"
 
 #if defined(CONFIG_IDF_TARGET_ESP32C3)
+    // Backlight is wired directly to 3V3 on this board — no GPIO drive needed.
     #define PIN_SCK  D8
     #define PIN_MOSI D10
     #define PIN_CS   D1
@@ -18,12 +20,14 @@ extern "C" {
     #define PIN_BL   D6
 
 #elif defined(BOARD_XIAO_ESP32S3_PLUS)
+    // RST and BL are driven through the MCP23017 here (A2/A3), NOT raw
+    // ESP32 GPIO — D0/D6 are freed up for the rotary encoder's CLK/DT
+    // instead. See esp32_hardware.h for the shared MCP instance.
+    #define DISPLAY_RESET_VIA_MCP
     #define PIN_SCK  D8
     #define PIN_MOSI D10
     #define PIN_CS   D1
     #define PIN_DC   D3
-    #define PIN_RST  D0
-    #define PIN_BL   D6
 /*
 | VCC  | 3V3  |
 | GND  | GND  |
@@ -31,8 +35,8 @@ extern "C" {
 | CLK  | D8   |
 | CS   | D1   |
 | DC   | D3   |
-| RST  | D0   |
-| BL   | D6   |
+| RST  | MCP A2 |
+| BL   | MCP A3 |
 */
 
 #elif defined(CONFIG_IDF_TARGET_ESP32S3)
@@ -48,7 +52,13 @@ extern "C" {
 #endif
 
 static Arduino_DataBus *bus = new Arduino_ESP32SPI(PIN_DC, PIN_CS, PIN_SCK, PIN_MOSI, GFX_NOT_DEFINED);
-static Arduino_GFX *panel = new Arduino_ST7789(bus, PIN_RST, 0, true, 240, 280, 0, 20, 0, 20);
+#ifdef DISPLAY_RESET_VIA_MCP
+    // RST not passed here — the library can't reach an I2C-expander pin
+    // itself, so it's pulsed manually in display_init() below instead.
+    static Arduino_GFX *panel = new Arduino_ST7789(bus, GFX_NOT_DEFINED, 0, true, 240, 280, 0, 20, 0, 20);
+#else
+    static Arduino_GFX *panel = new Arduino_ST7789(bus, PIN_RST, 0, true, 240, 280, 0, 20, 0, 20);
+#endif
 static Arduino_Canvas *gfx = new Arduino_Canvas(240, 280, panel);
 
 static const GFXfont *selectFont(int fontSize) {
@@ -62,17 +72,27 @@ extern "C" bool display_init(Display *display, CyberwatchData *data) {
     display->height = 280;
     display->backend = NULL;
 
-    Serial.printf("[display] compiled pins: SCK=%d MOSI=%d CS=%d DC=%d RST=%d\n",
-        PIN_SCK, PIN_MOSI, PIN_CS, PIN_DC, PIN_RST);
-#ifdef PIN_BL
-    Serial.printf("[display] compiled BL=%d\n", PIN_BL);
-#else
-    Serial.println("[display] no PIN_BL defined for this branch");
-#endif
+    // PC's display.c sets these; the ESP32 path never did — tabCount
+    // defaulting to 0 (zero-init) meant cycleTab()'s "% tabCount" was a
+    // modulo-by-zero the instant button 1 was pressed. That's the crash.
 
-#ifdef PIN_BL
-    pinMode(PIN_BL, OUTPUT);
-    digitalWrite(PIN_BL, HIGH);
+#ifdef DISPLAY_RESET_VIA_MCP
+    // esp32_hardware_init() must have already run (called from
+    // main_esp32.cpp before this function) — mcp is not valid otherwise.
+    if (!mcpReady) {
+        Serial.println("display_init: MCP23017 not ready — call esp32_hardware_init() first");
+        return false;
+    }
+    mcp.digitalWrite(MCP_DISP_RST, LOW);
+    delay(20);
+    mcp.digitalWrite(MCP_DISP_RST, HIGH);
+    delay(120); // ST7789 needs settle time after reset before accepting commands
+    mcp.digitalWrite(MCP_DISP_BL, HIGH);
+#else
+    #ifdef PIN_BL
+        pinMode(PIN_BL, OUTPUT);
+        digitalWrite(PIN_BL, HIGH);
+    #endif
 #endif
 
     if (!gfx->begin()) {
@@ -80,6 +100,13 @@ extern "C" bool display_init(Display *display, CyberwatchData *data) {
         return false;
     }
     gfx->fillScreen(0x0000); // black in RGB565
+
+#ifdef DISPLAY_RESET_VIA_MCP
+    // Must run here, after the display's own SPI setup — running SD's
+    // SPI.begin() before this caused a hang. See chat history.
+    esp32_sd_init();
+#endif
+
     return true;
 }
 

@@ -61,8 +61,6 @@ void read_time_date(CyberwatchData* data){
 }
 
 
-
-
 void widget_temperature(CyberwatchData *data, int debugOpacity, Clay_Sizing sizing) {
     CLAY(CLAY_ID("TemperatureDisplay"), {
         .backgroundColor = {100,32,24,debugOpacity},

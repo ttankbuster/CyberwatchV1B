@@ -1,4 +1,4 @@
-//cyberwatch.c — platform-neutral. No SDL, no Arduino, no clock()/millis().
+//cyberwatch.c
 #include <stdio.h>
 #include "cyberwatch.h"
 #include "clay_ui.h"
@@ -70,7 +70,9 @@ bool cyberwatch_init(void) {
         printf("Failed to initialise display\n");
         return false;
     }
-
+    data.tabs.tabCount = 4;
+    data.tabs.tabIndex = 0;
+    data.state = CYW_HOME;
     DisplaySize initialSize = display_get_size(&display);
     clay_ui_init(MAXIMUM_ELEMENTS, display_measure_text, &display, initialSize.width, initialSize.height);
 

@@ -6,13 +6,7 @@
 #include <time.h>
 #include "display.h"
 
-typedef struct EventQueue EventQueue; // forward declaration only — avoids a
-                                       // circular #include with data.h (which
-                                       // embeds ServiceRegistry BY VALUE and
-                                       // therefore must fully include this
-                                       // file; services.h can't include
-                                       // data.h back without breaking that
-                                       // ordering — see chat).
+typedef struct EventQueue EventQueue;
 
 typedef struct Service {
     const char *name;

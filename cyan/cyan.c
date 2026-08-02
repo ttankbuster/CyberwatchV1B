@@ -85,7 +85,6 @@ static int lua_draw_text(lua_State *L) {
     return 0;
 }
 
-
 static void push_draw_closure(lua_State *L, lua_CFunction fn, Surface *surface, Display *display) {
     lua_pushlightuserdata(L, surface);
     lua_pushlightuserdata(L, display);
@@ -201,7 +200,7 @@ bool cyan_init(Cyan *cyan, Display *display) {
     cyan->appCount = 0;
     cyan->appLua = NULL;
     cyan->devmode = true;
-    cyan_index_apps(cyan, "cyan/apps", display);
+    cyan_index_apps(cyan, "apps", display);
 
     return true;
 }
