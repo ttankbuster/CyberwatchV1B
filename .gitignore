@@ -3,10 +3,6 @@ platform/esp32/secrets.h
 build/
 .pio/
 
-external/SDL3/
-external/SDL_ttf/
-external/SDL3_image/
-
 .vscode/.browse.c_cpp.db*
 .vscode
 Thumbs.db

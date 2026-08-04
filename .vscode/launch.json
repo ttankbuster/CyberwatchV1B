@@ -31,35 +31,32 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
-            "executable": "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B/build/xiao_esp32s3_plus/firmware.elf",
-            "projectEnvName": "xiao_esp32s3_plus",
-            "toolchainBinDir": "C:/Users/Teddy/.platformio/packages/toolchain-xtensa-esp-elf/bin",
+            "executable": "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B/build/native/program.exe",
+            "projectEnvName": "native",
+            "toolchainBinDir": "C:/gcc/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "C:/Users/Teddy/.platformio/platforms/espressif32/misc/svd/esp32s3.svd",
             "preLaunchTask": {
                 "type": "PlatformIO",
-                "task": "Pre-Debug (xiao_esp32s3_plus)"
+                "task": "Pre-Debug"
             }
         },
         {
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
-            "executable": "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B/build/xiao_esp32s3_plus/firmware.elf",
-            "projectEnvName": "xiao_esp32s3_plus",
-            "toolchainBinDir": "C:/Users/Teddy/.platformio/packages/toolchain-xtensa-esp-elf/bin",
-            "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "C:/Users/Teddy/.platformio/platforms/espressif32/misc/svd/esp32s3.svd"
+            "executable": "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B/build/native/program.exe",
+            "projectEnvName": "native",
+            "toolchainBinDir": "C:/gcc/bin",
+            "internalConsoleOptions": "openOnSessionStart"
         },
         {
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (without uploading)",
-            "executable": "B:/Data/Teddy/Projects/Cyberwatch/CyberwatchV1B/build/xiao_esp32s3_plus/firmware.elf",
-            "projectEnvName": "xiao_esp32s3_plus",
-            "toolchainBinDir": "C:/Users/Teddy/.platformio/packages/toolchain-xtensa-esp-elf/bin",
+            "executable": "C:/Users/ttank/Desktop/Teddy/Projects/CyberwatchV1B/build/native/program.exe",
+            "projectEnvName": "native",
+            "toolchainBinDir": "C:/gcc/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "C:/Users/Teddy/.platformio/platforms/espressif32/misc/svd/esp32s3.svd",
             "loadMode": "manual"
         }
     ]
