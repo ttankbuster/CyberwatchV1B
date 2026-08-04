@@ -2,14 +2,14 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <time.h>
-#include "../../src/cyberwatch.h"
+#include "../../cyan/cyan_os.h"
 
 int main(int argc, char **argv) {
     (void) argc;
     (void) argv;
     printf("main_pc.c\n");
 
-    if (!cyberwatch_init()) {
+    if (!cyan_init()) {
         printf("Failed to initialise Cyberwatch\n");
         return 1;
     }
@@ -21,9 +21,9 @@ int main(int argc, char **argv) {
         clock_t now = clock();
         float dt = (float) (now - lastTime) / CLOCKS_PER_SEC;
         lastTime = now;
-        cyberwatch_update(dt, &running);
+        cyan_update(dt, &running);
     }
 
-    cyberwatch_shutdown();
+    cyan_shutdown();
     return 0;
 }

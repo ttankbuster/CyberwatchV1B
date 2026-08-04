@@ -1,0 +1,130 @@
+﻿// B:\Data\Teddy\Projects\Cyberwatch\CyberwatchV1B\cyan\clay_ui.c
+void handleClayErrors(Clay_ErrorData errorData)
+bool clay_ui_init(uint32_t max_elems, Clay_Dimensions (*measureTextFunction)(Clay_StringSlice, Clay_TextElementConfig *, void *), void *measureTextUserData, int width, int height)
+void render_battery(float chargePercent, void *icon, Clay_Dimensions dimensions)
+void widget_temperature(CyberwatchData *data, int debugOpacity, Clay_Sizing sizing)
+void widget_battery(CyberwatchData *data, int debugOpacity, Clay_Sizing sizing, Clay_Dimensions iconDimensions)
+void shutdown_bar(float progress, int headerWidth, int headerHeight)
+void render_header_bar(CyberwatchData *data, int debugOpacity, int headerWidth, int headerHeight)
+void render_footer(CyberwatchData *data, int debugOpacity, int footerHeight)
+static Clay_Color apply_overlay(Clay_Color colour)
+void clay_render(Display *display, Clay_RenderCommandArray *commands, bool debug_out)
+
+// B:\Data\Teddy\Projects\Cyberwatch\CyberwatchV1B\cyan\cyan_os.c
+static bool launch_app(int id)
+static bool exit_app(AppHandler *app_handler)
+static void check_shutdown(CyberwatchData *data, float dt, bool *running)
+static void cycle_tab(CyberwatchData *data)
+bool cyan_init(void)
+void cyan_update(float dt, bool *running)
+void cyan_shutdown(void)
+
+// B:\Data\Teddy\Projects\Cyberwatch\CyberwatchV1B\cyan\app_handling\app_handler.c
+static int AppHandler_print(lua_State *L)
+static void push_event_constants(lua_State *L)
+static void register_sandbox_api(lua_State *L, const char *appName)
+static int lua_draw_rect(lua_State *L)
+static int lua_draw_width(lua_State *L)
+static int lua_draw_height(lua_State *L)
+static int lua_draw_text(lua_State *L)
+static void push_draw_closure(lua_State *L, lua_CFunction fn, Surface *surface, Display *display)
+static void register_draw_api(lua_State *L, Surface *surface, Display *display)
+static bool load_app_manifest(AppEntry *app, bool load_dev)
+static bool load_app_icon(AppEntry *app, Display *display)
+static void app_handler_index(AppHandler *AppHandler, char *path, Display *display)
+bool app_handler_init(AppHandler *AppHandler, Display *display)
+bool app_handler_launch(AppHandler *AppHandler, int id, Display *display)
+void app_handler_run_frame(AppHandler *AppHandler, Display *display, float dt)
+void app_handler_dispatch_events(AppHandler *AppHandler, EventQueue *queue)
+void app_handler_unload(AppHandler *AppHandler)
+void app_handler_shutdown(AppHandler *AppHandler)
+
+// B:\Data\Teddy\Projects\Cyberwatch\CyberwatchV1B\cyan\app_handling\surface.c
+void surface_init(Surface *surface, int originX, int originY, int width, int height)
+void surface_set_region(Surface *surface, int originX, int originY, int width, int height)
+void surface_push_rect(Surface *surface, int x, int y, int w, int h, Clay_Color color)
+void surface_push_text(Surface *surface, int x, int y, const char *text, int fontId, int fontSize, Clay_Color color)
+void surface_push_image(Surface *surface, int x, int y, int w, int h, void *imageHandle)
+static Clay_BoundingBox clamp_to_surface(Surface *surface, int x, int y, int w, int h)
+void surface_render(Display *display, Surface *surface)
+
+// B:\Data\Teddy\Projects\Cyberwatch\CyberwatchV1B\cyan\data\services_base.c
+void services_init(ServiceRegistry *registry)
+bool services_register(ServiceRegistry *registry, Service *service)
+void services_update(ServiceRegistry *registry, float dt)
+void services_shutdown(ServiceRegistry *registry)
+bool services_is_available(ServiceRegistry *registry, ServiceId id)
+
+// B:\Data\Teddy\Projects\Cyberwatch\CyberwatchV1B\cyan\data\timer_handling.c
+
+// B:\Data\Teddy\Projects\Cyberwatch\CyberwatchV1B\cyan\tabs\screen_app.c
+Clay_RenderCommandArray clay_AppHandler_app(CyberwatchData* data, AppHandler *app_handler, int width, int height, bool show_debug, bool show_header)
+
+// B:\Data\Teddy\Projects\Cyberwatch\CyberwatchV1B\cyan\tabs\screen_catalogue.c
+void render_AppHandler_catalogue(AppCatalogue *catalogue, AppHandler *app_handler, int width, int height, bool show_debug)
+Clay_RenderCommandArray clay_AppHandler_catalogue(CyberwatchData* data, AppHandler *app_handler,int width, int height, bool show_debug)
+void AppHandler_catalogue_move(AppCatalogue *catalogue, AppHandler *app_handler, int delta)
+
+// B:\Data\Teddy\Projects\Cyberwatch\CyberwatchV1B\cyan\tabs\screen_stopwatch.c
+static void render_stopwatch(CyberwatchData *data, int debugOpacity, Clay_String stopwatchString, bool stopwatchActive)
+Clay_RenderCommandArray clay_stopwatch(CyberwatchData* data, int width, int height, bool show_debug)
+void stopwatch_toggle(CyberwatchData *data)
+void stopwatch_reset(CyberwatchData *data)
+void read_stopwatch(CyberwatchData* data)
+
+// B:\Data\Teddy\Projects\Cyberwatch\CyberwatchV1B\cyan\tabs\screen_timer.c
+static void render_spinbox(int number, char *textChars, size_t textCharsSize, bool active)
+static void render_timer(CyberwatchData *data, int debugOpacity, Clay_String timerString, bool timerActive)
+Clay_RenderCommandArray clay_timer(CyberwatchData* data, int width, int height, bool show_debug)
+void timer_cycle_element(CyberwatchData *data)
+void timer_init(CyberwatchData *data)
+void timer_toggle(CyberwatchData *data)
+void read_timer(CyberwatchData* data)
+void timer_spinbox_input(CyberwatchData *data, int difference)
+
+// B:\Data\Teddy\Projects\Cyberwatch\CyberwatchV1B\cyan\tabs\screen_watchface.c
+static void render_time(CyberwatchData *data, int debugOpacity, Clay_String timeString, Clay_String dateString)
+void read_time_date(CyberwatchData* data)
+Clay_RenderCommandArray clay_watchface(CyberwatchData* data, int width, int height, bool show_debug)
+
+// B:\Data\Teddy\Projects\Cyberwatch\CyberwatchV1B\platform\pc\data_pc.c
+static void append_event(EventQueue* queue, Event event)
+static void update_events(CyberwatchData *data, Display *display, bool *running, bool debug)
+bool has_event_type(EventQueue *queue, EventType type)
+void platform_store_resolved_path(const char *relativePath, char *outBuffer, size_t bufferSize)
+char* platform_resolve_path(char *relativePath)
+bool load_image(Display *display, const char *path, void *outHandle)
+void update_data(CyberwatchData *data, Display *display, bool *running)
+FolderList scan_folder(char *path)
+float get_delta(void)
+
+// B:\Data\Teddy\Projects\Cyberwatch\CyberwatchV1B\platform\pc\display_sdl.c
+static SDL_Color toSdlColor(Clay_Color colour)
+bool display_init(Display *display, CyberwatchData *data)
+void display_shutdown(Display *display)
+DisplaySize display_get_size(Display *display)
+void display_clear(Display *display, Clay_Color colour)
+void display_fill_rect(Display *display, Clay_BoundingBox box, Clay_Color colour)
+
+// B:\Data\Teddy\Projects\Cyberwatch\CyberwatchV1B\platform\pc\display_sdl.c (continued)
+void display_draw_border(Display *display, Clay_BoundingBox box, Clay_BorderRenderData border)
+void display_draw_text(Display *display, Clay_BoundingBox box, Clay_TextRenderData text)
+void display_draw_image(Display *display, Clay_BoundingBox box, Clay_ImageRenderData image)
+void display_set_clip(Display *display, Clay_BoundingBox box)
+void display_clear_clip(Display *display)
+void display_present(Display *display)
+Clay_Dimensions display_measure_text(Clay_StringSlice text, Clay_TextElementConfig *config, void *userData)
+
+// B:\Data\Teddy\Projects\Cyberwatch\CyberwatchV1B\platform\pc\main_pc.c
+int main(int argc, char **argv)
+
+// B:\Data\Teddy\Projects\Cyberwatch\CyberwatchV1B\platform\pc\services_pc.c
+static bool time_available(void)
+static struct tm time_now(void)
+static bool power_available(void)
+static bool power_has_battery(void)
+static float power_battery_percent(void)
+static bool power_is_charging(void)
+static void power_shutdown(void)
+static void power_sleep(void)
+void register_available_services(CyberwatchData *data)

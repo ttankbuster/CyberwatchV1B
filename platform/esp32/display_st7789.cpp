@@ -11,7 +11,7 @@ extern "C" {
 #include "assets/fonts/GFX/FreeSansBold24pt7b.h"
 
 #if defined(CONFIG_IDF_TARGET_ESP32C3)
-    // Backlight is wired directly to 3V3 on this board — no GPIO drive needed.
+    // Backlight is wired directly to 3V3 on this board - no GPIO drive needed.
     #define PIN_SCK  D8
     #define PIN_MOSI D10
     #define PIN_CS   D1
@@ -21,7 +21,7 @@ extern "C" {
 
 #elif defined(BOARD_XIAO_ESP32S3_PLUS)
     // RST and BL are driven through the MCP23017 here (A2/A3), NOT raw
-    // ESP32 GPIO — D0/D6 are freed up for the rotary encoder's CLK/DT
+    // ESP32 GPIO - D0/D6 are freed up for the rotary encoder's CLK/DT
     // instead. See esp32_hardware.h for the shared MCP instance.
     #define DISPLAY_RESET_VIA_MCP
     #define PIN_SCK  D8
@@ -48,12 +48,12 @@ extern "C" {
     #define PIN_BL   9
 
 #else
-    #error "Unsupported target — add a pin block for this chip"
+    #error "Unsupported target - add a pin block for this chip"
 #endif
 
 static Arduino_DataBus *bus = new Arduino_ESP32SPI(PIN_DC, PIN_CS, PIN_SCK, PIN_MOSI, GFX_NOT_DEFINED);
 #ifdef DISPLAY_RESET_VIA_MCP
-    // RST not passed here — the library can't reach an I2C-expander pin
+    // RST not passed here - the library can't reach an I2C-expander pin
     // itself, so it's pulsed manually in display_init() below instead.
     static Arduino_GFX *panel = new Arduino_ST7789(bus, GFX_NOT_DEFINED, 0, true, 240, 280, 0, 20, 0, 20);
 #else
@@ -72,15 +72,15 @@ extern "C" bool display_init(Display *display, CyberwatchData *data) {
     display->height = 280;
     display->backend = NULL;
 
-    // PC's display.c sets these; the ESP32 path never did — tabCount
-    // defaulting to 0 (zero-init) meant cycleTab()'s "% tabCount" was a
+    // PC's display.c sets these; the ESP32 path never did - tabCount
+    // defaulting to 0 (zero-init) meant cycle_tab()'s "% tabCount" was a
     // modulo-by-zero the instant button 1 was pressed. That's the crash.
 
 #ifdef DISPLAY_RESET_VIA_MCP
     // esp32_hardware_init() must have already run (called from
-    // main_esp32.cpp before this function) — mcp is not valid otherwise.
+    // main_esp32.cpp before this function) - mcp is not valid otherwise.
     if (!mcpReady) {
-        Serial.println("display_init: MCP23017 not ready — call esp32_hardware_init() first");
+        Serial.println("display_init: MCP23017 not ready - call esp32_hardware_init() first");
         return false;
     }
     mcp.digitalWrite(MCP_DISP_RST, LOW);
@@ -102,7 +102,7 @@ extern "C" bool display_init(Display *display, CyberwatchData *data) {
     gfx->fillScreen(0x0000); // black in RGB565
 
 #ifdef DISPLAY_RESET_VIA_MCP
-    // Must run here, after the display's own SPI setup — running SD's
+    // Must run here, after the display's own SPI setup - running SD's
     // SPI.begin() before this caused a hang. See chat history.
     esp32_sd_init();
 #endif

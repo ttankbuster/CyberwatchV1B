@@ -1,6 +1,6 @@
 //screen_watchface.c
 #include "../clay_ui.h"
-#include "../data.h"
+#include "../data/data.h"
 
 static void render_time(CyberwatchData *data, int debugOpacity, Clay_String timeString, Clay_String dateString) {
     Clay_Sizing expand = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) };
@@ -36,6 +36,12 @@ static void render_time(CyberwatchData *data, int debugOpacity, Clay_String time
             }));
         }
     }
+}
+
+void read_time_date(CyberwatchData* data){
+    WatchfaceData *wf = &data->watchface;
+    snprintf(wf->timeChars, sizeof(wf->timeChars),"%02d:%02d",wf->time.tm_hour,wf->time.tm_min);
+    snprintf(wf->dateChars, sizeof(wf->dateChars),"%02d/%02d/%02d %.3s",wf->time.tm_mday,wf->time.tm_mon,wf->time.tm_year%100, WEEKDAYS[wf->time.tm_wday]);
 }
 
 Clay_RenderCommandArray clay_watchface(CyberwatchData* data, int width, int height, bool show_debug) {

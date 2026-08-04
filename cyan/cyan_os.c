@@ -1,17 +1,17 @@
 //cyberwatch.c
 #include <stdio.h>
-#include "cyberwatch.h"
+#include "app_handling/app_handler.h"
 #include "clay_ui.h"
-#include "surface.h"
-#include "services.h"
+#include "app_handling/surface.h"
+#include "data/services.h"
 
 const uint32_t MAXIMUM_ELEMENTS = 60;
 CyberwatchData data;
 Display display;
-Cyan cyan;
+AppHandler app_handler;
 
 static bool launch_app(int id) {
-    if (cyan_launch_app(&cyan, id, &display)) {
+    if (app_handler_launch(&app_handler, id, &display)) {
         data.state = CYW_APP_RUNNING;
         return true;
     } else {
@@ -21,8 +21,8 @@ static bool launch_app(int id) {
     }
 }
 
-static bool exit_app(Cyan *cyan) {
-    cyan_unload_app(cyan);
+static bool exit_app(AppHandler *app_handler) {
+    app_handler_unload(app_handler);
     data.state = CYW_HOME;
     data.tabs.tabIndex = 1;
     return true;
@@ -61,11 +61,11 @@ static void check_shutdown(CyberwatchData *data, float dt, bool *running) {
     }
 }
 
-static void cycleTab(CyberwatchData *data) {
+static void cycle_tab(CyberwatchData *data) {
     data->tabs.tabIndex = (data->tabs.tabIndex + 1) % data->tabs.tabCount;
 }
 
-bool cyberwatch_init(void) {
+bool cyan_init(void) {
     if (!display_init(&display, &data)) {
         printf("Failed to initialise display\n");
         return false;
@@ -76,18 +76,18 @@ bool cyberwatch_init(void) {
     DisplaySize initialSize = display_get_size(&display);
     clay_ui_init(MAXIMUM_ELEMENTS, display_measure_text, &display, initialSize.width, initialSize.height);
 
-    if (!cyan_init(&cyan, &display)) {
-        printf("Failed to initialise Cyan\n");
+    if (!app_handler_init(&app_handler, &display)) {
+        printf("Failed to initialise AppHandler\n");
         display_shutdown(&display);
         return false;
     }
 
     timer_init(&data);
-    printf("cyberwatch_init complete\n");
+    printf("AppHandler_init complete\n");
     return true;
 }
 
-void cyberwatch_update(float dt, bool *running) {
+void cyan_update(float dt, bool *running) {
     update_data(&data, &display, running);
     check_shutdown(&data, dt, running);
 
@@ -96,22 +96,22 @@ void cyberwatch_update(float dt, bool *running) {
 
     switch (data.state) {
         case CYW_APP_RUNNING:
-            if (has_event_type(&data.eventQueue, EVENT_BUTTON1_DOWN)) { exit_app(&cyan); }
-            commands = clay_cyan_app(&data, &cyan, size.width, size.height, false, false);
+            if (has_event_type(&data.eventQueue, EVENT_BUTTON1_DOWN)) { exit_app(&app_handler); }
+            commands = clay_AppHandler_app(&data, &app_handler, size.width, size.height, false, false);
             break;
 
         case CYW_HOME:
         default:
-            if (has_event_type(&data.eventQueue, EVENT_BUTTON1_DOWN)) { cycleTab(&data); }
+            if (has_event_type(&data.eventQueue, EVENT_BUTTON1_DOWN)) { cycle_tab(&data); }
             switch (data.tabs.tabIndex) {
                 case 0:
                     commands = clay_watchface(&data, size.width, size.height, false);
                     break;
                 case 1:
-                    commands = clay_cyan_catalogue(&data, &cyan, size.width, size.height, false);
-                    if (has_event_type(&data.eventQueue, EVENT_SCROLL_UP)) { cyan_catalogue_move(&cyan, -1); }
-                    if (has_event_type(&data.eventQueue, EVENT_SCROLL_DOWN)) { cyan_catalogue_move(&cyan, 1); }
-                    if (has_event_type(&data.eventQueue, EVENT_BUTTON3_DOWN)) { launch_app(cyan.highlightedApp); }
+                    commands = clay_AppHandler_catalogue(&data, &app_handler, size.width, size.height, false);
+                    if (has_event_type(&data.eventQueue, EVENT_SCROLL_UP)) { AppHandler_catalogue_move(&data.appCatalogue, &app_handler, -1); }
+                    if (has_event_type(&data.eventQueue, EVENT_SCROLL_DOWN)) { AppHandler_catalogue_move(&data.appCatalogue, &app_handler, 1); }
+                    if (has_event_type(&data.eventQueue, EVENT_BUTTON3_DOWN)) { launch_app(data.appCatalogue.highlightedApp); }
                     break;
                 case 2:
                     commands = clay_timer(&data, size.width, size.height, false);
@@ -139,7 +139,7 @@ void cyberwatch_update(float dt, bool *running) {
     if (data.state == CYW_APP_RUNNING) {
         Clay_ElementData appContentData = Clay_GetElementData(CLAY_ID("AppContent"));
         if (appContentData.found) {
-            surface_set_region(&cyan.surface,
+            surface_set_region(&app_handler.surface,
                 (int) appContentData.boundingBox.x,
                 (int) appContentData.boundingBox.y,
                 (int) appContentData.boundingBox.width,
@@ -148,22 +148,22 @@ void cyberwatch_update(float dt, bool *running) {
     }
 
     if (data.state == CYW_APP_RUNNING) {
-        cyan_dispatch_events(&cyan, &data.eventQueue);
-        cyan_run_frame(&cyan, &display, dt);
+        app_handler_dispatch_events(&app_handler, &data.eventQueue);
+        app_handler_run_frame(&app_handler, &display, dt);
     }
 
     display_clear(&display, (Clay_Color) {0, 0, 0, 255});
     clay_render(&display, &commands, false);
 
     if (data.state == CYW_APP_RUNNING) {
-        surface_render(&display, &cyan.surface);
+        surface_render(&display, &app_handler.surface);
     }
 
     display_present(&display);
 }
 
-void cyberwatch_shutdown(void) {
-    cyan_unload_app(&cyan);
-    cyan_shutdown(&cyan);
+void cyan_shutdown(void) {
+    app_handler_unload(&app_handler);
+    app_handler_shutdown(&app_handler);
     display_shutdown(&display);
 }

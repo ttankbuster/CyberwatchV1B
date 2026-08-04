@@ -1,6 +1,6 @@
 //screen_stopwatch.c
 #include "../clay_ui.h"
-#include "../data.h"
+#include "../data/data.h"
 
 static void render_stopwatch(CyberwatchData *data, int debugOpacity, Clay_String stopwatchString, bool stopwatchActive) {
     Clay_Sizing expand = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) };

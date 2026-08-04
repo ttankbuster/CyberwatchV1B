@@ -2,7 +2,7 @@
 #define SURFACE_H
 
 #include "../external/clay/clay.h"
-#include "../src/display.h"
+#include "../data/display.h"
 
 #define MAX_SURFACE_COMMANDS 128
 #define MAX_SURFACE_TEXT 64

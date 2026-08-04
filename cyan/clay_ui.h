@@ -10,8 +10,8 @@
 #include <time.h>
 
 #include "../external/clay/clay.h"
-#include "display.h"
-#include "data.h"
+#include "data/display.h"
+#include "data/data.h"
 
 static const uint32_t FONT_LARGE = 0;
 static const uint32_t FONT_INFO = 1;
@@ -26,17 +26,17 @@ static const char* WEEKDAYS[] = {
     "SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"
 };
 
-typedef struct Cyan Cyan;
+typedef struct AppHandler AppHandler;
 
 void handleClayErrors(Clay_ErrorData errorData);
 bool clay_ui_init(uint32_t max_elems, Clay_Dimensions (*measureTextFunction)(Clay_StringSlice, Clay_TextElementConfig *, void *), void *measureTextUserData, int width, int height);
 void clay_render(Display *display, Clay_RenderCommandArray *commands, bool debug_out);
 Clay_RenderCommandArray clay_watchface(CyberwatchData* data, int width, int height, bool show_debug);
-Clay_RenderCommandArray clay_cyan_catalogue(CyberwatchData* data, Cyan *cyan,int width, int height, bool show_debug);
+Clay_RenderCommandArray clay_AppHandler_catalogue(CyberwatchData* data, AppHandler *app_handler,int width, int height, bool show_debug);
 Clay_RenderCommandArray clay_timer(CyberwatchData* data, int width, int height, bool show_debug);
 Clay_RenderCommandArray clay_stopwatch(CyberwatchData* data, int width, int height, bool show_debug);
 
-Clay_RenderCommandArray clay_cyan_app(CyberwatchData* data, Cyan *cyan, int width, int height, bool show_debug, bool show_header);
+Clay_RenderCommandArray clay_AppHandler_app(CyberwatchData* data, AppHandler *app_handler, int width, int height, bool show_debug, bool show_header);
 
 void render_footer(CyberwatchData *data, int debugOpacity, int footerHeight);
 void render_header_bar(CyberwatchData *data, int debugOpacity, int headerWidth, int headerHeight);
@@ -48,5 +48,5 @@ void read_time_date(CyberwatchData* data);
 void read_timer(CyberwatchData* data);
 void read_stopwatch(CyberwatchData* data);
 
-void cyan_catalogue_move(Cyan *cyan, int delta);
+void AppHandler_catalogue_move(AppCatalogue *catalogue, AppHandler *app_handler, int delta);
 #endif

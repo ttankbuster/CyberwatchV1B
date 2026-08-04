@@ -69,6 +69,13 @@ typedef struct {
 } WatchfaceData;
 
 typedef struct {
+    int selected_app;
+    float catalogueScrollY;
+    float contentHeight;
+    int highlightedApp;
+} AppCatalogue;
+
+typedef struct {
     int tabIndex;
     int tabCount;
     void* tabIcons[TAB_ICON_COUNT];
@@ -82,9 +89,12 @@ typedef struct CyberwatchData {
     WatchfaceData watchface;
     TabData tabs;
     TimerData timer;
+    AppCatalogue appCatalogue;
     StopwatchData stopwatch;
     ShutdownData shutdown;
     void *batteryIcon;
+    float temperature;
+    char temperatureChars[6]; // 23°C [000*C - 999*C]
 } CyberwatchData;
 
 #define MAX_FOLDERS 32

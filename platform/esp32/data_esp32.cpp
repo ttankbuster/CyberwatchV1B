@@ -127,14 +127,14 @@ bool has_event_type(EventQueue *queue, EventType type) {
 }
 
 // Strips any leading slashes/path components, returning just the last
-// segment — Arduino's File::name() has returned either a bare filename or
+// segment - Arduino's File::name() has returned either a bare filename or
 // a full path depending on core version, so this is defensive either way.
 static const char *baseName(const char *path) {
     const char *lastSlash = strrchr(path, '/');
     return lastSlash ? lastSlash + 1 : path;
 }
 
-// Used by Arduino's own SD.* API — no mountpoint prefix needed, these
+// Used by Arduino's own SD.* API - no mountpoint prefix needed, these
 // paths are relative to the card root.
 static void resolveSdApiPath(const char *relativePath, char *outBuffer, size_t bufferSize) {
     if (relativePath[0] == '/') {
@@ -145,7 +145,7 @@ static void resolveSdApiPath(const char *relativePath, char *outBuffer, size_t b
 }
 
 // Used for anything that ends up going through standard C fopen() (Lua's
-// stock luaL_dofile, in particular) — DOES need the "/sd" VFS mountpoint
+// stock luaL_dofile, in particular) - DOES need the "/sd" VFS mountpoint
 // prefix. See chat: this is the default mountpoint SD.begin() uses when
 // no explicit mountpoint argument is given.
 void platform_store_resolved_path(const char *relativePath, char *outBuffer, size_t bufferSize) {
@@ -197,8 +197,8 @@ FolderList scan_folder(char *path) {
     return result;
 }
 
-// --- Minimal 24-bit uncompressed BMP -> RGB565 decoder ---
-// Same design discussed earlier for LittleFS — identical logic works
+// --- Minimal uncompressed BMP -> RGB565 decoder, 24-bit or 32-bit ---
+// Same design discussed earlier for LittleFS - identical logic works
 // unchanged against SD, since both share Arduino's File/fs::FS interface.
 #pragma pack(push, 1)
 struct BmpHeader {
@@ -218,15 +218,31 @@ struct BmpHeader {
 static uint16_t *loadBmpAsRgb565(File &file, int *outWidth, int *outHeight) {
     BmpHeader header;
     file.read((uint8_t *) &header, sizeof(header));
-    if (header.signature != 0x4D42 || header.bitsPerPixel != 24 || header.compression != 0) {
-        Serial.println("[SD] load_image: unsupported BMP format (need 24-bit uncompressed)");
+
+    if (header.signature != 0x4D42) {
+        Serial.println("[SD] load_image: not a BMP file (bad signature)");
+        return NULL;
+    }
+    if (header.bitsPerPixel != 24 && header.bitsPerPixel != 32) {
+        Serial.printf("[SD] load_image: unsupported bit depth %u (need 24 or 32)\n", header.bitsPerPixel);
+        return NULL;
+    }
+    if (header.compression != 0) {
+        // BI_BITFIELDS (3) and others need explicit channel-mask parsing,
+        // not handled here - a straightforward uncompressed export is
+        // what this expects.
+        Serial.println("[SD] load_image: unsupported compression (need uncompressed BI_RGB)");
         return NULL;
     }
 
     int width = header.width;
     int height = abs(header.height);
     bool bottomUp = header.height > 0;
-    int rowSize = ((width * 3 + 3) / 4) * 4; // BMP rows pad to 4-byte boundary
+    int bytesPerPixel = header.bitsPerPixel / 8; // 3 or 4
+    // 24-bit rows pad to 4-byte boundaries; 32-bit rows are already
+    // naturally aligned (width*4 is always a multiple of 4), so this
+    // formula correctly adds zero padding in that case.
+    int rowSize = ((width * bytesPerPixel + 3) / 4) * 4;
 
     uint16_t *pixels = (uint16_t *) malloc(width * height * sizeof(uint16_t));
     if (!pixels) {
@@ -245,7 +261,11 @@ static uint16_t *loadBmpAsRgb565(File &file, int *outWidth, int *outHeight) {
         file.seek(header.dataOffset + (bottomUp ? (height - 1 - y) : y) * rowSize);
         file.read(rowBuf, rowSize);
         for (int x = 0; x < width; x++) {
-            uint8_t b = rowBuf[x * 3 + 0], g = rowBuf[x * 3 + 1], r = rowBuf[x * 3 + 2];
+            uint8_t *px = &rowBuf[x * bytesPerPixel];
+            uint8_t b = px[0], g = px[1], r = px[2];
+            // px[3] (alpha, if 32-bit) is intentionally ignored - RGB565
+            // has no alpha channel and display_draw_image has no blending
+            // support, so any source transparency is lost here.
             pixels[y * width + x] = ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
         }
     }

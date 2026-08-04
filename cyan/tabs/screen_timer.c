@@ -1,6 +1,6 @@
 //screen_timer.c
 #include "../clay_ui.h"
-#include "../data.h"
+#include "../data/data.h"
 
 static void render_spinbox(int number, char *textChars, size_t textCharsSize, bool active) {
     Clay_Color bgColor = active ? (Clay_Color){255, 255, 255, 255} : (Clay_Color){55, 55, 55, 255};

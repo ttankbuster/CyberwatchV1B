@@ -3,8 +3,8 @@
 #include <time.h>
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
-#include "../../src/data.h"
-#include "../../src/display.h"
+#include "../../cyan/data/data.h"
+#include "../../cyan/data/display.h"
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>

@@ -76,12 +76,12 @@ bool esp32_hardware_init(void) {
     return true;
 }
 
-// Deliberately NOT called from esp32_hardware_init() — must run AFTER the
+// Deliberately NOT called from esp32_hardware_init() - must run AFTER the
 // display's own Arduino_ESP32SPI has configured the shared bus (called
 // from display_init(), right after gfx->begin() succeeds), not before.
 // Calling this before display init caused a hang; see chat history.
 bool esp32_sd_init(void) {
-    // 400kHz — the ESP32 SD library uses this frequency for the entire
+    // 400kHz - the ESP32 SD library uses this frequency for the entire
     // init handshake, not just post-init transfers. 4MHz default failed
     // on this hardware; see chat history.
     SPI.begin(PIN_SD_SCK, PIN_SD_MISO, PIN_SD_MOSI, PIN_SD_CS);

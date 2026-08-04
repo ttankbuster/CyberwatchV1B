@@ -18,7 +18,7 @@ void setup() {
         while (1) delay(1000);
     }
     printf("initialising cyberwatch...\n");
-    if (!cyberwatch_init()) {
+    if (!AppHandler_init()) {
         Serial.println("Failed to initialise Cyberwatch");
         while (1) delay(1000);
     }
@@ -32,5 +32,5 @@ void loop() {
     lastTime = now;
 
     bool running = true;
-    cyberwatch_update(dt, &running);
+    AppHandler_update(dt, &running);
 }

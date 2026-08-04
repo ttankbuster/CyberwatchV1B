@@ -1,7 +1,7 @@
 //display_sdl.c
-#include "../../src/data.h"
-#include "../../src/display.h"
-#include "../../src/clay_ui.h"
+#include "../../cyan/data/data.h"
+#include "../../cyan/data/display.h"
+#include "../../cyan/clay_ui.h"
 
 #include <stdlib.h>
 #include <stdio.h>

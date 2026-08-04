@@ -54,12 +54,6 @@ void render_battery(float chargePercent, void *icon, Clay_Dimensions dimensions)
     }
 }
 
-void read_time_date(CyberwatchData* data){
-    WatchfaceData *wf = &data->watchface;
-    snprintf(wf->timeChars, sizeof(wf->timeChars),"%02d:%02d",wf->time.tm_hour,wf->time.tm_min);
-    snprintf(wf->dateChars, sizeof(wf->dateChars),"%02d/%02d/%02d %.3s",wf->time.tm_mday,wf->time.tm_mon,wf->time.tm_year%100, WEEKDAYS[wf->time.tm_wday]);
-}
-
 
 void widget_temperature(CyberwatchData *data, int debugOpacity, Clay_Sizing sizing) {
     CLAY(CLAY_ID("TemperatureDisplay"), {
@@ -79,10 +73,12 @@ void widget_temperature(CyberwatchData *data, int debugOpacity, Clay_Sizing sizi
 
 void widget_battery(CyberwatchData *data, int debugOpacity, Clay_Sizing sizing, Clay_Dimensions iconDimensions) {
     float chargePercent = 0.0f;
-    Service *s = services_find(&data->services, "Battery");
+    Service *s = services_get(&data->services, SERVICE_POWER);
     if (s && s->available && s->available()) {
-        BatteryService *battery = (BatteryService *) s;
-        chargePercent = battery->charge_percent();
+        PowerService *power = (PowerService *) s;
+        if (power->has_battery && power->has_battery()) {
+            chargePercent = power->battery_percent();
+        }
     }
 
     CLAY(CLAY_ID("BatteryDisplayContext"), {
@@ -159,7 +155,7 @@ void render_footer(CyberwatchData *data, int debugOpacity, int footerHeight) {
 static Clay_Color overlayStack[MAX_OVERLAY_STACK];
 static int overlayStackDepth = 0;
 
-static Clay_Color applyOverlay(Clay_Color colour) {
+static Clay_Color apply_overlay(Clay_Color colour) {
     if (overlayStackDepth == 0) return colour;
     Clay_Color overlay = overlayStack[overlayStackDepth - 1];
     float alpha = overlay.a / 255.0f;
@@ -186,13 +182,13 @@ void clay_render(Display *display, Clay_RenderCommandArray *commands, bool debug
             case CLAY_RENDER_COMMAND_TYPE_NONE:
                 break;
             case CLAY_RENDER_COMMAND_TYPE_RECTANGLE: {
-                Clay_Color colour = applyOverlay(cmd->renderData.rectangle.backgroundColor);
+                Clay_Color colour = apply_overlay(cmd->renderData.rectangle.backgroundColor);
                 display_fill_rect(display, box, colour);
                 break;
             }
             case CLAY_RENDER_COMMAND_TYPE_BORDER: {
                 Clay_BorderRenderData border = cmd->renderData.border;
-                border.color = applyOverlay(border.color);
+                border.color = apply_overlay(border.color);
                 display_draw_border(display, box, border);
                 break;
             }
