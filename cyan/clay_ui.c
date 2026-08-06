@@ -9,9 +9,10 @@ void handleClayErrors(Clay_ErrorData errorData) {
 }
 
 bool clay_ui_init(uint32_t max_elems, Clay_Dimensions (*measureTextFunction)(Clay_StringSlice, Clay_TextElementConfig *, void *), void *measureTextUserData, int width, int height) {
+    
     Clay_SetMaxElementCount(max_elems);
     uint64_t clayRequiredMemory = Clay_MinMemorySize();
-    printf("Clay memory requirement: %" PRIu64 " bytes\n", clayRequiredMemory);
+    cyan_log(VERBOSE_MED,"[Clay] memory requirement: %" PRIu64 " bytes", clayRequiredMemory);
     void *memory = malloc(clayRequiredMemory);
     if (!memory) {
         return false;
@@ -23,7 +24,23 @@ bool clay_ui_init(uint32_t max_elems, Clay_Dimensions (*measureTextFunction)(Cla
 }
 
 void render_battery(float chargePercent, void *icon, Clay_Dimensions dimensions){
-    int battery_outline = (int) (dimensions.width * 0.06f);
+    float battery_outline_x = (dimensions.width/10);
+    float battery_outline_y = (dimensions.height/6);
+    float overlap = 2.0f; // small overlap to avoid a gap between the nib
+    Clay_Color fillColor = (Clay_Color){30,255,0,255};
+
+    int innerWidth = (int) dimensions.width - (int) (battery_outline_x * 3);
+    int nibMaxWidth = (int) battery_outline_x;
+    int totalFillableLength = innerWidth + nibMaxWidth;
+    int totalFillLength = (int) (chargePercent * totalFillableLength);
+
+    int mainFillWidth = totalFillLength;
+    if (mainFillWidth > innerWidth) mainFillWidth = innerWidth;
+    if (mainFillWidth < 0) mainFillWidth = 0;
+
+    int nibFillWidth = totalFillLength - innerWidth;
+    if (nibFillWidth < 0) nibFillWidth = 0;
+    if (nibFillWidth > nibMaxWidth) nibFillWidth = nibMaxWidth;
 
     CLAY(CLAY_ID("BatteryDisplay"), {
         .layout = {
@@ -34,26 +51,41 @@ void render_battery(float chargePercent, void *icon, Clay_Dimensions dimensions)
         CLAY(CLAY_ID("BatteryOutlineImage"), {
             .layout = { .sizing = { .width = CLAY_SIZING_GROW(), .height = CLAY_SIZING_GROW() } },
             .image = { .imageData = icon },
-            .floating = { .attachTo = CLAY_ATTACH_TO_PARENT, .zIndex = 1 }
+            .floating = { .attachTo = CLAY_ATTACH_TO_PARENT, .zIndex = -1 }
         }) {}
 
         CLAY(CLAY_ID("BatteryFill"), {
-            .backgroundColor = {20,244,200,120},
+            .backgroundColor = fillColor,
             .layout = {
                 .sizing = {
-                    .width = CLAY_SIZING_FIXED((chargePercent * (dimensions.width - (battery_outline * 2))) + battery_outline),
-                    .height = CLAY_SIZING_FIXED(dimensions.height - (battery_outline * 2))
+                    .width = CLAY_SIZING_FIXED(mainFillWidth),
+                    .height = CLAY_SIZING_FIXED(dimensions.height - (battery_outline_y * 2))
                 }
             },
             .floating = {
                 .attachTo = CLAY_ATTACH_TO_PARENT,
                 .zIndex = 0,
+                .offset = { battery_outline_x, 0 },
+                .attachPoints = { .element = CLAY_ATTACH_POINT_LEFT_CENTER, .parent = CLAY_ATTACH_POINT_LEFT_CENTER }
+            }
+        }) {}
+        CLAY(CLAY_ID("BatteryFillNib"), {
+            .backgroundColor = fillColor,
+            .layout = {
+                .sizing = {
+                    .width = CLAY_SIZING_FIXED(nibFillWidth > 0 ? nibFillWidth + overlap : 0),
+                    .height = CLAY_SIZING_FIXED(battery_outline_y * 2)
+                }
+            },
+            .floating = {
+                .attachTo = CLAY_ATTACH_TO_PARENT,
+                .zIndex = 0,
+                .offset = { battery_outline_x + mainFillWidth - overlap, 0 },
                 .attachPoints = { .element = CLAY_ATTACH_POINT_LEFT_CENTER, .parent = CLAY_ATTACH_POINT_LEFT_CENTER }
             }
         }) {}
     }
 }
-
 
 void widget_temperature(CyberwatchData *data, int debugOpacity, Clay_Sizing sizing) {
     CLAY(CLAY_ID("TemperatureDisplay"), {
@@ -72,7 +104,7 @@ void widget_temperature(CyberwatchData *data, int debugOpacity, Clay_Sizing sizi
 }
 
 void widget_battery(CyberwatchData *data, int debugOpacity, Clay_Sizing sizing, Clay_Dimensions iconDimensions) {
-    float chargePercent = 0.0f;
+    float chargePercent = 1.0f;
     Service *s = services_get(&data->services, SERVICE_POWER);
     if (s && s->available && s->available()) {
         PowerService *power = (PowerService *) s;
@@ -126,20 +158,13 @@ void render_footer(CyberwatchData *data, int debugOpacity, int footerHeight) {
         .layout = { .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER }, .childGap = 20, .layoutDirection = CLAY_LEFT_TO_RIGHT, .sizing = { .height = CLAY_SIZING_FIXED(footerHeight), .width = CLAY_SIZING_GROW() } }
     }) {
         int tabIndex = data->tabs.tabIndex;
-        int tabIconSize = 30;
+        int tabIconSize = 12;
         for (int i = 0; i < data->tabs.tabCount; i++) {
             if (i == tabIndex){
-                if (i < TAB_ICON_COUNT-2){
-                    CLAY(CLAY_IDI("TabIcon", i), {
-                        .layout = { .sizing = { .width = CLAY_SIZING_FIXED(tabIconSize), .height = CLAY_SIZING_FIXED(tabIconSize) } },
-                        .image = { .imageData = data->tabs.tabIcons[i+2] },
-                    }) {}
-                } else {
-                    CLAY(CLAY_IDI("TabIcon", i), {
-                        .layout = { .sizing = { .width = CLAY_SIZING_FIXED(tabIconSize), .height = CLAY_SIZING_FIXED(tabIconSize) } },
-                        .image = { .imageData = data->tabs.tabIcons[1] },
-                    }) {}
-                }
+                CLAY(CLAY_IDI("TabIcon", i), {
+                    .layout = { .sizing = { .width = CLAY_SIZING_FIXED(tabIconSize), .height = CLAY_SIZING_FIXED(tabIconSize) } },
+                    .image = { .imageData = data->tabs.tabIcons[1] },
+                }) {}
             } else {
                 CLAY(CLAY_IDI("TabIcon", i), {
                     .layout = { .sizing = { .width = CLAY_SIZING_FIXED(tabIconSize), .height = CLAY_SIZING_FIXED(tabIconSize) } },

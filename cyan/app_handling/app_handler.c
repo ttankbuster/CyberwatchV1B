@@ -3,6 +3,8 @@
 #include "surface.h"
 #include <string.h>
 
+#define APP_MANIFEST ".cyan_app.lua"
+
 static int AppHandler_print(lua_State *L) {
     const char *appName = (const char *) lua_touserdata(L, lua_upvalueindex(1));
     int n = lua_gettop(L);
@@ -111,7 +113,7 @@ static void register_draw_api(lua_State *L, Surface *surface, Display *display) 
 
 static bool load_app_manifest(AppEntry *app, bool load_dev) {
     char manifestPath[MAX_FILE_PATH];
-    snprintf(manifestPath, sizeof(manifestPath), "%s/.AppHandler_app.lua", app->path);
+    snprintf(manifestPath, sizeof(manifestPath), "%s/%s", app->path, APP_MANIFEST);
 
     char resolvedPath[512];
     platform_store_resolved_path(manifestPath, resolvedPath, sizeof(resolvedPath));
@@ -120,13 +122,13 @@ static bool load_app_manifest(AppEntry *app, bool load_dev) {
     if (!L) return false;
 
     if (luaL_dofile(L, resolvedPath) != LUA_OK) {
-        fprintf(stderr, "AppHandler: failed to load manifest '%s': %s\n", resolvedPath, lua_tostring(L, -1));
+        fprintf(stderr, "[AppHandler] failed to load manifest '%s': %s\n", resolvedPath, lua_tostring(L, -1));
         lua_close(L);
         return false;
     }
 
     if (!lua_istable(L, -1)) {
-        fprintf(stderr, "AppHandler: manifest '%s' did not return a table\n", resolvedPath);
+        fprintf(stderr, "[AppHandler] manifest '%s' did not return a table\n", resolvedPath);
         lua_close(L);
         return false;
     }
@@ -164,12 +166,12 @@ static bool load_app_icon(AppEntry *app, Display *display) {
         return true;
     }
 
-    fprintf(stderr, "AppHandler: failed to load icon '%s', using fallback\n", iconPath);
+    fprintf(stderr, "[AppHandler] failed to load icon '%s', using fallback\n", iconPath);
     if (load_image(display, "assets/icons/test.png", &app->iconHandle)) {
         return true;
     }
 
-    fprintf(stderr, "AppHandler: failed to load fallback icon\n");
+    fprintf(stderr, "[AppHandler] failed to load fallback icon\n");
     return false;
 }
 
@@ -189,9 +191,9 @@ static void app_handler_index(AppHandler *AppHandler, char *path, Display *displ
         }
     }
 
-    printf("AppHandler: indexed %d app(s)\n", AppHandler->appCount);
+    cyan_log(VERBOSE_MED, "[AppHandler] indexed %d app(s):", AppHandler->appCount);
     for (int i = 0; i < AppHandler->appCount; i++) {
-        printf("  %d: %s (script: %s, icon: %s, path: %s)\n", i, AppHandler->apps[i].name, AppHandler->apps[i].script, AppHandler->apps[i].icon, AppHandler->apps[i].path);
+        cyan_log(VERBOSE_MED, ">    %d: %s (script: %s, icon: %s, path: %s)", i, AppHandler->apps[i].name, AppHandler->apps[i].script, AppHandler->apps[i].icon, AppHandler->apps[i].path);
     }
 }
 
@@ -207,7 +209,7 @@ bool app_handler_init(AppHandler *AppHandler, Display *display) {
 bool app_handler_launch(AppHandler *AppHandler, int id, Display *display) {
 
     if (id < 0 || id > AppHandler->appCount - 1) {
-        printf("AppHandler: incorrect app ID.\n");
+        cyan_log(VERBOSE_LOW, "[AppHandler] incorrect app ID.\n");
         return false;
     }
 
@@ -216,12 +218,12 @@ bool app_handler_launch(AppHandler *AppHandler, int id, Display *display) {
     }
 
     AppEntry *app = &AppHandler->apps[id];
-    printf("AppHandler: launching app [%d]: %s\n", id, app->name);
+    cyan_log(VERBOSE_LOW, "[AppHandler] launching app [%d]: %s\n", id, app->name);
 
     // Create the runtime FIRST - L doesn't exist before this line.
     AppHandler->appLua = luaL_newstate();
     if (!AppHandler->appLua) {
-        printf("AppHandler: failed to create runtime for '%s'\n", app->name);
+        cyan_log(VERBOSE_LOW,"[AppHandler] failed to create runtime for '%s'\n", app->name);
         return false;
     }
     lua_State *L = AppHandler->appLua;
@@ -239,7 +241,7 @@ bool app_handler_launch(AppHandler *AppHandler, int id, Display *display) {
     platform_store_resolved_path(scriptRelPath, resolvedPath, sizeof(resolvedPath));
 
     if (luaL_dofile(L, resolvedPath) != LUA_OK) {
-        fprintf(stderr, "AppHandler: failed to load script '%s': %s\n", resolvedPath, lua_tostring(L, -1));
+        fprintf(stderr, "[AppHandler] failed to load script '%s': %s\n", resolvedPath, lua_tostring(L, -1));
         lua_pop(L, 1);
         lua_close(L);
         AppHandler->appLua = NULL;
@@ -249,7 +251,7 @@ bool app_handler_launch(AppHandler *AppHandler, int id, Display *display) {
     lua_getglobal(L, "on_load");
     if (lua_isfunction(L, -1)) {
         if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
-            fprintf(stderr, "AppHandler: on_load error: %s\n", lua_tostring(L, -1));
+            fprintf(stderr, "[AppHandler] on_load error: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
         }
     } else {
@@ -265,7 +267,7 @@ void app_handler_run_frame(AppHandler *AppHandler, Display *display, float dt) {
     if (lua_isfunction(L, -1)) {
         lua_pushnumber(L, dt);
         if (lua_pcall(L, 1, 0, 0) != LUA_OK) {
-            fprintf(stderr, "AppHandler: on_update error: %s\n", lua_tostring(L, -1));
+            fprintf(stderr, "[AppHandler] on_update error: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
         }
     } else {
@@ -275,7 +277,7 @@ void app_handler_run_frame(AppHandler *AppHandler, Display *display, float dt) {
     lua_getglobal(L, "on_draw");
     if (lua_isfunction(L, -1)) {
         if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
-            fprintf(stderr, "AppHandler: on_draw error: %s\n", lua_tostring(L, -1));
+            fprintf(stderr, "[AppHandler] on_draw error: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
         }
     } else {
@@ -299,7 +301,7 @@ void app_handler_dispatch_events(AppHandler *AppHandler, EventQueue *queue) {
 
         lua_pushinteger(L, ev->type);
         if (lua_pcall(L, 1, 0, 0) != LUA_OK) {
-            fprintf(stderr, "AppHandler: on_event error: %s\n", lua_tostring(L, -1));
+            fprintf(stderr, "[AppHandler] on_event error: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
         }
     }
@@ -312,7 +314,7 @@ void app_handler_unload(AppHandler *AppHandler) {
     lua_getglobal(L, "on_unload");
     if (lua_isfunction(L, -1)) {
         if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
-            fprintf(stderr, "AppHandler: on_unload error: %s\n", lua_tostring(L, -1));
+            fprintf(stderr, "[AppHandler] on_unload error: %s\n", lua_tostring(L, -1));
             lua_pop(L, 1);
         }
     } else {

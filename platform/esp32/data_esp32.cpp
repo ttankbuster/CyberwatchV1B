@@ -7,7 +7,7 @@
 #include "esp32_hardware.h"
 
 extern "C" {
-    #include "data.h"
+    #include "../../cyan/data/data.h"
 }
 
 #define ENCODER_CLK_PIN D0
@@ -19,8 +19,8 @@ static bool lastButton1Pressed = false;
 static bool lastButton2Pressed = false;
 static bool lastDialPressed = false;
 
-static volatile int encoderDelta = 0;
-static volatile uint8_t lastEncoded = 0;
+static int encoderDelta = 0;
+static uint8_t lastEncoded = 0;
 static bool encoderInitialized = false;
 
 void IRAM_ATTR encoderISR() {
@@ -109,7 +109,7 @@ void update_data(CyberwatchData *data, Display *display, bool *running) {
 
     if (!rtcReady) {
         rtcReady = rtc.begin();
-        if (rtcReady) Serial.println("[hw] RTC OK");
+        if (rtcReady) cyan_log(VERBOSE_HIGH, "[Hardware] RTC OK");
     }
 
     pollButtons(data);
@@ -169,7 +169,7 @@ char* platform_resolve_path(char *relativePath) {
 FolderList scan_folder(char *path) {
     FolderList result = {0};
     if (!sdReady) {
-        Serial.println("[SD] scan_folder: SD not ready");
+        cyan_log(VERBOSE_HIGH, "[Services/Memory] scan_folder: SD not ready");
         return result;
     }
 
@@ -178,7 +178,7 @@ FolderList scan_folder(char *path) {
 
     File dir = SD.open(resolvedPath);
     if (!dir || !dir.isDirectory()) {
-        Serial.printf("[SD] scan_folder: could not open '%s'\n", resolvedPath);
+        cyan_log(VERBOSE_HIGH, "[Services/Memory] scan_folder: could not open '%s'", resolvedPath);
         return result;
     }
 
@@ -220,18 +220,18 @@ static uint16_t *loadBmpAsRgb565(File &file, int *outWidth, int *outHeight) {
     file.read((uint8_t *) &header, sizeof(header));
 
     if (header.signature != 0x4D42) {
-        Serial.println("[SD] load_image: not a BMP file (bad signature)");
+        cyan_log(VERBOSE_HIGH, "[Services/Memory] load_image: not a BMP file (bad signature)");
         return NULL;
     }
     if (header.bitsPerPixel != 24 && header.bitsPerPixel != 32) {
-        Serial.printf("[SD] load_image: unsupported bit depth %u (need 24 or 32)\n", header.bitsPerPixel);
+        cyan_log(VERBOSE_HIGH, "[Services/Memory] load_image: unsupported bit depth %u (need 24 or 32)", header.bitsPerPixel);
         return NULL;
     }
     if (header.compression != 0) {
         // BI_BITFIELDS (3) and others need explicit channel-mask parsing,
         // not handled here - a straightforward uncompressed export is
         // what this expects.
-        Serial.println("[SD] load_image: unsupported compression (need uncompressed BI_RGB)");
+        cyan_log(VERBOSE_HIGH, "[Services/Memory] load_image: unsupported compression (need uncompressed BI_RGB)");
         return NULL;
     }
 
@@ -246,14 +246,14 @@ static uint16_t *loadBmpAsRgb565(File &file, int *outWidth, int *outHeight) {
 
     uint16_t *pixels = (uint16_t *) malloc(width * height * sizeof(uint16_t));
     if (!pixels) {
-        Serial.println("[SD] load_image: out of memory for pixel buffer");
+        cyan_log(VERBOSE_HIGH, "[Services/Memory] load_image: out of memory for pixel buffer");
         return NULL;
     }
 
     uint8_t *rowBuf = (uint8_t *) malloc(rowSize);
     if (!rowBuf) {
         free(pixels);
-        Serial.println("[SD] load_image: out of memory for row buffer");
+        cyan_log(VERBOSE_HIGH, "[Services/Memory] load_image: out of memory for row buffer");
         return NULL;
     }
 
@@ -285,7 +285,7 @@ bool load_image(Display *display, const char *path, void *outHandle) {
 
     File file = SD.open(resolvedPath);
     if (!file) {
-        Serial.printf("[SD] load_image: could not open '%s'\n", resolvedPath);
+        cyan_log(VERBOSE_HIGH, "[Services/Memory] load_image: could not open '%s'", resolvedPath);
         return false;
     }
 
@@ -295,6 +295,19 @@ bool load_image(Display *display, const char *path, void *outHandle) {
 
     if (!pixels) return false;
 
-    *(uint16_t **) outHandle = pixels;
+    IconHandle *handle = (IconHandle *) malloc(sizeof(IconHandle));
+    if (!handle) {
+        free(pixels);
+        return false;
+    }
+    handle->width = width;
+    handle->height = height;
+    handle->pixels = pixels;
+
+    *(IconHandle **) outHandle = handle;
     return true;
+}
+
+void register_available_services(CyberwatchData *data){
+    cyan_log(VERBOSE_HIGH, "[Services] Registering available services");
 }

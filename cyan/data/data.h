@@ -35,7 +35,6 @@ typedef enum {
     CYW_APP_RUNNING,
 } CyberwatchState;
 
-#define TAB_ICON_COUNT 6
 #define SHUTDOWN_HOLD_TIME_TRIGGER 1.5f // seconds
 #define SHUTDOWN_SHOW_PROGRESS 0.3f     // time it starts to show shutdown bar
 #define TIMER_SELECTABLE_ELEMENT_COUNT 3
@@ -78,7 +77,7 @@ typedef struct {
 typedef struct {
     int tabIndex;
     int tabCount;
-    void* tabIcons[TAB_ICON_COUNT];
+    void* tabIcons[2];
     void* tabData;
 } TabData;
 
@@ -92,10 +91,16 @@ typedef struct CyberwatchData {
     AppCatalogue appCatalogue;
     StopwatchData stopwatch;
     ShutdownData shutdown;
-    void *batteryIcon;
+    const void *batteryIcon;
     float temperature;
     char temperatureChars[6]; // 23°C [000*C - 999*C]
 } CyberwatchData;
+
+typedef struct {
+    uint16_t width;
+    uint16_t height;
+    uint16_t *pixels;
+} IconHandle;
 
 #define MAX_FOLDERS 32
 #define MAX_FILE_NAME 64
@@ -107,6 +112,7 @@ typedef struct {
 } FolderList;
 
 FolderList scan_folder(char *path);
+
 
 void update_data(CyberwatchData *data, Display *display, bool *running);
 bool has_event_type(EventQueue *queue, EventType type);
@@ -125,4 +131,5 @@ void stopwatch_toggle(CyberwatchData *data);
 void stopwatch_reset(CyberwatchData *data);
 
 float get_delta(void);
+
 #endif

@@ -1,8 +1,9 @@
 // platform/pc/services_pc.c
 #include "../../cyan/data/services.h"
 #include "../../cyan/data/data.h"
-#include "../../cyan/data/services.h"
+#include "../../cyan/data/display.h"
 #include <time.h>
+#include <stdio.h>
 
 extern CyberwatchData data;
 
@@ -18,10 +19,9 @@ TimeService timeService = {
     .now = time_now
 };
 
-static float pcBatteryCharge = 1.0f;
 static bool power_available(void) { return true; }
 static bool power_has_battery(void) { return true; }
-static float power_battery_percent(void) { return pcBatteryCharge; }
+static float power_battery_percent(void) { return 0.5f; }
 static bool power_is_charging(void) { return false; }
 static void power_shutdown(void) { /* no real system shutdown on PC implemented*/ }
 static void power_sleep(void) { /* no-op on PC */ }
@@ -37,7 +37,8 @@ PowerService powerService = {
 
 void register_available_services(CyberwatchData *data) {
     services_init(&data->services);
-    services_register(&data->services, (Service *) &timeService);
-    services_register(&data->services, (Service *) &powerService);
-    // services_register(&data->services, (Service *) &powerService)
+    bool timeOk = services_register(&data->services, (Service *) &timeService);
+    cyan_log(VERBOSE_LOW, "[Services/Time]=%s", timeOk ? "OK": "FAILED");
+    bool powerOk = services_register(&data->services, (Service *) &powerService);
+    cyan_log(VERBOSE_LOW, "[Services/Power]=%s", timeOk ? "OK": "FAILED");
 }

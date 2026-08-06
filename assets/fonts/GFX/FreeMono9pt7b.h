@@ -1,6 +1,5 @@
 #ifndef FreeMono9pt7b_H
 #define FreeMono9pt7b_H
-
 #ifdef __AVR__
 #include <avr/io.h>
 #include <avr/pgmspace.h>

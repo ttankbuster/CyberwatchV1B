@@ -1,8 +1,11 @@
+//esp32_hardware.h
 #ifndef ESP32_HARDWARE_H
 #define ESP32_HARDWARE_H
 
 #include <Adafruit_MCP23X17.h>
 #include <WiFi.h>
+#include "../../cyan/data/display.h"
+
 extern Adafruit_MCP23X17 mcp;
 extern bool mcpReady;
 extern bool sdReady;

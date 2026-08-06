@@ -11,7 +11,7 @@ void render_AppHandler_catalogue(AppCatalogue *catalogue, AppHandler *app_handle
     const int targetCardSize = 100; // rough desired size - actual size is derived below
     int columns = width / targetCardSize;
     if (columns < 1) columns = 1;
-    int cardWidth = width / columns; // guarantees columns * cardWidth == width exactly
+    int cardWidth = 70; // guarantees columns * cardWidth == width exactly
     int cardHeight = cardWidth;      // square cards, matching your original .aspectRatio = 1
 
     int rows = (app_handler->appCount + columns - 1) / columns; // ceil division
@@ -59,7 +59,7 @@ void render_AppHandler_catalogue(AppCatalogue *catalogue, AppHandler *app_handle
                             bool highlighted = (i == catalogue->highlightedApp);
 
                             CLAY(CLAY_IDI("AppCard", i), {
-                                .backgroundColor = highlighted ? (Clay_Color){90,90,90,255} : (Clay_Color){50,50,50,255},
+                                .backgroundColor = highlighted ? (Clay_Color){255,255,255,255} : (Clay_Color){20,20,20,255},
                                 .layout = {
                                     .layoutDirection = CLAY_TOP_TO_BOTTOM,
                                     .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER },
@@ -76,7 +76,7 @@ void render_AppHandler_catalogue(AppCatalogue *catalogue, AppHandler *app_handle
                                 CLAY_TEXT(appNameString, CLAY_TEXT_CONFIG({
                                     .fontId = FONT_SMALL,
                                     .fontSize = 20,
-                                    .textColor = INFO_COLOUR
+                                    .textColor = highlighted ? (Clay_Color){0,0,0,255} : INFO_COLOUR,
                                 }));
                             }
                         }
@@ -115,5 +115,5 @@ Clay_RenderCommandArray clay_AppHandler_catalogue(CyberwatchData* data, AppHandl
 
 void AppHandler_catalogue_move(AppCatalogue *catalogue, AppHandler *app_handler, int delta) {
     if (app_handler->appCount == 0) return;
-    catalogue->highlightedApp = (catalogue->highlightedApp + delta + app_handler->appCount) % app_handler->appCount;
+    catalogue->highlightedApp = (catalogue->highlightedApp - delta + app_handler->appCount) % app_handler->appCount;
 }

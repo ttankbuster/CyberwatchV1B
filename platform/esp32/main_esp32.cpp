@@ -1,6 +1,6 @@
 //platform/esp32/main_esp32.cpp
 extern "C" {
-    #include "cyberwatch.h"
+    #include "cyan_os.h"
 }
 #include <Arduino.h>
 #include "esp32_hardware.h"
@@ -17,13 +17,11 @@ void setup() {
         Serial.println("Failed to initialise ESP32 hardware (MCP23017)");
         while (1) delay(1000);
     }
-    printf("initialising cyberwatch...\n");
-    if (!AppHandler_init()) {
-        Serial.println("Failed to initialise Cyberwatch");
+    if (!cyan_init()) {
         while (1) delay(1000);
     }
-    Serial.println("[esp32] setup() complete");
-    lastTime = millis();
+    lastTime = millis();    
+    // while(1)delay(1000);
 }
 
 void loop() {
@@ -32,5 +30,5 @@ void loop() {
     lastTime = now;
 
     bool running = true;
-    AppHandler_update(dt, &running);
+    cyan_update(dt, &running);
 }

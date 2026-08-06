@@ -7,13 +7,12 @@
 int main(int argc, char **argv) {
     (void) argc;
     (void) argv;
-    printf("main_pc.c\n");
 
     if (!cyan_init()) {
         printf("Failed to initialise Cyberwatch\n");
         return 1;
     }
-    printf("setup complete: starting.\n");
+
 
     clock_t lastTime = clock();
     bool running = true;

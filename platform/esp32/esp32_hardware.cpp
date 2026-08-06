@@ -1,9 +1,11 @@
+//esp32_hardware.cpp
 #include <Arduino.h>
 #include <Wire.h>
 #include <SPI.h>
 #include <SD.h>
 #include "esp32_hardware.h"
 #include "secrets.h"
+#include "../../cyan/data/log.h"
 
 Adafruit_MCP23X17 mcp;
 bool mcpReady = false;
@@ -15,57 +17,56 @@ bool sdReady = false;
 #define PIN_SD_CS   D9
 
 static void scanI2C() {
-    Serial.println("[hw] Scanning I2C...");
+    cyan_log(VERBOSE_LOW, "[Hardware/I2C] Scanning...");
+    int found = 0;
     for (byte address = 1; address < 127; address++) {
         Wire.beginTransmission(address);
         byte error = Wire.endTransmission();
         if (error == 0) {
-            Serial.printf("[hw] Found I2C device at 0x%02X\n", address);
+            cyan_log(VERBOSE_HIGH, ">    Found device: 0x%02X", address);
+            found++;
         }
     }
+    cyan_log(VERBOSE_LOW, "[Hardware/I2C] OK: %d device(s) found.", found);
 }
 
-static void scanWiFi() {
-    Serial.println("Scanning WiFi...");
+static void connectWiFi() {
+    cyan_log(VERBOSE_LOW, "[Services/WiFi] Scanning...");
     int n = WiFi.scanNetworks();
-    Serial.printf("Found %d networks:\n", n);
+    cyan_log(VERBOSE_LOW, "[Services/WiFi] OK: %d network(s) found.", n);
     for (int i = 0; i < n; i++) {
-        Serial.printf("  %s (RSSI %d, ch %d, %s)\n",
-            WiFi.SSID(i).c_str(), WiFi.RSSI(i), WiFi.channel(i),
-            WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? "open" : "secured");
+        cyan_log(VERBOSE_HIGH, ">    %s (RSSI %d dBm, ch %d, %s)", WiFi.SSID(i).c_str(), WiFi.RSSI(i), WiFi.channel(i), WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? "open" : "secured");
     }
 
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
 
-    Serial.print("Connecting");
+    cyan_log(VERBOSE_LOW, "[Services/WiFi] Connecting...");
     uint32_t start = millis();
     while (WiFi.status() != WL_CONNECTED && millis() - start < 20000) {
         delay(500);
-        Serial.print(".");
     }
 
     if (WiFi.status() == WL_CONNECTED) {
-        Serial.println("\nConnected!");
-        Serial.print("IP: "); Serial.println(WiFi.localIP());
-        Serial.print("Gateway: "); Serial.println(WiFi.gatewayIP());
-        Serial.print("RSSI: "); Serial.println(WiFi.RSSI());
+        cyan_log(VERBOSE_LOW, "[Services/WiFi] OK: connected.");
+        cyan_log(VERBOSE_LOW, ">    IP: %s", WiFi.localIP().toString().c_str());
+        cyan_log(VERBOSE_LOW, ">    Gateway: %s", WiFi.gatewayIP().toString().c_str());
+        cyan_log(VERBOSE_LOW, ">    RSSI: %d dBm", WiFi.RSSI());
     } else {
-        Serial.printf("\nFailed. Status: %d\n", WiFi.status());
+        cyan_log(VERBOSE_LOW, "[Services/WiFi] FAILED: status %d.", WiFi.status());
     }
-
 }
 
 bool esp32_hardware_init(void) {
     Wire.begin(D4, D5);
     scanI2C();
-    scanWiFi();
+    connectWiFi();
     mcpReady = mcp.begin_I2C();
     if (!mcpReady) {
-        Serial.println("[hw] MCP23017 not found");
+        cyan_log(VERBOSE_LOW, "[Hardware/MCP23017] FAILED: device not found.");
         return false;
     }
-    Serial.println("[hw] MCP23017 OK");
+    cyan_log(VERBOSE_LOW, "[Hardware/MCP23017] OK.");
 
     mcp.pinMode(MCP_BTN1, INPUT_PULLUP);
     mcp.pinMode(MCP_BTN2, INPUT_PULLUP);
@@ -76,21 +77,15 @@ bool esp32_hardware_init(void) {
     return true;
 }
 
-// Deliberately NOT called from esp32_hardware_init() - must run AFTER the
-// display's own Arduino_ESP32SPI has configured the shared bus (called
-// from display_init(), right after gfx->begin() succeeds), not before.
-// Calling this before display init caused a hang; see chat history.
+// must run AFTER the display's own Arduino_ESP32SPI has configured the shared bus, called from display_init()
+// Calling this before display init caused hang
 bool esp32_sd_init(void) {
-    // 400kHz - the ESP32 SD library uses this frequency for the entire
-    // init handshake, not just post-init transfers. 4MHz default failed
-    // on this hardware; see chat history.
     SPI.begin(PIN_SD_SCK, PIN_SD_MISO, PIN_SD_MOSI, PIN_SD_CS);
-
     sdReady = SD.begin(PIN_SD_CS, SPI, 400000);
     if (sdReady) {
-        Serial.printf("[hw] SD card OK, size: %llu MB\n", SD.cardSize() / (1024 * 1024));
+        cyan_log(VERBOSE_LOW, "[Hardware/SDCard] OK: %llu MB.", SD.cardSize() / (1024 * 1024));
     } else {
-        Serial.println("[hw] SD card not found");
+        cyan_log(VERBOSE_LOW, "[Hardware/SDCard] FAILED: card not found.");
     }
     return sdReady;
 }

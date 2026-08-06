@@ -1,14 +1,21 @@
 //cyberwatch.c
 #include <stdio.h>
+#include <unistd.h>
 #include "app_handling/app_handler.h"
 #include "clay_ui.h"
 #include "app_handling/surface.h"
 #include "data/services.h"
+#include "data/log.h"
+#include "data/display.h"
+
+#define DEBUG_MODE false
 
 const uint32_t MAXIMUM_ELEMENTS = 60;
 CyberwatchData data;
 Display display;
 AppHandler app_handler;
+
+
 
 static bool launch_app(int id) {
     if (app_handler_launch(&app_handler, id, &display)) {
@@ -65,25 +72,45 @@ static void cycle_tab(CyberwatchData *data) {
     data->tabs.tabIndex = (data->tabs.tabIndex + 1) % data->tabs.tabCount;
 }
 
+void print_log(VerbosityLevel level, const char *message){
+    (void) level;
+    printf("%s\n",message);
+}
+
 bool cyan_init(void) {
+    log_add_listener(display_loading_log_listener, VERBOSE_LOW);
+    log_add_listener(print_log, VERBOSE_HIGH);
+    cyan_log(VERBOSE_LOW, "[CyanOS] Starting...");
+
     if (!display_init(&display, &data)) {
-        printf("Failed to initialise display\n");
+        cyan_log(VERBOSE_LOW, "[Display]=FAILED");
         return false;
     }
+    cyan_log(VERBOSE_LOW, "[Display]=OK");
+    display_loading_screen(&display, 0.0);
     data.tabs.tabCount = 4;
     data.tabs.tabIndex = 0;
     data.state = CYW_HOME;
     DisplaySize initialSize = display_get_size(&display);
-    clay_ui_init(MAXIMUM_ELEMENTS, display_measure_text, &display, initialSize.width, initialSize.height);
+    bool clayOk = clay_ui_init(MAXIMUM_ELEMENTS, display_measure_text, &display, initialSize.width, initialSize.height);
+    cyan_log(VERBOSE_LOW, "[Clay]=%s", clayOk ? "OK": "FAILED");
+    display_loading_screen(&display, 0.2);
 
-    if (!app_handler_init(&app_handler, &display)) {
-        printf("Failed to initialise AppHandler\n");
-        display_shutdown(&display);
-        return false;
-    }
+    bool appHandlerOk = app_handler_init(&app_handler, &display);
+    cyan_log(VERBOSE_LOW, "[AppHandler]=%s", appHandlerOk ? "OK": "FAILED");
+    display_loading_screen(&display, 0.2);
 
     timer_init(&data);
-    printf("AppHandler_init complete\n");
+    register_available_services(&data);
+    cyan_log(VERBOSE_LOW, "[CyanOS]=OK");
+    display_loading_screen(&display, 0.2);
+    if (DEBUG_MODE){
+        bool run_splashscreen = true;
+        while (run_splashscreen){
+            update_data(&data, &display, &run_splashscreen);
+        }
+    }
+    display_present(&display);
     return true;
 }
 

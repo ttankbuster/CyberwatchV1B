@@ -1,9 +1,15 @@
+//display.h
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
 #include <stdbool.h>
 #include <stdint.h>
 #include "../external/clay/clay.h"
+#include "log.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef struct CyberwatchData CyberwatchData;
 
@@ -35,8 +41,13 @@ void display_draw_image(Display *display, Clay_BoundingBox box, Clay_ImageRender
 void display_set_clip(Display *display, Clay_BoundingBox box);
 void display_clear_clip(Display *display);
 void display_present(Display *display);
-
+void display_loading_log_listener(VerbosityLevel level, const char *message);
+void display_loading_screen(Display *display, float progress);
 
 Clay_Dimensions display_measure_text(Clay_StringSlice text, Clay_TextElementConfig *config, void *userData);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
