@@ -262,7 +262,9 @@
   },
   "libraries": {
     "pinned_footprint_libs": [],
-    "pinned_symbol_libs": []
+    "pinned_symbol_libs": [
+      "CY_library"
+    ]
   },
   "meta": {
     "filename": "CyberwatchV1B.kicad_pro",
@@ -437,7 +439,7 @@
         "uuid": "68fdecbc-307b-4175-ba1b-687d291eebec"
       }
     ],
-    "used_designators": "R_SDA1,U1-4,SW1-5,R1-2,J1-2,C1-3",
+    "used_designators": "R_SDA1,U1-4,SW1-6,R1-2,J1-2,C1-4,Q1,#PWR1-10,BT1",
     "variants": []
   },
   "sheets": [
