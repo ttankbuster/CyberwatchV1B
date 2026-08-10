@@ -9,25 +9,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run Native Program",
-            "type": "cppvsdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/native/program.exe",
-            "args": [],
-            "cwd": "${workspaceFolder}/build/native",
-            "preLaunchTask": "PlatformIO: Build (native)",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Run Native (No Rebuild)",
-            "type": "cppvsdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/native/program.exe",
-            "args": [],
-            "cwd": "${workspaceFolder}/build/native",
-            "console": "integratedTerminal"
-        },
-        {
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
