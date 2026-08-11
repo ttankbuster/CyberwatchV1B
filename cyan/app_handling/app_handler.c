@@ -181,8 +181,8 @@ static void app_handler_index(AppHandler *AppHandler, char *path, Display *displ
     AppHandler->appCount = 0;
     for (int i = 0; i < folders.count && AppHandler->appCount < MAX_APPS; i++) {
         AppEntry app = {0};
-        snprintf(app.name, MAX_FILE_PATH, "%s", folders.names[i]);
-        snprintf(app.path, MAX_FILE_PATH, "%s/%s", path, folders.names[i]);
+        snprintf(app.name, sizeof(app.name), "%s", folders.names[i]);
+        snprintf(app.path, sizeof(app.path), "%s/%s", path, folders.names[i]);
 
         if (load_app_manifest(&app, AppHandler->devmode)) {
             load_app_icon(&app, display);

@@ -21,7 +21,6 @@ void setup() {
         while (1) delay(1000);
     }
     lastTime = millis();    
-    // while(1)delay(1000);
 }
 
 void loop() {

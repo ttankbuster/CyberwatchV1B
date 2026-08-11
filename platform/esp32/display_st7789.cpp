@@ -106,12 +106,12 @@ extern "C" bool display_init(Display *display, CyberwatchData *data) {
 
     iconEmptyTab.width = ICON_EMPTY_TAB_WIDTH;
     iconEmptyTab.height = ICON_EMPTY_TAB_HEIGHT;
-    iconEmptyTab.pixels = convertRgb888ToRgb565(ICON_EMPTY_TAB, ICON_BATTERY_WIDTH, ICON_BATTERY_HEIGHT);
+    iconEmptyTab.pixels = convertRgb888ToRgb565(ICON_EMPTY_TAB, ICON_EMPTY_TAB_WIDTH, ICON_EMPTY_TAB_HEIGHT);
     data->tabs.tabIcons[0] = &iconEmptyTab;
-    
+
     iconFullTab.width = ICON_FULL_TAB_WIDTH;
     iconFullTab.height = ICON_FULL_TAB_HEIGHT;
-    iconFullTab.pixels = convertRgb888ToRgb565(ICON_FULL_TAB, ICON_BATTERY_WIDTH, ICON_BATTERY_HEIGHT);
+    iconFullTab.pixels = convertRgb888ToRgb565(ICON_FULL_TAB, ICON_FULL_TAB_WIDTH, ICON_FULL_TAB_HEIGHT);
     data->tabs.tabIcons[1] = &iconFullTab;
 
 #ifdef DISPLAY_RESET_VIA_MCP
