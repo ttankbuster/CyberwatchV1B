@@ -38,9 +38,4 @@ void app_handler_run_frame(AppHandler *AppHandler, Display *display, float dt);
 void app_handler_dispatch_events(AppHandler *AppHandler, EventQueue *queue);
 void app_handler_shutdown(AppHandler *AppHandler);
 
-int app_handler_count(AppHandler *AppHandler);
-const char *app_handler_name(AppHandler *AppHandler, int index);
-void *app_handler_icon(AppHandler *AppHandler, int index);
-bool app_handler_is_running(AppHandler *AppHandler);
-
 #endif

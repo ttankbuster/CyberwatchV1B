@@ -26,11 +26,16 @@ introduced it. This rule is non-negotiable, not a nice-to-have.
   both bugs (the `app_handler.c` buffer overflow and the
   `display_st7789.cpp` out-of-bounds read) to Phase 1 alongside the
   rename — superseded: fixed directly instead, each as its own isolated
-  change (see Audit Findings Log for the diffs). Not yet committed or
-  boot-tested. **Next step: boot-and-smoke-test on real hardware (PC and
-  ESP32 — the icon fix is ESP32-only and unverifiable on the PC build),
-  then git tag, per the cross-cutting rule**, before Phase 0 is
-  considered closed.
+  change (see Audit Findings Log for the diffs). **Committed** as
+  `de4f58a` ("memory safety fix"), which also included the
+  `main_esp32.cpp` dead-code cleanup and this plan doc itself.
+  **PC half of the boot-and-smoke-test complete**: native build compiles
+  clean and the launched binary stays up and responsive (window "Watch",
+  no crash) — confirms the `app_handler.c` fix. Tagged at that point:
+  `phase0-pc-verified` → `de4f58a`. **Still outstanding**: the ESP32
+  hardware boot test for the `display_st7789.cpp` icon-dimension fix,
+  which is ESP32-only and unverifiable on the PC build. Phase 0 isn't
+  fully closed until that runs too.
   - `src/` reconciliation: **resolved** — confirmed directly against the
     repo tree that no `src/` directory exists; nothing to migrate.
   - Entry points audited (`main_pc.c`, `main_esp32.cpp`) — see Audit

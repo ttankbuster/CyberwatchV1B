@@ -182,7 +182,11 @@ static void app_handler_index(AppHandler *AppHandler, char *path, Display *displ
     for (int i = 0; i < folders.count && AppHandler->appCount < MAX_APPS; i++) {
         AppEntry app = {0};
         snprintf(app.name, sizeof(app.name), "%s", folders.names[i]);
-        snprintf(app.path, sizeof(app.path), "%s/%s", path, folders.names[i]);
+        int pathLen = snprintf(app.path, sizeof(app.path), "%s/%s", path, folders.names[i]);
+        if (pathLen < 0 || (size_t) pathLen >= sizeof(app.path)) {
+            cyan_log(VERBOSE_LOW, "[AppHandler] app folder name too long, skipping: %s", folders.names[i]);
+            continue;
+        }
 
         if (load_app_manifest(&app, AppHandler->devmode)) {
             load_app_icon(&app, display);
@@ -216,7 +220,6 @@ bool app_handler_launch(AppHandler *AppHandler, int id, Display *display) {
     if (AppHandler->appLua) {
         app_handler_unload(AppHandler);
     }
-
     AppEntry *app = &AppHandler->apps[id];
     cyan_log(VERBOSE_LOW, "[AppHandler] launching app [%d]: %s\n", id, app->name);
 
@@ -261,8 +264,11 @@ bool app_handler_launch(AppHandler *AppHandler, int id, Display *display) {
 }
 
 void app_handler_run_frame(AppHandler *AppHandler, Display *display, float dt) {
+    if (!AppHandler->appLua) {
+        cyan_log(VERBOSE_MED, "ERROR: no AppHandler app to run frame for.\n");
+        return;
+    }
     lua_State *L = AppHandler->appLua;
-
     lua_getglobal(L, "on_update");
     if (lua_isfunction(L, -1)) {
         lua_pushnumber(L, dt);
