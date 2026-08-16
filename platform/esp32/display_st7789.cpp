@@ -94,7 +94,7 @@ static const GFXfont *selectFont(int fontSize) {
     return &FreeSans9pt7b;
 }
 
-extern "C" bool display_init(Display *display, CyberwatchData *data) {
+extern "C" bool display_init(Display *display, CyanData *data) {
     display->width = 240;
     display->height = 280;
     display->backend = NULL;

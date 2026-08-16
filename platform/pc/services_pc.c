@@ -5,7 +5,7 @@
 #include <time.h>
 #include <stdio.h>
 
-extern CyberwatchData data;
+extern CyanData data;
 
 static bool time_available(void) { return true; }
 static struct tm time_now(void) {
@@ -35,7 +35,7 @@ PowerService powerService = {
     .sleep = power_sleep
 };
 
-void register_available_services(CyberwatchData *data) {
+void register_available_services(CyanData *data) {
     services_init(&data->services);
     bool timeOk = services_register(&data->services, (Service *) &timeService);
     cyan_log(VERBOSE_LOW, "[Services/Time]=%s", timeOk ? "OK": "FAILED");

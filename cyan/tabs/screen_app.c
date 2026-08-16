@@ -2,7 +2,7 @@
 #include "../clay_ui.h"
 #include "../data/data.h"
 
-Clay_RenderCommandArray clay_AppHandler_app(CyberwatchData* data, AppHandler *app_handler, int width, int height, bool show_debug, bool show_header) {
+Clay_RenderCommandArray clay_AppHandler_app(CyanData* data, AppHandler *app_handler, int width, int height, bool show_debug, bool show_header) {
     float deltaTime = get_delta();
     int debugOpacity = show_debug ? 100 : 0;
 

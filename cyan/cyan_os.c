@@ -11,7 +11,7 @@
 #define DEBUG_MODE false
 
 const uint32_t MAXIMUM_ELEMENTS = 60;
-CyberwatchData data;
+CyanData data;
 Display display;
 AppHandler app_handler;
 
@@ -35,7 +35,7 @@ static bool exit_app(AppHandler *app_handler) {
     return true;
 }
 
-static void check_shutdown(CyberwatchData *data, float dt, bool *running) {
+static void check_shutdown(CyanData *data, float dt, bool *running) {
     ShutdownData *sd = &data->shutdown;
 
     if (has_event_type(&data->eventQueue, EVENT_BUTTON1_DOWN)) {
@@ -68,7 +68,7 @@ static void check_shutdown(CyberwatchData *data, float dt, bool *running) {
     }
 }
 
-static void cycle_tab(CyberwatchData *data) {
+static void cycle_tab(CyanData *data) {
     data->tabs.tabIndex = (data->tabs.tabIndex + 1) % data->tabs.tabCount;
 }
 

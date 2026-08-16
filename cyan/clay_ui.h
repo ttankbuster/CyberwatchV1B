@@ -31,22 +31,22 @@ typedef struct AppHandler AppHandler;
 void handleClayErrors(Clay_ErrorData errorData);
 bool clay_ui_init(uint32_t max_elems, Clay_Dimensions (*measureTextFunction)(Clay_StringSlice, Clay_TextElementConfig *, void *), void *measureTextUserData, int width, int height);
 void clay_render(Display *display, Clay_RenderCommandArray *commands, bool debug_out);
-Clay_RenderCommandArray clay_watchface(CyberwatchData* data, int width, int height, bool show_debug);
-Clay_RenderCommandArray clay_AppHandler_catalogue(CyberwatchData* data, AppHandler *app_handler,int width, int height, bool show_debug);
-Clay_RenderCommandArray clay_timer(CyberwatchData* data, int width, int height, bool show_debug);
-Clay_RenderCommandArray clay_stopwatch(CyberwatchData* data, int width, int height, bool show_debug);
+Clay_RenderCommandArray clay_watchface(CyanData* data, int width, int height, bool show_debug);
+Clay_RenderCommandArray clay_AppHandler_catalogue(CyanData* data, AppHandler *app_handler,int width, int height, bool show_debug);
+Clay_RenderCommandArray clay_timer(CyanData* data, int width, int height, bool show_debug);
+Clay_RenderCommandArray clay_stopwatch(CyanData* data, int width, int height, bool show_debug);
 
-Clay_RenderCommandArray clay_AppHandler_app(CyberwatchData* data, AppHandler *app_handler, int width, int height, bool show_debug, bool show_header);
+Clay_RenderCommandArray clay_AppHandler_app(CyanData* data, AppHandler *app_handler, int width, int height, bool show_debug, bool show_header);
 
-void render_footer(CyberwatchData *data, int debugOpacity, int footerHeight);
-void render_header_bar(CyberwatchData *data, int debugOpacity, int headerWidth, int headerHeight);
-void widget_temperature(CyberwatchData *data, int debugOpacity, Clay_Sizing sizing);
-void widget_battery(CyberwatchData *data, int debugOpacity, Clay_Sizing sizing, Clay_Dimensions iconDimensions);
+void render_footer(CyanData *data, int debugOpacity, int footerHeight);
+void render_header_bar(CyanData *data, int debugOpacity, int headerWidth, int headerHeight);
+void widget_temperature(CyanData *data, int debugOpacity, Clay_Sizing sizing);
+void widget_battery(CyanData *data, int debugOpacity, Clay_Sizing sizing, Clay_Dimensions iconDimensions);
 void render_battery(float chargePercent, void *icon, Clay_Dimensions dimensions);
 
-void read_time_date(CyberwatchData* data);
-void read_timer(CyberwatchData* data);
-void read_stopwatch(CyberwatchData* data);
+void read_time_date(CyanData* data);
+void read_timer(CyanData* data);
+void read_stopwatch(CyanData* data);
 
 void AppHandler_catalogue_move(AppCatalogue *catalogue, AppHandler *app_handler, int delta);
 #endif

@@ -36,7 +36,7 @@ static SDL_Color toSdlColor(Clay_Color colour) {
 
 
 
-bool display_init(Display *display, CyberwatchData *data) {
+bool display_init(Display *display, CyanData *data) {
     SdlBackend *backend = calloc(1, sizeof(SdlBackend));
     
     display->width = 240*PC_DISPLAY_SCALE_FACTOR;

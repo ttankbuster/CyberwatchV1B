@@ -24,7 +24,7 @@ static void append_event(EventQueue* queue, Event event){
     }
 }
 
-static void update_events(CyberwatchData *data, Display *display, bool *running, bool debug) {
+static void update_events(CyanData *data, Display *display, bool *running, bool debug) {
     SDL_Event sdl_event;
     Event event;
     event.type = EVENT_NONE;
@@ -158,7 +158,7 @@ bool load_image(Display *display, const char *path, void *outHandle){
     return true;
 }
 
-void update_data(CyberwatchData *data, Display *display, bool *running) {
+void update_data(CyanData *data, Display *display, bool *running) {
     data->eventQueue.len = 0;
     time_t raw_time = time(NULL);
     struct tm *local_ptr = localtime(&raw_time);

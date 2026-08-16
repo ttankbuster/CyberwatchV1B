@@ -43,7 +43,7 @@ void services_update(ServiceRegistry *registry, float dt);
 void services_shutdown(ServiceRegistry *registry);
 Service *services_get(ServiceRegistry *registry, ServiceId id);
 bool services_is_available(ServiceRegistry *registry, ServiceId id);
-void register_available_services(CyberwatchData *data);
+void register_available_services(CyanData *data);
 
 typedef struct {
     Service service;

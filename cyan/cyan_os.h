@@ -1,13 +1,13 @@
 //cyan_os.h
-#ifndef CYBERWATCH_H
-#define CYBERWATCH_H
+#ifndef CYAN_OS_H
+#define CYAN_OS_H
 
 #include <stdbool.h>
 #include "data/data.h"
 #include "data/display.h"
 #include "app_handling/app_handler.h"
 
-extern CyberwatchData data;
+extern CyanData data;
 extern Display display;
 
 bool cyan_init(void);

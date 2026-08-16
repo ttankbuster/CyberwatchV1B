@@ -33,14 +33,14 @@ void IRAM_ATTR encoderISR() {
     lastEncoded = encoded;
 }
 
-static void appendEvent(CyberwatchData *data, EventType type) {
+static void appendEvent(CyanData *data, EventType type) {
     if (data->eventQueue.len + 1 < MAX_EVENTS) {
         data->eventQueue.events[data->eventQueue.len].type = type;
         data->eventQueue.len += 1;
     }
 }
 
-static void pollButtons(CyberwatchData *data) {
+static void pollButtons(CyanData *data) {
     if (!mcpReady) return;
 
     bool pressed1 = !mcp.digitalRead(MCP_BTN1);
@@ -62,7 +62,7 @@ static void pollButtons(CyberwatchData *data) {
     }
 }
 
-static void pollEncoder(CyberwatchData *data) {
+static void pollEncoder(CyanData *data) {
     if (!encoderInitialized) {
         pinMode(ENCODER_CLK_PIN, INPUT_PULLUP);
         pinMode(ENCODER_DT_PIN, INPUT_PULLUP);
@@ -82,7 +82,7 @@ static void pollEncoder(CyberwatchData *data) {
     while (accumulated <= -4) { appendEvent(data, EVENT_SCROLL_DOWN); accumulated += 4; }
 }
 
-static void readRTC(CyberwatchData *data) {
+static void readRTC(CyanData *data) {
     if (!rtcReady) return;
     DateTime now = rtc.now();
     data->watchface.time.tm_sec  = now.second();
@@ -102,7 +102,7 @@ float get_delta(void) {
     return delta;
 }
 
-void update_data(CyberwatchData *data, Display *display, bool *running) {
+void update_data(CyanData *data, Display *display, bool *running) {
     (void) display;
     *running = true;
     data->eventQueue.len = 0;
@@ -308,6 +308,6 @@ bool load_image(Display *display, const char *path, void *outHandle) {
     return true;
 }
 
-void register_available_services(CyberwatchData *data){
+void register_available_services(CyanData *data){
     cyan_log(VERBOSE_HIGH, "[Services] Registering available services");
 }

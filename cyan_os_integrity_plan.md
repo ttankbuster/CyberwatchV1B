@@ -36,6 +36,26 @@ introduced it. This rule is non-negotiable, not a nice-to-have.
   hardware boot test for the `display_st7789.cpp` icon-dimension fix,
   which is ESP32-only and unverifiable on the PC build. Phase 0 isn't
   fully closed until that runs too.
+  - **Follow-up commit landed outside this documented flow**: `8e53165`
+    ("memory safety fix #2") added three more `app_handler.c`/`.h` changes
+    on top of `de4f58a` — see Audit Findings Log for detail on each.
+    Reconciled here since it wasn't logged when made, matching the
+    cross-cutting rule's concern about silent drift between phases.
+    PC boot-and-smoke-test re-run against this commit specifically
+    (native build clean, binary stayed alive and responsive, indexed all
+    5 apps correctly, no crash) — tagged `phase0-pc-verified-2` →
+    `8e53165`. ESP32 hardware boot test is still the one outstanding item
+    blocking Phase 0 closure — unverifiable from this environment,
+    needs to be run on real hardware.
+  - **Explicit decision, 2026-08-16**: no ESP32 hardware access right
+    now. Rather than stall, proceeding into Phase 1 with Phase 0 held
+    open specifically on that one item — the PC-verifiable half (the
+    `app_handler.c` overflow, and everything else audited off the
+    source directly) is done and tagged. The ESP32 boot test for the
+    `display_st7789.cpp` icon fix will be run once hardware is
+    available again; this is a deliberate, logged exception to the
+    cross-cutting rule's "boot-test before the next phase" ordering,
+    not a silent skip.
   - `src/` reconciliation: **resolved** — confirmed directly against the
     repo tree that no `src/` directory exists; nothing to migrate.
   - Entry points audited (`main_pc.c`, `main_esp32.cpp`) — see Audit
@@ -85,6 +105,9 @@ findings, every phase that touches existing code adds here.*
 | `display_load_image()` in `display_st7789.cpp:166` is defined but has no call sites anywhere in the codebase and isn't declared in `display.h`. | Trivial | Dead code — cleanup candidate, Phase 1 sweep |
 | `cyan_os.h`'s include guard is `CYBERWATCH_H` (`cyan_os.h:2-3`) — leftover from the pre-rename name. Extends the Phase 1 naming-drift note (which already covers function naming) to include guards specifically. | Informational | Folds into the already-deferred `CyberwatchData` → `CyanData` sweep in Phase 1, not a new decision |
 | Input debounce — confirmed at its exact location: `data_esp32.cpp:43-63` (`pollButtons`) does pure edge detection (`pressed != lastButtonNPressed`), no time-based debounce anywhere in the poll path. | Confirmed, matches Phase 0 scope | Not a new finding — this is the debounce gap the plan already named as an explicit audit target (see below); recorded here with its concrete file/line now that the file has been read directly |
+| `app_handler.c:186` (`app_handler_index`, landed in `8e53165`) — even after the `sizeof(app.path)` fix, `snprintf` silently truncates rather than erroring when `"<path>/<foldername>"` still doesn't fit `app.path`'s 64 bytes. A truncated path is a distinct hazard from the original overflow: it's a valid-looking path to the *wrong* location (or a nonexistent one), which fails later, further from the actual cause. | Hardening, not a new memory-safety bug (the overflow itself was already fixed) | **Fixed** — `snprintf`'s return value is now checked; a folder name that would overflow `app.path` is logged and the entry is skipped instead of silently truncated. Covered by this pass's PC boot-and-smoke-test (`phase0-pc-verified-2`) |
+| `app_handler.c:266` (`app_handler_run_frame`, landed in `8e53165`) — no null check on `AppHandler->appLua` before dereferencing it via `lua_getglobal`. Traced every call site (`cyan_os.c:117-189`): all four `data.state` writes (`launch_app`, `exit_app`, init, shutdown) update `state` and `appLua` together, synchronously, single-threaded — so a null-`appLua` call during `CYW_APP_RUNNING` isn't reachable through any currently-existing control path. | Defensive hardening, not a demonstrated live bug under current control flow | **Fixed** — added as a guard anyway (cheap, and Phase 6's capability-enforcement/Lua-bounds work will add more control paths here where this stops being trivially true). Worth re-checking reachability once Phase 6 lands |
+| `app_handler.h` — `app_handler_count`, `app_handler_name`, `app_handler_icon`, `app_handler_is_running` were declared but never defined or called anywhere in `cyan/`. | Trivial | **Removed** in `8e53165`, ahead of the general Phase 1 dead-code sweep — confirmed zero remaining references before deletion |
 
 **Before changing anything.**
 

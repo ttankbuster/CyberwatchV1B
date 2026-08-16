@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-typedef struct CyberwatchData CyberwatchData;
+typedef struct CyanData CyanData;
 
 typedef struct Display {
     int width;
@@ -28,7 +28,7 @@ typedef enum {
     DISPICON_BATTERY_OUTLINE,
 } DisplayIcon;
 
-bool display_init(Display *display, CyberwatchData *data);
+bool display_init(Display *display, CyanData *data);
 void display_shutdown(Display *display);
 
 DisplaySize display_get_size(Display *display);

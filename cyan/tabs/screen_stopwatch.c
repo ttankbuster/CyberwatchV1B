@@ -2,7 +2,7 @@
 #include "../clay_ui.h"
 #include "../data/data.h"
 
-static void render_stopwatch(CyberwatchData *data, int debugOpacity, Clay_String stopwatchString, bool stopwatchActive) {
+static void render_stopwatch(CyanData *data, int debugOpacity, Clay_String stopwatchString, bool stopwatchActive) {
     Clay_Sizing expand = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) };
 
     CLAY(CLAY_ID("Main"), {
@@ -40,7 +40,7 @@ static void render_stopwatch(CyberwatchData *data, int debugOpacity, Clay_String
     }
 }
 
-Clay_RenderCommandArray clay_stopwatch(CyberwatchData* data, int width, int height, bool show_debug) {
+Clay_RenderCommandArray clay_stopwatch(CyanData* data, int width, int height, bool show_debug) {
     float deltaTime = get_delta();
     int debugOpacity = show_debug ? 100 : 0;
 
@@ -69,17 +69,17 @@ Clay_RenderCommandArray clay_stopwatch(CyberwatchData* data, int width, int heig
     return Clay_EndLayout(deltaTime);
 }
 
-void stopwatch_toggle(CyberwatchData *data){
+void stopwatch_toggle(CyanData *data){
     data->stopwatch.active = !data->stopwatch.active;
 }
 
-void stopwatch_reset(CyberwatchData *data){
+void stopwatch_reset(CyanData *data){
     data->stopwatch.h = 0;
     data->stopwatch.m = 0;
     data->stopwatch.s = 0;
 }
 
-void read_stopwatch(CyberwatchData* data){
+void read_stopwatch(CyanData* data){
     StopwatchData *sw = &data->stopwatch;
     if (sw->active) {
         time_t now = time(NULL);

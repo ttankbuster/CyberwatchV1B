@@ -81,7 +81,7 @@ typedef struct {
     void* tabData;
 } TabData;
 
-typedef struct CyberwatchData {
+typedef struct CyanData {
     CyberwatchState state;
     ServiceRegistry services;
     EventQueue eventQueue;
@@ -94,7 +94,7 @@ typedef struct CyberwatchData {
     const void *batteryIcon;
     float temperature;
     char temperatureChars[6]; // 23°C [000*C - 999*C]
-} CyberwatchData;
+} CyanData;
 
 typedef struct {
     uint16_t width;
@@ -114,7 +114,7 @@ typedef struct {
 FolderList scan_folder(char *path);
 
 
-void update_data(CyberwatchData *data, Display *display, bool *running);
+void update_data(CyanData *data, Display *display, bool *running);
 bool has_event_type(EventQueue *queue, EventType type);
 
 void platform_store_resolved_path(const char *relativePath, char *outBuffer, size_t bufferSize);
@@ -122,13 +122,13 @@ char* platform_resolve_path(char *relativePath);
 
 bool load_image(Display *display, const char *path, void *outHandle);
 
-void timer_init(CyberwatchData *data);
-void timer_cycle_element(CyberwatchData *data);
-void timer_toggle(CyberwatchData *data);
-void timer_spinbox_input(CyberwatchData *data, int difference);
+void timer_init(CyanData *data);
+void timer_cycle_element(CyanData *data);
+void timer_toggle(CyanData *data);
+void timer_spinbox_input(CyanData *data, int difference);
 
-void stopwatch_toggle(CyberwatchData *data);
-void stopwatch_reset(CyberwatchData *data);
+void stopwatch_toggle(CyanData *data);
+void stopwatch_reset(CyanData *data);
 
 float get_delta(void);
 

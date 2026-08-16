@@ -87,7 +87,7 @@ void render_battery(float chargePercent, void *icon, Clay_Dimensions dimensions)
     }
 }
 
-void widget_temperature(CyberwatchData *data, int debugOpacity, Clay_Sizing sizing) {
+void widget_temperature(CyanData *data, int debugOpacity, Clay_Sizing sizing) {
     CLAY(CLAY_ID("TemperatureDisplay"), {
         .backgroundColor = {100,32,24,debugOpacity},
         .layout = {
@@ -103,7 +103,7 @@ void widget_temperature(CyberwatchData *data, int debugOpacity, Clay_Sizing sizi
     }
 }
 
-void widget_battery(CyberwatchData *data, int debugOpacity, Clay_Sizing sizing, Clay_Dimensions iconDimensions) {
+void widget_battery(CyanData *data, int debugOpacity, Clay_Sizing sizing, Clay_Dimensions iconDimensions) {
     float chargePercent = 1.0f;
     Service *s = services_get(&data->services, SERVICE_POWER);
     if (s && s->available && s->available()) {
@@ -137,7 +137,7 @@ void shutdown_bar(float progress, int headerWidth, int headerHeight){
     }) {}
 }
 
-void render_header_bar(CyberwatchData *data, int debugOpacity, int headerWidth, int headerHeight) {
+void render_header_bar(CyanData *data, int debugOpacity, int headerWidth, int headerHeight) {
     float batteryHeight = headerHeight * 0.45f;
     float batteryWidth = batteryHeight * (33.0f / 16.0f);
     Clay_Dimensions batteryDimensions = (Clay_Dimensions) { batteryWidth, batteryHeight };
@@ -152,7 +152,7 @@ void render_header_bar(CyberwatchData *data, int debugOpacity, int headerWidth, 
     }
 }
 
-void render_footer(CyberwatchData *data, int debugOpacity, int footerHeight) {
+void render_footer(CyanData *data, int debugOpacity, int footerHeight) {
     CLAY(CLAY_ID("Footer"), {
         .backgroundColor = {47,24,24,debugOpacity},
         .layout = { .childAlignment = { .x = CLAY_ALIGN_X_CENTER, .y = CLAY_ALIGN_Y_CENTER }, .childGap = 20, .layoutDirection = CLAY_LEFT_TO_RIGHT, .sizing = { .height = CLAY_SIZING_FIXED(footerHeight), .width = CLAY_SIZING_GROW() } }

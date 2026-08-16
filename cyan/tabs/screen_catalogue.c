@@ -87,7 +87,7 @@ void render_AppHandler_catalogue(AppCatalogue *catalogue, AppHandler *app_handle
     }
 }
 
-Clay_RenderCommandArray clay_AppHandler_catalogue(CyberwatchData* data, AppHandler *app_handler,int width, int height, bool show_debug) {
+Clay_RenderCommandArray clay_AppHandler_catalogue(CyanData* data, AppHandler *app_handler,int width, int height, bool show_debug) {
     float deltaTime = get_delta();
     int debugOpacity = show_debug ? 100 : 0;
 

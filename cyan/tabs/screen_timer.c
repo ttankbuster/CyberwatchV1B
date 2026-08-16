@@ -29,7 +29,7 @@ static void render_spinbox(int number, char *textChars, size_t textCharsSize, bo
     }
 }
 
-static void render_timer(CyberwatchData *data, int debugOpacity, Clay_String timerString, bool timerActive) {
+static void render_timer(CyanData *data, int debugOpacity, Clay_String timerString, bool timerActive) {
     Clay_Sizing expand = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_GROW(0) };
     TimerData *t = &data->timer;
 
@@ -120,7 +120,7 @@ static void render_timer(CyberwatchData *data, int debugOpacity, Clay_String tim
     }
 }
 
-Clay_RenderCommandArray clay_timer(CyberwatchData* data, int width, int height, bool show_debug) {
+Clay_RenderCommandArray clay_timer(CyanData* data, int width, int height, bool show_debug) {
     float deltaTime = get_delta();
     int debugOpacity = show_debug ? 100 : 0;
 
@@ -149,16 +149,16 @@ Clay_RenderCommandArray clay_timer(CyberwatchData* data, int width, int height, 
     return Clay_EndLayout(deltaTime);
 }
 
-void timer_cycle_element(CyberwatchData *data) {
+void timer_cycle_element(CyanData *data) {
     data->timer.selectedElement = (data->timer.selectedElement+1) % TIMER_SELECTABLE_ELEMENT_COUNT;
     // printf("data->timer.selectedElement = %i\n", data->timer.selectedElement);
 }
 
-void timer_init(CyberwatchData *data){
+void timer_init(CyanData *data){
     data->timer.selectedElement = -1;
 }
 
-void timer_toggle(CyberwatchData *data){
+void timer_toggle(CyanData *data){
     if (!data) return;
     if (data->timer.hSpinbox==0&&data->timer.mSpinbox==0&&data->timer.sSpinbox==0 && data->timer.h==0&&data->timer.m==0&&data->timer.s==0){return;}
     bool newState = !data->timer.active;
@@ -185,7 +185,7 @@ void timer_toggle(CyberwatchData *data){
     if (!data->timer.active) { data->timer.selectedElement=-1; }
 }
 
-void read_timer(CyberwatchData* data){
+void read_timer(CyanData* data){
     static int lastAppliedHSpinbox = -1;
     static int lastAppliedMSpinbox = -1;
     static int lastAppliedSSpinbox = -1;
@@ -228,7 +228,7 @@ void read_timer(CyberwatchData* data){
     snprintf(t->chars, sizeof(t->chars), "%03d:%02d:%02d", t->h, t->m, t->s);
 }
 
-void timer_spinbox_input(CyberwatchData *data, int difference){
+void timer_spinbox_input(CyanData *data, int difference){
     if (!data) return;
     TimerData *t = &data->timer;
     int sel = t->selectedElement;
