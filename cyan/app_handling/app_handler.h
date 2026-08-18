@@ -31,11 +31,11 @@ typedef struct AppHandler {
     bool devmode;
 } AppHandler;
 
-bool app_handler_init(AppHandler *AppHandler, Display *display);
-bool app_handler_launch(AppHandler *AppHandler, int id, Display *display);
-void app_handler_unload(AppHandler *AppHandler);
-void app_handler_run_frame(AppHandler *AppHandler, Display *display, float dt);
-void app_handler_dispatch_events(AppHandler *AppHandler, EventQueue *queue);
-void app_handler_shutdown(AppHandler *AppHandler);
+bool AppHandler_init(AppHandler *AppHandler, Display *display);
+bool AppHandler_launch(AppHandler *AppHandler, int id, Display *display);
+void AppHandler_unload(AppHandler *AppHandler);
+void AppHandler_update(AppHandler *AppHandler, Display *display, float dt);
+void AppHandler_dispatch_events(AppHandler *AppHandler, EventQueue *queue);
+void AppHandler_shutdown(AppHandler *AppHandler);
 
 #endif

@@ -18,7 +18,7 @@ AppHandler app_handler;
 
 
 static bool launch_app(int id) {
-    if (app_handler_launch(&app_handler, id, &display)) {
+    if (AppHandler_launch(&app_handler, id, &display)) {
         data.state = CYW_APP_RUNNING;
         return true;
     } else {
@@ -29,7 +29,7 @@ static bool launch_app(int id) {
 }
 
 static bool exit_app(AppHandler *app_handler) {
-    app_handler_unload(app_handler);
+    AppHandler_unload(app_handler);
     data.state = CYW_HOME;
     data.tabs.tabIndex = 1;
     return true;
@@ -96,7 +96,7 @@ bool cyan_init(void) {
     cyan_log(VERBOSE_LOW, "[Clay]=%s", clayOk ? "OK": "FAILED");
     display_loading_screen(&display, 0.2);
 
-    bool appHandlerOk = app_handler_init(&app_handler, &display);
+    bool appHandlerOk = AppHandler_init(&app_handler, &display);
     cyan_log(VERBOSE_LOW, "[AppHandler]=%s", appHandlerOk ? "OK": "FAILED");
     display_loading_screen(&display, 0.2);
 
@@ -175,8 +175,8 @@ void cyan_update(float dt, bool *running) {
     }
 
     if (data.state == CYW_APP_RUNNING) {
-        app_handler_dispatch_events(&app_handler, &data.eventQueue);
-        app_handler_run_frame(&app_handler, &display, dt);
+        AppHandler_dispatch_events(&app_handler, &data.eventQueue);
+        AppHandler_update(&app_handler, &display, dt);
     }
 
     display_clear(&display, (Clay_Color) {0, 0, 0, 255});
@@ -190,7 +190,7 @@ void cyan_update(float dt, bool *running) {
 }
 
 void cyan_shutdown(void) {
-    app_handler_unload(&app_handler);
-    app_handler_shutdown(&app_handler);
+    AppHandler_unload(&app_handler);
+    AppHandler_shutdown(&app_handler);
     display_shutdown(&display);
 }
