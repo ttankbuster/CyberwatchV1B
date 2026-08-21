@@ -10,581 +10,56 @@
 		(rev "#1")
 		(company "Edward Swingler")
 	)
-	(lib_symbols
-		(symbol "Switch:SW_Push"
-			(pin_numbers
-				(hide yes)
-			)
-			(pin_names
-				(offset 1.016)
-				(hide yes)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "SW"
-				(at 1.27 2.54 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify left)
-				)
-			)
-			(property "Value" "SW_Push"
-				(at 0 -1.524 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 5.08 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 5.08 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" "Push button switch, generic, two pins"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_keywords" "switch normally-open pushbutton push-button"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "SW_Push_0_1"
-				(circle
-					(center -2.032 0)
-					(radius 0.508)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 1.27) (xy 0 3.048)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 2.032 0)
-					(radius 0.508)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 2.54 1.27) (xy -2.54 1.27)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(pin passive line
-					(at -5.08 0 0)
-					(length 2.54)
-					(name "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 5.08 0 180)
-					(length 2.54)
-					(name "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
-	)
-	(wire
-		(pts
-			(xy 120.65 88.9) (xy 120.65 116.84)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "01e23421-e561-4181-9fcb-d5a9151564e4")
-	)
-	(wire
-		(pts
-			(xy 118.11 116.84) (xy 118.11 78.74)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3b0a9860-51cb-41f2-868d-e4be7c848493")
-	)
-	(wire
-		(pts
-			(xy 196.85 87.63) (xy 186.69 87.63)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3be718bc-ffff-45f0-804b-0e30cbeecbd4")
-	)
-	(wire
-		(pts
-			(xy 115.57 66.04) (xy 115.57 116.84)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3cc25c6e-b47e-4a35-a022-fd422638e6a0")
-	)
-	(wire
-		(pts
-			(xy 64.77 88.9) (xy 120.65 88.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "5865dd0d-4bbe-45e8-a488-f4be41a74c1c")
-	)
-	(wire
-		(pts
-			(xy 106.68 66.04) (xy 115.57 66.04)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "8b03cf71-fe6c-4038-a240-38a364aacf99")
-	)
-	(wire
-		(pts
-			(xy 123.19 104.14) (xy 123.19 116.84)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a012636c-799b-4efe-9f2c-45cec163f0c8")
-	)
-	(wire
-		(pts
-			(xy 118.11 78.74) (xy 106.68 78.74)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d956d983-ca55-4387-944f-8a1e67a633aa")
-	)
-	(wire
-		(pts
-			(xy 106.68 104.14) (xy 123.19 104.14)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d95df7d7-5680-4cce-ae14-b858e1a5f3c7")
-	)
-	(symbol
-		(lib_id "Switch:SW_Push")
-		(at 101.6 104.14 0)
-		(unit 1)
-		(body_style 1)
+	(lib_symbols)
+	(sheet
+		(at 215.9 76.2)
+		(size 63.5 76.2)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
-		(in_pos_files yes)
 		(dnp no)
-		(uuid "65627feb-9f6b-4282-b232-d06c0ef68e05")
-		(property "Reference" "SW4"
-			(at 101.6 96.52 0)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "3dad58ef-54de-4aca-b47b-9f59223c3d09")
+		(property "Sheetname" "input_right"
+			(at 215.9 75.4884 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left bottom)
 			)
 		)
-		(property "Value" "SW_Push"
-			(at 101.6 99.06 0)
+		(property "Sheetfile" "input_right.kicad_sch"
+			(at 215.9 152.9846 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left top)
 			)
-		)
-		(property "Footprint" ""
-			(at 101.6 99.06 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 101.6 99.06 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Push button switch, generic, two pins"
-			(at 101.6 104.14 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "6e8da3f7-a166-451c-8ca4-496d4cd49cd2")
-		)
-		(pin "2"
-			(uuid "610d2d73-d48f-4f10-94e6-c2a1b362c376")
 		)
 		(instances
 			(project "CyberwatchV1B"
 				(path "/68fdecbc-307b-4175-ba1b-687d291eebec"
-					(reference "SW4")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Switch:SW_Push")
-		(at 59.69 88.9 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "838f21a0-230e-42c2-b23c-e72c4897b2ee")
-		(property "Reference" "SW3"
-			(at 59.69 81.28 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "SW_Push"
-			(at 59.69 83.82 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 59.69 83.82 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 59.69 83.82 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Push button switch, generic, two pins"
-			(at 59.69 88.9 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "05deeee6-6fe8-496f-8634-42393305f6de")
-		)
-		(pin "2"
-			(uuid "458490d4-afea-442a-8694-a4420d34c32b")
-		)
-		(instances
-			(project "CyberwatchV1B"
-				(path "/68fdecbc-307b-4175-ba1b-687d291eebec"
-					(reference "SW3")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Switch:SW_Push")
-		(at 101.6 78.74 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "910dc684-4957-48fd-a358-91c40d6b1cbd")
-		(property "Reference" "SW2"
-			(at 101.6 71.12 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "SW_Push"
-			(at 101.6 73.66 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 101.6 73.66 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 101.6 73.66 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Push button switch, generic, two pins"
-			(at 101.6 78.74 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "2"
-			(uuid "c756b0b7-6dea-45cf-9076-c7e0807f28d7")
-		)
-		(pin "1"
-			(uuid "2217509f-f060-4c1f-9f47-6dea0c003577")
-		)
-		(instances
-			(project "CyberwatchV1B"
-				(path "/68fdecbc-307b-4175-ba1b-687d291eebec"
-					(reference "SW2")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Switch:SW_Push")
-		(at 101.6 66.04 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(uuid "d77a6473-85be-4b2f-a7f9-177a1b691a04")
-		(property "Reference" "SW1"
-			(at 101.6 58.42 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "SW_Push"
-			(at 101.6 60.96 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 101.6 60.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 101.6 60.96 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Push button switch, generic, two pins"
-			(at 101.6 66.04 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "2"
-			(uuid "268956b4-f812-4870-9a1e-09b0b8be8d1d")
-		)
-		(pin "1"
-			(uuid "443644fa-8562-4fd7-a8ee-acad922dc86d")
-		)
-		(instances
-			(project "CyberwatchV1B"
-				(path "/68fdecbc-307b-4175-ba1b-687d291eebec"
-					(reference "SW1")
-					(unit 1)
+					(page "5")
 				)
 			)
 		)
 	)
 	(sheet
-		(at 167.64 106.68)
-		(size 34.29 22.86)
+		(at 101.6 76.2)
+		(size 101.6 76.2)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
@@ -599,7 +74,7 @@
 		)
 		(uuid "3e32a5f4-5f73-4190-bd49-348c2c57a12f")
 		(property "Sheetname" "main"
-			(at 167.64 105.9684 0)
+			(at 101.6 75.4884 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -610,7 +85,7 @@
 			)
 		)
 		(property "Sheetfile" "main.kicad_sch"
-			(at 167.64 130.1246 0)
+			(at 101.6 152.9846 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -629,8 +104,8 @@
 		)
 	)
 	(sheet
-		(at 26.67 25.4)
-		(size 46.99 31.75)
+		(at 25.4 24.13)
+		(size 254 39.37)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
@@ -645,7 +120,7 @@
 		)
 		(uuid "7bf68128-0be5-4fe2-83b8-92b11acee9d6")
 		(property "Sheetname" "power"
-			(at 26.67 24.6884 0)
+			(at 25.4 23.4184 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -656,7 +131,7 @@
 			)
 		)
 		(property "Sheetfile" "power.kicad_sch"
-			(at 26.67 57.7346 0)
+			(at 25.4 64.0846 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -675,8 +150,8 @@
 		)
 	)
 	(sheet
-		(at 86.36 167.64)
-		(size 58.42 21.59)
+		(at 25.4 76.2)
+		(size 63.5 76.2)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
@@ -689,9 +164,9 @@
 		(fill
 			(color 0 0 0 0)
 		)
-		(uuid "8cbb68ad-4fdc-438c-8fec-3f34e50a945c")
-		(property "Sheetname" "crown"
-			(at 86.36 166.9284 0)
+		(uuid "ea0244fb-2f59-483a-a25c-2656c752d645")
+		(property "Sheetname" "input_left"
+			(at 25.4 75.4884 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -701,8 +176,8 @@
 				(justify left bottom)
 			)
 		)
-		(property "Sheetfile" "crown.kicad_sch"
-			(at 86.36 189.8146 0)
+		(property "Sheetfile" "input_left.kicad_sch"
+			(at 25.4 152.9846 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects

@@ -663,7 +663,7 @@
         "uuid": "68fdecbc-307b-4175-ba1b-687d291eebec"
       }
     ],
-    "used_designators": "R_SDA1,U1-4,SW1-6,R1-2,J1-2,C1-4,Q1,#PWR1-10,BT1",
+    "used_designators": "R_SDA1,U1-4,SW1-6,R1-2,J1-3,C1-4,Q1,#PWR1-10,BT1",
     "variants": []
   },
   "sheets": [
@@ -680,8 +680,12 @@
       "power"
     ],
     [
-      "8cbb68ad-4fdc-438c-8fec-3f34e50a945c",
-      "crown"
+      "ea0244fb-2f59-483a-a25c-2656c752d645",
+      "input_left"
+    ],
+    [
+      "3dad58ef-54de-4aca-b47b-9f59223c3d09",
+      "input_right"
     ]
   ],
   "text_variables": {},
