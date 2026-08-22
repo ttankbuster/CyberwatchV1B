@@ -13,7 +13,7 @@
 	(lib_symbols)
 	(wire
 		(pts
-			(xy 124.46 67.31) (xy 124.46 76.2)
+			(xy 127 67.31) (xy 127 76.2)
 		)
 		(stroke
 			(width 0)
@@ -23,13 +23,43 @@
 	)
 	(wire
 		(pts
-			(xy 134.62 67.31) (xy 134.62 76.2)
+			(xy 114.3 67.31) (xy 114.3 76.2)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "3d2c4b43-867e-43b1-957a-6108037776ea")
+	)
+	(wire
+		(pts
+			(xy 177.8 67.31) (xy 177.8 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4a46e6e2-c395-48dc-87c0-46a737bb6cef")
+	)
+	(wire
+		(pts
+			(xy 165.1 67.31) (xy 165.1 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6b99547e-5e3d-495a-a7f2-a7f0a88b62c4")
+	)
+	(wire
+		(pts
+			(xy 152.4 67.31) (xy 152.4 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cba941df-1879-4591-8e85-ada70187b155")
 	)
 	(sheet
 		(at 215.9 76.2)
@@ -116,7 +146,7 @@
 			)
 		)
 		(pin "VBAT_RAW" input
-			(at 134.62 76.2 90)
+			(at 114.3 76.2 90)
 			(uuid "3bb1e504-3d3f-4330-b50b-42597b59ee3b")
 			(effects
 				(font
@@ -126,8 +156,58 @@
 			)
 		)
 		(pin "VBAT_SWITCHED" input
-			(at 124.46 76.2 90)
+			(at 127 76.2 90)
 			(uuid "fb5b8f99-26fb-4d20-bc19-2d61dccf969e")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "BTN_1" input
+			(at 101.6 102.87 180)
+			(uuid "2deba47b-33a5-41b7-a7c6-ace613d4fc49")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "BTN_2" input
+			(at 101.6 105.41 180)
+			(uuid "ad3e9a02-7c42-418f-a673-5b434a05a44c")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "GND" input
+			(at 177.8 76.2 90)
+			(uuid "d99cc051-c427-404d-9571-194ae21359cc")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "SCL" input
+			(at 165.1 76.2 90)
+			(uuid "cff1dcb5-9b0a-4b96-aa5a-c1629d75726d")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "SDA" input
+			(at 152.4 76.2 90)
+			(uuid "976539bd-3218-4aea-8b1d-6c8c56d8d805")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -144,8 +224,8 @@
 		)
 	)
 	(sheet
-		(at 120.65 44.45)
-		(size 55.88 22.86)
+		(at 101.6 44.45)
+		(size 101.6 22.86)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
@@ -160,7 +240,7 @@
 		)
 		(uuid "7bf68128-0be5-4fe2-83b8-92b11acee9d6")
 		(property "Sheetname" "power"
-			(at 119.9384 67.31 90)
+			(at 100.8884 67.31 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -171,7 +251,7 @@
 			)
 		)
 		(property "Sheetfile" "power.kicad_sch"
-			(at 177.1146 67.31 90)
+			(at 203.7846 67.31 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -182,7 +262,7 @@
 			)
 		)
 		(pin "ALRT" output
-			(at 172.72 67.31 270)
+			(at 139.7 67.31 270)
 			(uuid "12243b47-cf48-4d64-b0fb-f0143221a4e1")
 			(effects
 				(font
@@ -192,7 +272,7 @@
 			)
 		)
 		(pin "GND" output
-			(at 163.83 67.31 270)
+			(at 177.8 67.31 270)
 			(uuid "2543b61e-bf38-44c3-8547-e6e28aab7984")
 			(effects
 				(font
@@ -202,7 +282,7 @@
 			)
 		)
 		(pin "SCL" input
-			(at 153.67 67.31 270)
+			(at 165.1 67.31 270)
 			(uuid "ed51d039-396e-40b7-88c1-ee5df92762b8")
 			(effects
 				(font
@@ -212,7 +292,7 @@
 			)
 		)
 		(pin "SDA" bidirectional
-			(at 143.51 67.31 270)
+			(at 152.4 67.31 270)
 			(uuid "2681c987-7d9d-4751-ab0e-0cf9c3c331e4")
 			(effects
 				(font
@@ -222,7 +302,7 @@
 			)
 		)
 		(pin "VBAT_RAW" output
-			(at 134.62 67.31 270)
+			(at 114.3 67.31 270)
 			(uuid "b3432009-3998-4fea-90fa-b5e8fd584006")
 			(effects
 				(font
@@ -232,7 +312,7 @@
 			)
 		)
 		(pin "VBAT_SWITCHED" output
-			(at 124.46 67.31 270)
+			(at 127 67.31 270)
 			(uuid "33828e62-cc98-4caf-a331-a5fce27f1443")
 			(effects
 				(font
