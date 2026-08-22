@@ -11,6 +11,26 @@
 		(company "Edward Swingler")
 	)
 	(lib_symbols)
+	(wire
+		(pts
+			(xy 124.46 67.31) (xy 124.46 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2133b628-b316-41db-8a9d-20400aeb27b3")
+	)
+	(wire
+		(pts
+			(xy 134.62 67.31) (xy 134.62 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3d2c4b43-867e-43b1-957a-6108037776ea")
+	)
 	(sheet
 		(at 215.9 76.2)
 		(size 63.5 76.2)
@@ -95,6 +115,26 @@
 				(justify left top)
 			)
 		)
+		(pin "VBAT_RAW" input
+			(at 134.62 76.2 90)
+			(uuid "3bb1e504-3d3f-4330-b50b-42597b59ee3b")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "VBAT_SWITCHED" input
+			(at 124.46 76.2 90)
+			(uuid "fb5b8f99-26fb-4d20-bc19-2d61dccf969e")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
 		(instances
 			(project "CyberwatchV1B"
 				(path "/68fdecbc-307b-4175-ba1b-687d291eebec"
@@ -104,8 +144,8 @@
 		)
 	)
 	(sheet
-		(at 25.4 24.13)
-		(size 254 39.37)
+		(at 120.65 44.45)
+		(size 55.88 22.86)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
@@ -120,7 +160,7 @@
 		)
 		(uuid "7bf68128-0be5-4fe2-83b8-92b11acee9d6")
 		(property "Sheetname" "power"
-			(at 25.4 23.4184 0)
+			(at 119.9384 67.31 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -131,7 +171,7 @@
 			)
 		)
 		(property "Sheetfile" "power.kicad_sch"
-			(at 25.4 64.0846 0)
+			(at 177.1146 67.31 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -139,6 +179,66 @@
 					(size 1.27 1.27)
 				)
 				(justify left top)
+			)
+		)
+		(pin "ALRT" output
+			(at 172.72 67.31 270)
+			(uuid "12243b47-cf48-4d64-b0fb-f0143221a4e1")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "GND" output
+			(at 163.83 67.31 270)
+			(uuid "2543b61e-bf38-44c3-8547-e6e28aab7984")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "SCL" input
+			(at 153.67 67.31 270)
+			(uuid "ed51d039-396e-40b7-88c1-ee5df92762b8")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "SDA" bidirectional
+			(at 143.51 67.31 270)
+			(uuid "2681c987-7d9d-4751-ab0e-0cf9c3c331e4")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "VBAT_RAW" output
+			(at 134.62 67.31 270)
+			(uuid "b3432009-3998-4fea-90fa-b5e8fd584006")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "VBAT_SWITCHED" output
+			(at 124.46 67.31 270)
+			(uuid "33828e62-cc98-4caf-a331-a5fce27f1443")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
 			)
 		)
 		(instances
