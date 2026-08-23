@@ -260,7 +260,16 @@
     "equivalence_files": []
   },
   "erc": {
-    "erc_exclusions": [],
+    "erc_exclusions": [
+      [
+        "multiple_net_names|1676400|660400|498e33d4-db94-4800-a350-364c4f5159a5|4254229f-1278-42d6-a41e-918500430c40|/68fdecbc-307b-4175-ba1b-687d291eebec/7bf68128-0be5-4fe2-83b8-92b11acee9d6|/68fdecbc-307b-4175-ba1b-687d291eebec/7bf68128-0be5-4fe2-83b8-92b11acee9d6|/68fdecbc-307b-4175-ba1b-687d291eebec/7bf68128-0be5-4fe2-83b8-92b11acee9d6",
+        ""
+      ],
+      [
+        "multiple_net_names|1676400|711200|d1db4e79-3393-46d9-a030-2740cf14bf8c|68ca1fb7-5a69-4bbe-8ac9-67456f11c343|/68fdecbc-307b-4175-ba1b-687d291eebec/7bf68128-0be5-4fe2-83b8-92b11acee9d6|/68fdecbc-307b-4175-ba1b-687d291eebec/7bf68128-0be5-4fe2-83b8-92b11acee9d6|/68fdecbc-307b-4175-ba1b-687d291eebec/7bf68128-0be5-4fe2-83b8-92b11acee9d6",
+        ""
+      ]
+    ],
     "meta": {
       "version": 0
     },
@@ -605,12 +614,90 @@
           "label": "Datasheet",
           "name": "Datasheet",
           "show": true
+        },
+        {
+          "group_by": false,
+          "label": "Manufacturer",
+          "name": "Manufacturer",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "Part Type",
+          "name": "Part Type",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "Priority",
+          "name": "Priority",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "Rating",
+          "name": "Rating",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "SKU",
+          "name": "SKU",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "Sim.Device",
+          "name": "Sim.Device",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "Sim.Pins",
+          "name": "Sim.Pins",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "Sim.Type",
+          "name": "Sim.Type",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "Status",
+          "name": "Status",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "Temperature",
+          "name": "Temperature",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "MPN",
+          "name": "MPN",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "Description",
+          "name": "Description",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "#",
+          "name": "${ITEM_NUMBER}",
+          "show": false
         }
       ],
       "filter_string": "",
       "group_symbols": true,
       "include_excluded_from_bom": true,
-      "name": "Default Editing",
+      "name": "",
       "sort_asc": true,
       "sort_field": "Reference"
     },
@@ -663,7 +750,7 @@
         "uuid": "68fdecbc-307b-4175-ba1b-687d291eebec"
       }
     ],
-    "used_designators": "R_SDA1,U1-4,SW1-6,#FLG1-3,R1-7,J1-3,C1-4,Q1,#PWR1-10,BT1",
+    "used_designators": "R_SDA1,U1-7,SW1-6,#FLG1-8,R1-10,J1-9,C1-4,Q1,#PWR1-33,BT1",
     "variants": []
   },
   "sheets": [
