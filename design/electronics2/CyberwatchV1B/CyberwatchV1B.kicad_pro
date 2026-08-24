@@ -268,6 +268,14 @@
       [
         "multiple_net_names|1676400|711200|d1db4e79-3393-46d9-a030-2740cf14bf8c|68ca1fb7-5a69-4bbe-8ac9-67456f11c343|/68fdecbc-307b-4175-ba1b-687d291eebec/7bf68128-0be5-4fe2-83b8-92b11acee9d6|/68fdecbc-307b-4175-ba1b-687d291eebec/7bf68128-0be5-4fe2-83b8-92b11acee9d6|/68fdecbc-307b-4175-ba1b-687d291eebec/7bf68128-0be5-4fe2-83b8-92b11acee9d6",
         ""
+      ],
+      [
+        "multiple_net_names|2197100|660400|498e33d4-db94-4800-a350-364c4f5159a5|4254229f-1278-42d6-a41e-918500430c40|/68fdecbc-307b-4175-ba1b-687d291eebec/7bf68128-0be5-4fe2-83b8-92b11acee9d6|/68fdecbc-307b-4175-ba1b-687d291eebec/7bf68128-0be5-4fe2-83b8-92b11acee9d6|/68fdecbc-307b-4175-ba1b-687d291eebec/7bf68128-0be5-4fe2-83b8-92b11acee9d6",
+        ""
+      ],
+      [
+        "multiple_net_names|2197100|685800|d1db4e79-3393-46d9-a030-2740cf14bf8c|68ca1fb7-5a69-4bbe-8ac9-67456f11c343|/68fdecbc-307b-4175-ba1b-687d291eebec/7bf68128-0be5-4fe2-83b8-92b11acee9d6|/68fdecbc-307b-4175-ba1b-687d291eebec/7bf68128-0be5-4fe2-83b8-92b11acee9d6|/68fdecbc-307b-4175-ba1b-687d291eebec/7bf68128-0be5-4fe2-83b8-92b11acee9d6",
+        ""
       ]
     ],
     "meta": {
@@ -750,7 +758,7 @@
         "uuid": "68fdecbc-307b-4175-ba1b-687d291eebec"
       }
     ],
-    "used_designators": "R_SDA1,U1-7,SW1-6,#FLG1-8,R1-10,J1-9,C1-4,Q1,#PWR1-33,BT1",
+    "used_designators": "R_SDA1,U1-7,SW1-6,#FLG1-8,R1-10,J1-11,C1-4,Q1,#PWR1-44,BT1",
     "variants": []
   },
   "sheets": [

@@ -1,41 +1,102 @@
-ERC report (2026-08-23T21:39:09, Encoding UTF8)
+ERC report (2026-08-24T10:14:42, Encoding UTF8)
 Report includes: Errors, Warnings, Exclusions
 
 ***** Sheet /
-[lib_symbol_mismatch]: Symbol 'MAX17048' doesn't match copy in library 'CY_library'
+[hier_label_mismatch]: Sheet pin BTN_3 has no matching hierarchical label inside the sheet
+    ; error
+    @(8000 mils, 4000 mils): Hierarchical Sheet Pin 'BTN_3'
+[hier_label_mismatch]: Sheet pin BTN_4 has no matching hierarchical label inside the sheet
+    ; error
+    @(8000 mils, 4500 mils): Hierarchical Sheet Pin 'BTN_4'
+[hier_label_mismatch]: Sheet pin BTN_3 has no matching hierarchical label inside the sheet
+    ; error
+    @(8500 mils, 4000 mils): Hierarchical Sheet Pin 'BTN_3'
+[hier_label_mismatch]: Sheet pin BTN_4 has no matching hierarchical label inside the sheet
+    ; error
+    @(8500 mils, 4500 mils): Hierarchical Sheet Pin 'BTN_4'
+[hier_label_mismatch]: Sheet pin SDA has no matching hierarchical label inside the sheet
+    ; error
+    @(8500 mils, 5000 mils): Hierarchical Sheet Pin 'SDA'
+[hier_label_mismatch]: Sheet pin SCL has no matching hierarchical label inside the sheet
+    ; error
+    @(8500 mils, 5500 mils): Hierarchical Sheet Pin 'SCL'
+[endpoint_off_grid]: Symbol pin or wire end off connection grid
     ; warning
-    @(5950 mils, 3350 mils): Symbol U4 [MAX17048]
-[footprint_link_issues]: The current configuration does not include the footprint library 'Seeed_Studio_XIAO_Series'
+    @(2050 mils, 1240 mils): Horizontal Wire, length 300 mils
+[endpoint_off_grid]: Symbol pin or wire end off connection grid
     ; warning
-    @(4650 mils, 4250 mils): Symbol U1 [XIAO-ESP32-S3 Plus-SMD]
-[lib_symbol_mismatch]: Symbol 'DS3231MZ' doesn't match copy in library 'Timer_RTC'
+    @(2050 mils, 1340 mils): Horizontal Wire, length 300 mils
+[endpoint_off_grid]: Symbol pin or wire end off connection grid
     ; warning
-    @(6750 mils, 2550 mils): Symbol U3 [DS3231MZ]
+    @(2050 mils, 1440 mils): Symbol #PWR035 Pin 1 [Power input, Line]
+[endpoint_off_grid]: Symbol pin or wire end off connection grid
+    ; warning
+    @(2050 mils, 1440 mils): Horizontal Wire, length 300 mils
+[endpoint_off_grid]: Symbol pin or wire end off connection grid
+    ; warning
+    @(2050 mils, 1540 mils): Horizontal Wire, length 300 mils
+[endpoint_off_grid]: Symbol pin or wire end off connection grid
+    ; warning
+    @(2050 mils, 1640 mils): Horizontal Wire, length 300 mils
+[endpoint_off_grid]: Symbol pin or wire end off connection grid
+    ; warning
+    @(2050 mils, 1740 mils): Horizontal Wire, length 300 mils
+[endpoint_off_grid]: Symbol pin or wire end off connection grid
+    ; warning
+    @(2050 mils, 1840 mils): Horizontal Wire, length 300 mils
+[endpoint_off_grid]: Symbol pin or wire end off connection grid
+    ; warning
+    @(2050 mils, 1840 mils): Symbol #PWR036 Pin 1 [Power input, Line]
+[endpoint_off_grid]: Symbol pin or wire end off connection grid
+    ; warning
+    @(2350 mils, 1340 mils): Symbol J10 Pin 2 [Pin_2, Passive, Line]
+[endpoint_off_grid]: Symbol pin or wire end off connection grid
+    ; warning
+    @(3490 mils, 2300 mils): Horizontal Wire, length 300 mils
+[endpoint_off_grid]: Symbol pin or wire end off connection grid
+    ; warning
+    @(3490 mils, 2300 mils): Symbol #PWR041 Pin 1 [Power input, Line]
+[endpoint_off_grid]: Symbol pin or wire end off connection grid
+    ; warning
+    @(3490 mils, 2400 mils): Symbol #PWR042 Pin 1 [Power input, Line]
+[endpoint_off_grid]: Symbol pin or wire end off connection grid
+    ; warning
+    @(3490 mils, 2400 mils): Horizontal Wire, length 300 mils
+[endpoint_off_grid]: Symbol pin or wire end off connection grid
+    ; warning
+    @(3490 mils, 2900 mils): Horizontal Wire, length 300 mils
+[endpoint_off_grid]: Symbol pin or wire end off connection grid
+    ; warning
+    @(3490 mils, 2900 mils): Symbol #PWR043 Pin 1 [Power input, Line]
+[endpoint_off_grid]: Symbol pin or wire end off connection grid
+    ; warning
+    @(3790 mils, 2400 mils): Symbol J8 Pin 2 [Pin_2, Passive, Line]
 
 ***** Sheet /main/
-[power_pin_not_driven]: Input Power pin not driven by any Output Power pins
-    ; error
-    @(4550 mils, 3300 mils): Symbol #PWR06 Pin 1 [Power input, Line]
 
 ***** Sheet /power/
 [multiple_net_names]: Both S and VBAT_RAW are attached to the same items; S will be used in the netlist
     ; warning
     @(4700 mils, 4200 mils): Label 'S'
-    @(6600 mils, 2600 mils): Hierarchical Label 'VBAT_RAW'
+    @(8650 mils, 2600 mils): Hierarchical Label 'VBAT_RAW'
 [multiple_net_names]: Both D and VBAT_SWITCHED are attached to the same items; D will be used in the netlist
     ; warning
-    @(5150 mils, 4200 mils): Label 'D'
-    @(6600 mils, 2800 mils): Hierarchical Label 'VBAT_SWITCHED'
+    @(5100 mils, 4200 mils): Label 'D'
+    @(8650 mils, 2700 mils): Hierarchical Label 'VBAT_SWITCHED'
+[multiple_net_names]: More than one name given to this bus or net
+    ; warning (excluded)
+    @(4700 mils, 4200 mils): Label 'S'
+    @(8650 mils, 2600 mils): Hierarchical Label 'VBAT_RAW'
+[multiple_net_names]: More than one name given to this bus or net
+    ; warning (excluded)
+    @(5100 mils, 4200 mils): Label 'D'
+    @(8650 mils, 2700 mils): Hierarchical Label 'VBAT_SWITCHED'
 
 ***** Sheet /input_left/
 
 ***** Sheet /input_right/
-[pin_to_pin]: Pins of type Power output and Power output are connected
-    ; error
-    @(3450 mils, 2750 mils): Symbol #FLG03 Pin 1 [Power output, Line]
-    @(6250 mils, 4000 mils): Symbol #FLG04 Pin 1 [Power output, Line]
 
- ** ERC messages: 7  Errors 2  Warnings 5
+ ** ERC messages: 27  Errors 6  Warnings 21
 
  ** Ignored checks:
     - Global label only appears once in the schematic

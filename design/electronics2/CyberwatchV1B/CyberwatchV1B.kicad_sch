@@ -385,7 +385,7 @@
 				(justify right)
 			)
 		)
-		(pin "ALRT" input
+		(pin "PWR_ALRT" input
 			(at 139.7 76.2 90)
 			(uuid "45a32e03-6dd1-4097-b520-d9b2445080c5")
 			(effects
@@ -461,7 +461,7 @@
 				(justify left top)
 			)
 		)
-		(pin "ALRT" output
+		(pin "PWR_ALRT" output
 			(at 139.7 60.96 270)
 			(uuid "12243b47-cf48-4d64-b0fb-f0143221a4e1")
 			(effects
