@@ -716,7 +716,7 @@
 				)
 			)
 		)
-		(property "Value" "Conn_01x03_main"
+		(property "Value" "Conn_01x03_IL_main"
 			(at 197.612 90.678 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -726,7 +726,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_JST:JST_SH_SM03B-SRSS-TB_1x03-1MP_P1.00mm_Horizontal"
 			(at 195.58 99.06 0)
 			(hide yes)
 			(show_name no)

@@ -2598,9 +2598,8 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Package_DFN_QFN:TDFN-8-1EP_2x2mm_P0.5mm_EP0.8x1.2mm"
 			(at 151.13 87.63 0)
-			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -2842,7 +2841,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "Conn_01x07_main"
+		(property "Value" "Conn_01x07_PWR_main"
 			(at 205.486 62.23 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -2853,7 +2852,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_JST:JST_SH_SM07B-SRSS-TB_1x07-1MP_P1.00mm_Horizontal"
 			(at 217.17 73.66 0)
 			(hide yes)
 			(show_name no)
@@ -3113,7 +3112,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Button_Switch_SMD:SW_DIP_SPSTx01_Slide_Copal_CHS-01A_W5.08mm_P1.27mm_JPin"
 			(at 149.86 120.65 0)
 			(hide yes)
 			(show_name no)

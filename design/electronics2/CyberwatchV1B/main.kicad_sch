@@ -6538,7 +6538,7 @@
 				)
 			)
 		)
-		(property "Value" "Conn_01x07_input_right"
+		(property "Value" "Conn_01x07_M_input_right"
 			(at 261.62 61.468 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6548,7 +6548,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_JST:JST_SH_SM07B-SRSS-TB_1x07-1MP_P1.00mm_Horizontal"
 			(at 261.62 74.93 0)
 			(hide yes)
 			(show_name no)
@@ -8225,7 +8225,7 @@
 		(dnp no)
 		(uuid "a0890a20-e1ff-4465-b278-e9e62dafbafc")
 		(property "Reference" "U3"
-			(at 165.862 65.532 0)
+			(at 165.862 66.294 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8236,7 +8236,7 @@
 			)
 		)
 		(property "Value" "DS3231MZ"
-			(at 165.862 63.5 0)
+			(at 165.862 64.262 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -8413,7 +8413,7 @@
 				)
 			)
 		)
-		(property "Value" "Conn_01x03_input_left"
+		(property "Value" "Conn_01x03_M_input_left"
 			(at 52.578 61.468 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8423,7 +8423,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_JST:JST_SH_SM03B-SRSS-TB_1x03-1MP_P1.00mm_Horizontal"
 			(at 54.61 69.85 0)
 			(hide yes)
 			(show_name no)
@@ -9068,7 +9068,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "Conn_01x07_power"
+		(property "Value" "Conn_01x07_M_power"
 			(at 115.824 21.59 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9079,7 +9079,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "Connector_JST:JST_SH_SM07B-SRSS-TB_1x07-1MP_P1.00mm_Horizontal"
 			(at 104.14 33.02 0)
 			(hide yes)
 			(show_name no)
