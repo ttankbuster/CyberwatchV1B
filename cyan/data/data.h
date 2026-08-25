@@ -3,6 +3,7 @@
 #include <time.h>
 #include <stdbool.h>
 #include "services.h"
+#include "surface.h"
 
 #define MAX_EVENTS 32
 
@@ -65,6 +66,7 @@ typedef struct {
     struct tm time;
     char timeChars[6];
     char dateChars[13];
+    Surface analogueSurface;
 } WatchfaceData;
 
 typedef struct {

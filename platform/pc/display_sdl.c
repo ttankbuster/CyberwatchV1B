@@ -94,6 +94,19 @@ void display_fill_rect(Display *display, Clay_BoundingBox box, Clay_Color colour
     SDL_RenderFillRect(backend->renderer, &rect);
 }
 
+void display_fill_quad(Display *display, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, Clay_Color colour) {
+    SdlBackend *backend = display->backend;
+    SDL_FColor c = { colour.r / 255.0f, colour.g / 255.0f, colour.b / 255.0f, colour.a / 255.0f };
+    SDL_Vertex vertices[4] = {
+        { .position = { (float) x1, (float) y1 }, .color = c },
+        { .position = { (float) x2, (float) y2 }, .color = c },
+        { .position = { (float) x3, (float) y3 }, .color = c },
+        { .position = { (float) x4, (float) y4 }, .color = c },
+    };
+    int indices[6] = { 0, 1, 2, 0, 2, 3 };
+    SDL_RenderGeometry(backend->renderer, NULL, vertices, 4, indices, 6);
+}
+
 void display_draw_border(Display *display, Clay_BoundingBox box, Clay_BorderRenderData border) {
     SdlBackend *backend = display->backend;
     SDL_Color c = toSdlColor(border.color);

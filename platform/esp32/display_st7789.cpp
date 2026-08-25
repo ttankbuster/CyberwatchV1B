@@ -185,6 +185,13 @@ extern "C" void display_fill_rect(Display *display, Clay_BoundingBox box, Clay_C
     gfx->fillRect((int) box.x, (int) box.y, (int) box.width, (int) box.height, toRgb565(colour));
 }
 
+extern "C" void display_fill_quad(Display *display, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, Clay_Color colour) {
+    (void) display;
+    uint16_t c = toRgb565(colour);
+    gfx->fillTriangle(x1, y1, x2, y2, x3, y3, c);
+    gfx->fillTriangle(x1, y1, x3, y3, x4, y4, c);
+}
+
 extern "C" void display_draw_border(Display *display, Clay_BoundingBox box, Clay_BorderRenderData border) {
     (void) display;
     uint16_t colour = toRgb565(border.color);

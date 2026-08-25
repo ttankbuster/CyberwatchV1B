@@ -8,7 +8,7 @@
 #include "../../external/lua/lua-5.4.7/lauxlib.h"
 #include "../data/data.h"
 #include "../data/display.h"
-#include "surface.h"
+#include "../data/surface.h"
 
 #define MAX_APPS 32
 

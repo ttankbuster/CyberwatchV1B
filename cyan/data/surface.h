@@ -9,6 +9,7 @@
 
 typedef enum {
     SURFACE_CMD_RECT,
+    SURFACE_CMD_QUAD,
     SURFACE_CMD_TEXT,
     SURFACE_CMD_IMAGE,
 } SurfaceCommandType;
@@ -21,6 +22,7 @@ typedef struct {
     int fontId;
     int fontSize;
     void *imageHandle;
+    int quad[4][2]; // x, y coordinates for each vertex
 } SurfaceCommand;
 
 typedef struct {
@@ -34,6 +36,7 @@ void surface_init(Surface *surface, int originX, int originY, int width, int hei
 void surface_push_rect(Surface *surface, int x, int y, int w, int h, Clay_Color color);
 void surface_push_text(Surface *surface, int x, int y, const char *text, int fontId, int fontSize, Clay_Color color);
 void surface_push_image(Surface *surface, int x, int y, int w, int h, void *imageHandle);
+void surface_push_quad(Surface *surface, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, Clay_Color color);
 void surface_render(Display *display, Surface *surface);
 void surface_set_region(Surface *surface, int originX, int originY, int width, int height);
 #endif

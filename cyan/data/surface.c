@@ -36,6 +36,17 @@ void surface_push_rect(Surface *surface, int x, int y, int w, int h, Clay_Color 
     cmd->color = color;
 }
 
+void surface_push_quad(Surface *surface, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, Clay_Color color) {
+    SurfaceCommand *cmd = push_command(surface);
+    if (!cmd) return;
+    cmd->type = SURFACE_CMD_QUAD;
+    cmd->quad[0][0] = x1; cmd->quad[0][1] = y1;
+    cmd->quad[1][0] = x2; cmd->quad[1][1] = y2;
+    cmd->quad[2][0] = x3; cmd->quad[2][1] = y3;
+    cmd->quad[3][0] = x4; cmd->quad[3][1] = y4;
+    cmd->color = color;
+}
+
 void surface_push_text(Surface *surface, int x, int y, const char *text, int fontId, int fontSize, Clay_Color color) {
     SurfaceCommand *cmd = push_command(surface);
     if (!cmd) return;
@@ -88,6 +99,16 @@ void surface_render(Display *display, Surface *surface) {
                 Clay_BoundingBox box = clamp_to_surface(surface, cmd->x, cmd->y, cmd->w, cmd->h);
                 if (box.width <= 0 || box.height <= 0) continue;
                 display_fill_rect(display, box, cmd->color);
+                break;
+            }
+
+            case SURFACE_CMD_QUAD: {
+                display_fill_quad(display,
+                    surface->originX + cmd->quad[0][0], surface->originY + cmd->quad[0][1],
+                    surface->originX + cmd->quad[1][0], surface->originY + cmd->quad[1][1],
+                    surface->originX + cmd->quad[2][0], surface->originY + cmd->quad[2][1],
+                    surface->originX + cmd->quad[3][0], surface->originY + cmd->quad[3][1],
+                    cmd->color);
                 break;
             }
 

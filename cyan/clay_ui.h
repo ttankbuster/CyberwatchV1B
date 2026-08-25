@@ -31,7 +31,7 @@ typedef struct AppHandler AppHandler;
 void handleClayErrors(Clay_ErrorData errorData);
 bool clay_ui_init(uint32_t max_elems, Clay_Dimensions (*measureTextFunction)(Clay_StringSlice, Clay_TextElementConfig *, void *), void *measureTextUserData, int width, int height);
 void clay_render(Display *display, Clay_RenderCommandArray *commands, bool debug_out);
-Clay_RenderCommandArray clay_watchface(CyanData* data, int width, int height, bool show_debug);
+Clay_RenderCommandArray clay_watchface(CyanData* data, int width, int height, bool analogue, bool show_debug);
 Clay_RenderCommandArray clay_AppHandler_catalogue(CyanData* data, AppHandler *app_handler,int width, int height, bool show_debug);
 Clay_RenderCommandArray clay_timer(CyanData* data, int width, int height, bool show_debug);
 Clay_RenderCommandArray clay_stopwatch(CyanData* data, int width, int height, bool show_debug);

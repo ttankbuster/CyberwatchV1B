@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include "app_handling/app_handler.h"
 #include "clay_ui.h"
-#include "app_handling/surface.h"
+#include "data/surface.h"
 #include "data/services.h"
 #include "data/log.h"
 #include "data/display.h"
@@ -132,7 +132,7 @@ void cyan_update(float dt, bool *running) {
             if (has_event_type(&data.eventQueue, EVENT_BUTTON1_DOWN)) { cycle_tab(&data); }
             switch (data.tabs.tabIndex) {
                 case 0:
-                    commands = clay_watchface(&data, size.width, size.height, false);
+                    commands = clay_watchface(&data, size.width, size.height, true, false);
                     break;
                 case 1:
                     commands = clay_AppHandler_catalogue(&data, &app_handler, size.width, size.height, false);
@@ -157,7 +157,7 @@ void cyan_update(float dt, bool *running) {
                     if (has_event_type(&data.eventQueue, EVENT_BUTTON3_DOWN)) { stopwatch_toggle(&data); }
                     break;
                 default:
-                    commands = clay_watchface(&data, size.width, size.height, false);
+                    commands = clay_watchface(&data, size.width, size.height, false, false);
                     break;
             }
             break;
@@ -184,6 +184,8 @@ void cyan_update(float dt, bool *running) {
 
     if (data.state == CYW_APP_RUNNING) {
         surface_render(&display, &app_handler.surface);
+    } else {
+        surface_render(&display, &data.watchface.analogueSurface);
     }
 
     display_present(&display);

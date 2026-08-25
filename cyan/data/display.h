@@ -35,6 +35,7 @@ DisplaySize display_get_size(Display *display);
 
 void display_clear(Display *display, Clay_Color colour);
 void display_fill_rect(Display *display, Clay_BoundingBox box, Clay_Color colour);
+void display_fill_quad(Display *display, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, Clay_Color colour);
 void display_draw_border(Display *display, Clay_BoundingBox box, Clay_BorderRenderData border);
 void display_draw_text(Display *display, Clay_BoundingBox box, Clay_TextRenderData text);
 void display_draw_image(Display *display, Clay_BoundingBox box, Clay_ImageRenderData image);

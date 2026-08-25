@@ -1,6 +1,6 @@
 //app_handler.c
 #include "app_handler.h"
-#include "surface.h"
+#include "../data/surface.h"
 #include <string.h>
 
 #define APP_MANIFEST ".cyan_app.lua"
