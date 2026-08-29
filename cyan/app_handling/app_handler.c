@@ -5,7 +5,7 @@
 
 #define APP_MANIFEST ".cyan_app.lua"
 
-static int AppHandler_print(lua_State *L) {
+static int app_handler_print(lua_State *L) {
     const char *appName = (const char *) lua_touserdata(L, lua_upvalueindex(1));
     int n = lua_gettop(L);
     printf("AppHandler[%s]> ", appName ? appName : "?");
@@ -42,13 +42,13 @@ static void push_event_constants(lua_State *L) {
 }
 static void register_sandbox_api(lua_State *L, const char *appName) {
     lua_pushlightuserdata(L, (void *) appName);
-    lua_pushcclosure(L, AppHandler_print, 1);
+    lua_pushcclosure(L, app_handler_print, 1);
     lua_setglobal(L, "print");
 
     push_event_constants(L);
 }
 
-static int AppHandler_draw_rect(lua_State *L) {
+static int app_handler_draw_rect(lua_State *L) {
     Surface *surface = (Surface *) lua_touserdata(L, lua_upvalueindex(1));
     int x = (int) luaL_checknumber(L, 1);
     int y = (int) luaL_checknumber(L, 2);
@@ -62,19 +62,19 @@ static int AppHandler_draw_rect(lua_State *L) {
     return 0;
 }
 
-static int AppHandler_draw_width(lua_State *L) {
+static int app_handler_draw_width(lua_State *L) {
     Surface *surface = (Surface *) lua_touserdata(L, lua_upvalueindex(1));
     lua_pushinteger(L, surface->width);
     return 1;
 }
 
-static int AppHandler_draw_height(lua_State *L) {
+static int app_handler_draw_height(lua_State *L) {
     Surface *surface = (Surface *) lua_touserdata(L, lua_upvalueindex(1));
     lua_pushinteger(L, surface->height);
     return 1;
 }
 
-static int AppHandler_draw_text(lua_State *L) {
+static int app_handler_draw_text(lua_State *L) {
     Surface *surface = (Surface *) lua_touserdata(L, lua_upvalueindex(1));
     int x = (int) luaL_checknumber(L, 1);
     int y = (int) luaL_checknumber(L, 2);
@@ -96,16 +96,16 @@ static void push_draw_closure(lua_State *L, lua_CFunction fn, Surface *surface, 
 static void register_draw_api(lua_State *L, Surface *surface, Display *display) {
     lua_newtable(L);
 
-    push_draw_closure(L, AppHandler_draw_rect, surface, display);
+    push_draw_closure(L, app_handler_draw_rect, surface, display);
     lua_setfield(L, -2, "rect");
 
-    push_draw_closure(L, AppHandler_draw_text, surface, display);
+    push_draw_closure(L, app_handler_draw_text, surface, display);
     lua_setfield(L, -2, "text");
 
-    push_draw_closure(L, AppHandler_draw_width, surface, display);
+    push_draw_closure(L, app_handler_draw_width, surface, display);
     lua_setfield(L, -2, "width");
 
-    push_draw_closure(L, AppHandler_draw_height, surface, display);
+    push_draw_closure(L, app_handler_draw_height, surface, display);
     lua_setfield(L, -2, "height");
 
     lua_setglobal(L, "draw");
@@ -175,7 +175,7 @@ static bool load_app_icon(AppEntry *app, Display *display) {
     return false;
 }
 
-static void AppHandler_index(AppHandler *AppHandler, char *path, Display *display) {
+static void app_handler_index(AppHandler *AppHandler, char *path, Display *display) {
     FolderList folders = scan_folder(path);
 
     AppHandler->appCount = 0;
@@ -201,16 +201,16 @@ static void AppHandler_index(AppHandler *AppHandler, char *path, Display *displa
     }
 }
 
-bool AppHandler_init(AppHandler *AppHandler, Display *display) {
+bool app_handler_init(AppHandler *AppHandler, Display *display) {
     AppHandler->appCount = 0;
     AppHandler->appLua = NULL;
     AppHandler->devmode = true;
-    AppHandler_index(AppHandler, "apps", display);
+    app_handler_index(AppHandler, "apps", display);
 
     return true;
 }
 
-bool AppHandler_launch(AppHandler *AppHandler, int id, Display *display) {
+bool app_handler_launch(AppHandler *AppHandler, int id, Display *display) {
 
     if (id < 0 || id > AppHandler->appCount - 1) {
         cyan_log(VERBOSE_LOW, "[AppHandler] incorrect app ID.\n");
@@ -218,7 +218,7 @@ bool AppHandler_launch(AppHandler *AppHandler, int id, Display *display) {
     }
 
     if (AppHandler->appLua) {
-        AppHandler_unload(AppHandler);
+        app_handler_unload(AppHandler);
     }
     AppEntry *app = &AppHandler->apps[id];
     cyan_log(VERBOSE_LOW, "[AppHandler] launching app [%d]: %s\n", id, app->name);
@@ -263,7 +263,7 @@ bool AppHandler_launch(AppHandler *AppHandler, int id, Display *display) {
     return true;
 }
 
-void AppHandler_update(AppHandler *AppHandler, Display *display, float dt) {
+void app_handler_run_frame(AppHandler *AppHandler, Display *display, float dt) {
     if (!AppHandler->appLua) {
         cyan_log(VERBOSE_MED, "ERROR: no AppHandler app to run frame for.\n");
         return;
@@ -291,7 +291,7 @@ void AppHandler_update(AppHandler *AppHandler, Display *display, float dt) {
     }
 }
 
-void AppHandler_dispatch_events(AppHandler *AppHandler, EventQueue *queue) {
+void app_handler_dispatch_events(AppHandler *AppHandler, EventQueue *queue) {
     if (!AppHandler->appLua) {
         printf("ERROR: no AppHandler app to dispatch events to.\n"); 
         return;
@@ -313,7 +313,7 @@ void AppHandler_dispatch_events(AppHandler *AppHandler, EventQueue *queue) {
     }
 }
 
-void AppHandler_unload(AppHandler *AppHandler) {
+void app_handler_unload(AppHandler *AppHandler) {
     if (!AppHandler->appLua) return;
     lua_State *L = AppHandler->appLua;
 
@@ -331,7 +331,7 @@ void AppHandler_unload(AppHandler *AppHandler) {
     AppHandler->appLua = NULL;
 }
 
-void AppHandler_shutdown(AppHandler *AppHandler) {
+void app_handler_shutdown(AppHandler *AppHandler) {
     if (AppHandler->appLua) {
         lua_close(AppHandler->appLua);
         AppHandler->appLua = NULL;

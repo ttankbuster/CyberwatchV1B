@@ -76,7 +76,51 @@ introduced it. This rule is non-negotiable, not a nice-to-have.
   it happens as one deliberate sweep rather than piecemeal. Scope
   confirmed during this pass: touches `cyan_os.c`, `cyan_os.h`, `data.h`,
   `app_handler.h`, `services.h`, and every platform data file — matches
-  what Phase 1 already expected, no surprises.
+  what Phase 1 already expected, no surprises. **Done** — landed in
+  `6d60554`.
+- **Gap reconciled, 2026-08-29**: this status section hadn't been updated
+  since `6d60554`, but 8 more commits had landed since (mostly unrelated
+  hardware/case-design/documentation work — `485a9d7`, `b2f2483`,
+  `c793bb0`'s electronics portion, and the schematic/analogue commits
+  through `9153969`). One of those, **`c793bb0`, silently renamed every
+  `app_handler_*` function to `AppHandler_*`** (PascalCase) without being
+  logged anywhere — exactly the undocumented-drift scenario the
+  cross-cutting rule exists to catch, since every other module
+  (`services_*`, `surface_*`, `display_*`, `cyan_*`) stayed snake_case.
+  Latest commit (`0ef6e52`, "added code style enforcement") also added
+  `.clang-format` plus two **empty** stub files, `cyan/cyan_shell.c` and
+  `cyan/cyan_shell.h` — read as early Phase 3 scaffolding, but Phase 2
+  (criticality model) hasn't been started yet (confirmed: `services.h`
+  has no `CyanCriticality` enum or `staticCriticality`/`dynamicCriticality`
+  fields). **Explicit decision**: revert the `AppHandler_*` drift back to
+  `app_handler_*`, finish Phase 1's two still-outstanding dead-code items
+  before moving on, and leave the `cyan_shell.c/h` stubs untouched for
+  now — Phase 2 comes next, per the plan's own sequencing.
+  - Reverted in the working tree: `app_handler_init`, `app_handler_launch`,
+    `app_handler_unload`, `app_handler_run_frame` (was renamed
+    `AppHandler_update`), `app_handler_dispatch_events`,
+    `app_handler_shutdown`, `app_handler_index`, `app_handler_print`, and
+    the four Lua draw closures (`app_handler_draw_rect/width/height/text`,
+    previously `lua_draw_*` before `c793bb0`, then `AppHandler_draw_*`) —
+    all back to snake_case, across `app_handler.c`, `app_handler.h`, and
+    every call site in `cyan_os.c`. See Audit Findings Log for detail.
+  - Both remaining Phase 1 dead-code items (see Audit Findings Log,
+    original entries) are now resolved: `cyan/data/timer_handling.c`
+    deleted (empty, vestigial), `display_load_image()` in
+    `display_st7789.cpp` deleted (dead, zero call sites, confirmed again
+    before removal).
+  - PC boot-and-smoke-test re-run against this working tree: native build
+    clean, binary launched, stayed alive and responsive for 5+ seconds
+    with no crash or error output, terminated cleanly. Tagged
+    `phase1-pc-verified` once committed.
+  - **New finding, not fixed this pass**: `cyan/tabs/screen_app.c` and
+    `screen_catalogue.c` have their own pre-existing mixed-case names —
+    `clay_AppHandler_app`, `clay_AppHandler_catalogue`,
+    `render_AppHandler_catalogue`, `AppHandler_catalogue_move` — embedding
+    `AppHandler` PascalCase inside otherwise snake_case names. These
+    predate `c793bb0` (unrelated to that drift) and predate this plan's
+    Phase 0 audit entirely. Left as-is — out of scope for this specific
+    drift-revert — but logged as a Phase 1 naming-sweep candidate.
 
 ---
 
@@ -101,8 +145,9 @@ findings, every phase that touches existing code adds here.*
 | `app_handler.c:184-185` (`app_handler_index`) — `snprintf(app.name, MAX_FILE_PATH, ...)` and `snprintf(app.path, MAX_FILE_PATH, ...)` passed `MAX_FILE_PATH` (256) as the size bound, but `app.name`/`app.path` are each `char[MAX_FILE_NAME]` (64 bytes) per the `AppEntry` struct (`app_handler.h:18-19`). For `app.path`, the written content is `"<path>/<foldername>"` — not bounded to ≤63 chars the way `folders.names[i]` alone is — so a folder name of roughly 60+ characters overflowed past `path`'s 64-byte field into the adjacent `icon` field. `app.name`'s copy was currently masked (safe only because `scan_folder` truncates source names to ≤63 chars first), but the size argument itself was still wrong. | **Bug — reachable stack buffer overflow** | **Fixed** — originally logged as deferred to Phase 1, but fixed immediately instead once flagged: both calls now use `sizeof(app.name)` / `sizeof(app.path)`. Still needs the boot-and-smoke-test before this is considered closed |
 | `display_st7789.cpp:109` and `:114` — `convertRgb888ToRgb565(ICON_EMPTY_TAB, ICON_BATTERY_WIDTH, ICON_BATTERY_HEIGHT)` and the equivalent for `ICON_FULL_TAB` passed the **battery** icon's dimensions instead of their own. Confirmed against the actual asset headers: `ICON_BATTERY` is 30×18 (540px), `ICON_EMPTY_TAB`/`ICON_FULL_TAB` are each 12×12 (144px) — so this read ~396 pixels (1.5KB) past the end of a 144-pixel static array on every boot, and also left `iconEmptyTab.pixels`/`iconFullTab.pixels` populated with the wrong stride relative to `width`/`height` — garbled tab icons, independent of the OOB read. PC's `display_sdl.c:55-62` never had this bug. | **Bug — confirmed out-of-bounds read + wrong render** | **Fixed** — originally logged as deferred to Phase 1, but fixed immediately instead once flagged: both calls now use each icon's own `ICON_EMPTY_TAB_WIDTH/HEIGHT` / `ICON_FULL_TAB_WIDTH/HEIGHT` constants. ESP32-only change — needs the boot-and-smoke-test on real hardware before this is considered closed (can't be verified on the PC build) |
 | `IconHandle`/`imageHandle` pattern — explicit audit target from the Phase 0 scope below | N/A | **Checked, consistent — no bug.** It's a deliberately opaque, per-platform `void*`: PC (`data_pc.c`/`display_sdl.c`) always writes/reads it as `SDL_Texture*`; ESP32 (`data_esp32.cpp`/`display_st7789.cpp`) always writes/reads it as `IconHandle*`. Platform-agnostic code (`screen_catalogue.c:72`) only passes it through to `display_draw_image`, never dereferences it directly. No cross-platform mixing found. |
-| `cyan/data/timer_handling.c` is an empty file, despite its name implying it holds `timer_init`/`timer_cycle_element`/`timer_toggle`/`timer_spinbox_input` (declared in `data.h`). Traced and resolved: those are actually implemented in `cyan/tabs/screen_timer.c`, and `stopwatch_toggle`/`stopwatch_reset` in `cyan/tabs/screen_stopwatch.c`. | Trivial | **Not a missing-implementation bug** — vestigial/misleadingly-named empty file. Cleanup candidate, Phase 1 sweep |
-| `display_load_image()` in `display_st7789.cpp:166` is defined but has no call sites anywhere in the codebase and isn't declared in `display.h`. | Trivial | Dead code — cleanup candidate, Phase 1 sweep |
+| `cyan/data/timer_handling.c` is an empty file, despite its name implying it holds `timer_init`/`timer_cycle_element`/`timer_toggle`/`timer_spinbox_input` (declared in `data.h`). Traced and resolved: those are actually implemented in `cyan/tabs/screen_timer.c`, and `stopwatch_toggle`/`stopwatch_reset` in `cyan/tabs/screen_stopwatch.c`. | Trivial | **Not a missing-implementation bug** — vestigial/misleadingly-named empty file. **Deleted**, 2026-08-29 |
+| `display_load_image()` in `display_st7789.cpp:166` is defined but has no call sites anywhere in the codebase and isn't declared in `display.h`. | Trivial | Dead code — **deleted**, 2026-08-29, re-confirmed zero call sites first |
+| `app_handling/app_handler.c`, all six public functions (`app_handler_init/launch/unload/run_frame/dispatch_events/shutdown`) plus internal `app_handler_index` and the Lua-facing statics, were silently renamed to `AppHandler_*` (PascalCase) in `c793bb0`, undocumented at the time. | **Undocumented drift, matches the cross-cutting rule's exact concern** | **Reverted to snake_case**, 2026-08-29, per explicit decision — see Current status above for full list and reasoning |
 | `cyan_os.h`'s include guard is `CYBERWATCH_H` (`cyan_os.h:2-3`) — leftover from the pre-rename name. Extends the Phase 1 naming-drift note (which already covers function naming) to include guards specifically. | Informational | Folds into the already-deferred `CyberwatchData` → `CyanData` sweep in Phase 1, not a new decision |
 | Input debounce — confirmed at its exact location: `data_esp32.cpp:43-63` (`pollButtons`) does pure edge detection (`pressed != lastButtonNPressed`), no time-based debounce anywhere in the poll path. | Confirmed, matches Phase 0 scope | Not a new finding — this is the debounce gap the plan already named as an explicit audit target (see below); recorded here with its concrete file/line now that the file has been read directly |
 | `app_handler.c:186` (`app_handler_index`, landed in `8e53165`) — even after the `sizeof(app.path)` fix, `snprintf` silently truncates rather than erroring when `"<path>/<foldername>"` still doesn't fit `app.path`'s 64 bytes. A truncated path is a distinct hazard from the original overflow: it's a valid-looking path to the *wrong* location (or a nonexistent one), which fails later, further from the actual cause. | Hardening, not a new memory-safety bug (the overflow itself was already fixed) | **Fixed** — `snprintf`'s return value is now checked; a folder name that would overflow `app.path` is logged and the entry is skipped instead of silently truncated. Covered by this pass's PC boot-and-smoke-test (`phase0-pc-verified-2`) |
@@ -153,6 +198,20 @@ written correctly the first time.
   once flagged (see Audit Findings Log): the `app_handler.c:184-185`
   buffer-size mismatch and the `display_st7789.cpp:109/114` tab-icon
   dimension mixup. Nothing left for Phase 1 to carry on these two.
+- **Dead-code sweep, done 2026-08-29**: `cyan/data/timer_handling.c`
+  (empty, vestigial) and `display_st7789.cpp`'s dead `display_load_image()`
+  both removed. The `main_esp32.cpp` commented-out dead code was already
+  removed earlier (part of `de4f58a`).
+- **Undocumented `AppHandler_*` naming drift, found and reverted
+  2026-08-29** — see Current status and Audit Findings Log for detail.
+  Function naming across `cyan/` is snake_case-consistent again as of
+  this pass.
+- **Still open, deliberately not touched this pass**: `screen_app.c`'s
+  `clay_AppHandler_app` and `screen_catalogue.c`'s
+  `clay_AppHandler_catalogue` / `render_AppHandler_catalogue` /
+  `AppHandler_catalogue_move` mix `AppHandler` PascalCase into otherwise
+  snake_case names. Pre-existing, predates this plan's Phase 0 audit —
+  a real Phase 1 naming-sweep candidate, not yet actioned.
 
 ---
 

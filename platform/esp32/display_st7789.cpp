@@ -163,14 +163,6 @@ extern "C" DisplaySize display_get_size(Display *display) {
     return (DisplaySize) { display->width, display->height };
 }
 
-extern "C" void *display_load_image(Display *display, const char *path) {
-    (void) display;
-    if (strcmp(path, "batteryOutline") == 0) {
-        return (void *) ICON_BATTERY;
-    }
-    return NULL;
-}
-
 static uint16_t toRgb565(Clay_Color colour) {
     return gfx->color565((uint8_t) colour.r, (uint8_t) colour.g, (uint8_t) colour.b);
 }
