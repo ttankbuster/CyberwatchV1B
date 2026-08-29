@@ -7,6 +7,7 @@
 #include "data/services.h"
 #include "data/log.h"
 #include "data/display.h"
+#include "cyan_shell.h"
 
 #define DEBUG_MODE false
 
@@ -78,6 +79,7 @@ void print_log(VerbosityLevel level, const char *message){
 }
 
 bool cyan_init(void) {
+    cyan_shell_test_decompose();
     log_add_listener(display_loading_log_listener, VERBOSE_LOW);
     log_add_listener(print_log, VERBOSE_HIGH);
     cyan_log(VERBOSE_LOW, "[CyanOS] Starting...");
