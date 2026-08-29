@@ -21,6 +21,10 @@ introduced it. This rule is non-negotiable, not a nice-to-have.
 
 ## Current status (updated as work progresses)
 
+- **Phase 1 closed, tagged `phase1-pc-verified`.** **Phase 2 (criticality
+  model) started** — data model landed (`CyanCriticality` enum, the two
+  `Service` fields, static tiers for the two currently-registered
+  services), full detail under Phase 2 below.
 - **Phase 0, audit pass complete, both confirmed bugs now fixed in the
   working tree.** Originally decided to keep Phase 0 audit-only and defer
   both bugs (the `app_handler.c` buffer overflow and the
@@ -219,9 +223,42 @@ written correctly the first time.
 
 Foundational — Phases 4–7 all consume this.
 
-- New type: `CyanCriticality` enum.
+**Started 2026-08-29, data model landed; started right after Phase 1's
+close (`phase1-pc-verified`) per the explicit decision to finish Phase 1
+first.**
+
+- New type: `CyanCriticality` enum. **Done** — `services.h`, four values
+  (`CRITICALITY_LOW/MED/HIGH/FOUNDATIONAL`).
 - `Service` struct gains two fields: `staticCriticality` and
   `dynamicCriticality` — one enum, two variables per service, as specified.
+  **Done**. `services_register()` seeds `dynamicCriticality` to match
+  `staticCriticality` at registration time, since no app can be running
+  yet at that point — matches the "reverts to static baseline" half of
+  the dynamic rule below by construction.
+- **Scope note, found while implementing**: `SERVICE_APPS` didn't exist
+  as a `ServiceId` — the `AppsService` struct type was already defined in
+  `services.h` but had no id to register under. Added it (`services.h`),
+  since the plan's own static-tier table names "Apps" as a tiered
+  service. Minimal addition, not a redesign — no `AppsService` instance
+  is registered anywhere yet (the running app is still driven directly
+  through the global `app_handler`, outside the services registry
+  entirely); wiring that up is later-phase work, not part of this step.
+- **Only `Time` and `Power` are actually registered anywhere right now**
+  (`platform/pc/services_pc.c`; ESP32's `register_available_services` in
+  `data_esp32.cpp` is still an empty stub) — so those are the only two
+  services with `staticCriticality` set in code so far (`Time` = HIGH,
+  `Power` = MED, matching the table). The rest of the table below is
+  recorded as a doc comment directly above the enum in `services.h`, so
+  whichever phase eventually registers `Input`/`Storage`/`Apps`/
+  `Network`/`Bluetooth`/`Display`/`Notifications` has the intended tier
+  already decided, not left to be re-litigated then.
+- **Dynamic override rule — data model only, mechanism deferred.** The
+  field exists and defaults to static baseline; the actual elevate-while-
+  a-running-app-depends-on-it behavior needs Phase 6's app manifest
+  `requires = {...}` field to know when to trigger, so there's nothing
+  to wire up yet. Not a gap — this is the expected order per the plan.
+- PC boot-and-smoke-test passed against this change (clean build, binary
+  alive and responsive, no crash).
 - **Static** tiers, assigned and reasoned:
 
   | Service | Tier | Reasoning |

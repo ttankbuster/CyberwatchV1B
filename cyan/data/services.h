@@ -15,6 +15,7 @@ typedef enum {
     SERVICE_INPUT_DISPLAY,
     SERVICE_STORAGE,
     SERVICE_POWER,
+    SERVICE_APPS,
     SERVICE_NETWORK,
     SERVICE_BLUETOOTH,
     SERVICE_NOTIFICATIONS,
@@ -24,6 +25,20 @@ typedef enum {
     SERVICE_COUNT // must stay last
 } ServiceId;
 
+// Static tier per the integrity plan's Phase 2 reasoning. FOUNDATIONAL sits
+// outside the HIGH/MED/LOW scale -- Display and Notifications are load-bearing
+// for the failure-reporting mechanism itself, not ranked against the others.
+//   HIGH:  Time, Input
+//   MED:   Storage, Power, Apps
+//   LOW:   Network, Bluetooth
+//   FOUNDATIONAL: Display, Notifications
+typedef enum {
+    CRITICALITY_LOW,
+    CRITICALITY_MED,
+    CRITICALITY_HIGH,
+    CRITICALITY_FOUNDATIONAL
+} CyanCriticality;
+
 typedef struct Service {
     ServiceId id;
     const char *name;
@@ -31,6 +46,12 @@ typedef struct Service {
     void (*update)(float dt);
     void (*shutdown)(void);
     bool (*available)(void);
+    CyanCriticality staticCriticality;
+    // Elevated above staticCriticality only while a currently-running app's
+    // manifest declares a dependency on this service (Phase 6); reverts to
+    // staticCriticality otherwise. services_register() seeds it to match
+    // staticCriticality, since no app can be running yet at registration time.
+    CyanCriticality dynamicCriticality;
 } Service;
 
 typedef struct {

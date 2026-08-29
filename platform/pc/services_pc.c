@@ -15,7 +15,8 @@ static struct tm time_now(void) {
 }
 
 TimeService timeService = {
-    .service = { .id = SERVICE_TIME, .name = "Time", .available = time_available },
+    .service = { .id = SERVICE_TIME, .name = "Time", .available = time_available,
+        .staticCriticality = CRITICALITY_HIGH },
     .now = time_now
 };
 
@@ -27,7 +28,8 @@ static void power_shutdown(void) { /* no real system shutdown on PC implemented*
 static void power_sleep(void) { /* no-op on PC */ }
 
 PowerService powerService = {
-    .service = { .id = SERVICE_POWER, .name = "Power", .available = power_available },
+    .service = { .id = SERVICE_POWER, .name = "Power", .available = power_available,
+        .staticCriticality = CRITICALITY_MED },
     .has_battery = power_has_battery,
     .battery_percent = power_battery_percent,
     .is_charging = power_is_charging,

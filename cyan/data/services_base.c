@@ -10,6 +10,7 @@ bool services_register(ServiceRegistry *registry, Service *service) {
     if (service->id < 0 || service->id >= SERVICE_COUNT) return false;
     if (registry->services[service->id] != NULL) return false;
     if (service->init && !service->init()) return false;
+    service->dynamicCriticality = service->staticCriticality;
     registry->services[service->id] = service;
     return true;
 }
