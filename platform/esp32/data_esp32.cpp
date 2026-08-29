@@ -156,16 +156,6 @@ void platform_store_resolved_path(const char *relativePath, char *outBuffer, siz
     }
 }
 
-char* platform_resolve_path(char *relativePath) {
-    size_t bufferSize = 512;
-    char *resolvedPath = (char*) malloc(bufferSize);
-    if (resolvedPath == NULL) {
-        return NULL;
-    }
-    platform_store_resolved_path(relativePath, resolvedPath, bufferSize);
-    return resolvedPath;
-}
-
 FolderList scan_folder(char *path) {
     FolderList result = {0};
     if (!sdReady) {

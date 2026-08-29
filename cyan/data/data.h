@@ -120,8 +120,6 @@ void update_data(CyanData *data, Display *display, bool *running);
 bool has_event_type(EventQueue *queue, EventType type);
 
 void platform_store_resolved_path(const char *relativePath, char *outBuffer, size_t bufferSize);
-char* platform_resolve_path(char *relativePath);
-
 bool load_image(Display *display, const char *path, void *outHandle);
 
 void timer_init(CyanData *data);

@@ -123,17 +123,6 @@ void platform_store_resolved_path(const char *relativePath, char *outBuffer, siz
     SDL_snprintf(outBuffer, bufferSize, "%s..\\..\\%s", basePath ? basePath : "", relativePath);
 }
 
-char* platform_resolve_path(char *relativePath) {
-    const char *basePath = SDL_GetBasePath();
-    size_t bufferSize = 512;
-    char *resolvedPath = (char*)SDL_malloc(bufferSize);
-    if (resolvedPath == NULL) {
-        return NULL;
-    }
-    SDL_snprintf(resolvedPath, bufferSize, "%s..\\..\\%s", basePath ? basePath : "", relativePath);
-    return resolvedPath;
-}
-
 bool load_image(Display *display, const char *path, void *outHandle){
     if (outHandle == NULL) {
         printf("load_image: outHandle is NULL\n");

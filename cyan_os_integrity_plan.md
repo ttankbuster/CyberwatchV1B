@@ -157,6 +157,43 @@ findings, every phase that touches existing code adds here.*
 | `app_handler.c:186` (`app_handler_index`, landed in `8e53165`) — even after the `sizeof(app.path)` fix, `snprintf` silently truncates rather than erroring when `"<path>/<foldername>"` still doesn't fit `app.path`'s 64 bytes. A truncated path is a distinct hazard from the original overflow: it's a valid-looking path to the *wrong* location (or a nonexistent one), which fails later, further from the actual cause. | Hardening, not a new memory-safety bug (the overflow itself was already fixed) | **Fixed** — `snprintf`'s return value is now checked; a folder name that would overflow `app.path` is logged and the entry is skipped instead of silently truncated. Covered by this pass's PC boot-and-smoke-test (`phase0-pc-verified-2`) |
 | `app_handler.c:266` (`app_handler_run_frame`, landed in `8e53165`) — no null check on `AppHandler->appLua` before dereferencing it via `lua_getglobal`. Traced every call site (`cyan_os.c:117-189`): all four `data.state` writes (`launch_app`, `exit_app`, init, shutdown) update `state` and `appLua` together, synchronously, single-threaded — so a null-`appLua` call during `CYW_APP_RUNNING` isn't reachable through any currently-existing control path. | Defensive hardening, not a demonstrated live bug under current control flow | **Fixed** — added as a guard anyway (cheap, and Phase 6's capability-enforcement/Lua-bounds work will add more control paths here where this stops being trivially true). Worth re-checking reachability once Phase 6 lands |
 | `app_handler.h` — `app_handler_count`, `app_handler_name`, `app_handler_icon`, `app_handler_is_running` were declared but never defined or called anywhere in `cyan/`. | Trivial | **Removed** in `8e53165`, ahead of the general Phase 1 dead-code sweep — confirmed zero remaining references before deletion |
+| `platform_resolve_path()` — declared in `data.h`, defined separately on both `data_pc.c` (SDL_malloc-backed) and `data_esp32.cpp` (malloc-backed) — zero call sites anywhere in the codebase on either platform. Distinct from `platform_store_resolved_path()` (the caller-supplies-the-buffer variant), which *is* used everywhere and stays. | Trivial | Dead code, both platforms — **deleted**, 2026-08-29, from `data.h` and both platform `.c` files. PC build/boot-tested; ESP32 side is a pure deletion of an unreferenced function, same risk profile as the PC-verified half |
+
+### `data_esp32.cpp` / `data_pc.c` vs. the services registry — architectural finding, 2026-08-29
+
+Read `data_esp32.cpp` in full while starting Phase 2. **The services
+registry that Phase 2's criticality model sits on top of is bypassed
+entirely by every real subsystem except Time and Power, on both
+platforms.** Concretely: ESP32's `pollButtons`/`pollEncoder` (Input),
+`readRTC` (Time — note ESP32 doesn't even register a `TimeService`,
+unlike PC), and `scan_folder`/`load_image` (Storage) are all called
+directly from `update_data()`/`app_handler.c`, never through a
+registered `InputService`/`StorageService`. PC's `data_pc.c` has the
+identical shape: `scan_folder`/`load_image` (Storage) and display's own
+event polling (Input) are wired directly, not through the registry.
+`register_available_services` on ESP32 (`data_esp32.cpp:311-313`) is a
+no-op that only logs. **This means `services_is_available()` would
+report `Input`/`Storage`/`Display`/`Notifications` as unavailable on
+both platforms today, even though Input and Storage plainly work** —
+the registry just was never told about them.
+
+This isn't a bug in what exists — everything that's wired directly
+still functions correctly. It's a **gap between the architecture the
+plan's later phases assume and what's actually built**: Phase 5
+("periodic re-registration / availability re-check for every service")
+and Phase 4's boot-ordering work both presuppose the registry is the
+real source of truth for every subsystem, which isn't true yet. Left
+unflagged, Phase 4/5 would either silently build on a registry that's
+missing most of the OS, or rediscover this same gap mid-phase.
+
+**Not fixed this pass** — deliberately. Registering Input/Storage/
+Display/Notifications as real services means restructuring the main
+update loop on both platforms, which is a materially bigger and riskier
+change than this pass's scope (dead-code cleanup + a data-model addition).
+Recorded here as a decision point for whichever phase migrates these —
+most naturally Phase 2's own completion (finish what it started) or as
+explicit prep work at the top of Phase 4, before boot-ordering logic
+starts relying on registry state that isn't there yet.
 
 **Before changing anything.**
 
