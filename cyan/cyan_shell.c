@@ -1,44 +1,9 @@
 //cyan_shell.c
 #include "cyan_os.h"
-
+#include "cyan_shell.h"
 
 //https://brennan.io/2015/01/16/write-a-shell-in-c/
 //http://kblomqvist.github.io/2013/03/21/creating-beatiful-command-line-interfaces-for-embedded-systems-part1
-
-#define CYAN_SHELL_LINE_MAX 1024
-#define CYAN_SHELL_MAX_ARGS 16
-#define CYAN_ESCAPE_CHAR '\\'
-
-
-
-typedef enum {
-    SHELL_PARSE_OK,
-    SHELL_PARSE_EMPTY,
-    SHELL_PARSE_UNTERMINATED_QUOTE,
-    SHELL_PARSE_TRAILING_ESCAPE,
-    SHELL_PARSE_TOO_MANY_ARGS
-} ShellParseStatus;
-
-typedef struct {
-    int argc;
-    char* argv[CYAN_SHELL_MAX_ARGS];
-    ShellParseStatus status;
-} ShellParse;
-
-typedef struct ShellCommand {
-    const char* name;
-    const char* help;
-    int (*handler)(int argc, char** argv);
-    const struct ShellCommand* children;
-    int childCount;
-} ShellCommand;
-
-typedef struct {
-    char lineBuffer[CYAN_SHELL_LINE_MAX];
-    int lineLength;
-    ShellParse parse;
-    
-} CyanShell;
 
 
 bool cyan_shell_line_decompose(ShellParse* parse, char* line) {
@@ -48,16 +13,13 @@ bool cyan_shell_line_decompose(ShellParse* parse, char* line) {
     bool escaped = false;
     bool in_word = false;
     bool in_quote = false;
-
     const char* start_word = NULL;
 
     for (int i = 0; i < CYAN_SHELL_LINE_MAX; i++) {
         int char_int = line[i];
-
         if (char_int == '\0' || char_int == '\n' || char_int == '\r') {
             break;
         }
-
         if (escaped) {
             if (!in_word) {
                 if (parse->argc >= CYAN_SHELL_MAX_ARGS) {
@@ -71,7 +33,6 @@ bool cyan_shell_line_decompose(ShellParse* parse, char* line) {
             escaped = false;
             continue;
         }
-
         if (char_int == CYAN_ESCAPE_CHAR) {
             if (!in_word) {
                 if (parse->argc >= CYAN_SHELL_MAX_ARGS) {
@@ -151,7 +112,7 @@ bool cyan_shell_line_decompose(ShellParse* parse, char* line) {
     return true;
 }
 
-bool cyan_shell_line_parse(char* line){
+_Bool cyan_shell_line_parse(char* line) {
     if (!line) {
         return false;
     } else if (line == NULL) {
@@ -161,7 +122,7 @@ bool cyan_shell_line_parse(char* line){
     return true;
 }
 
-bool cyan_shell_read_line() {
+_Bool cyan_shell_read_line() {
   int bufsize = CYAN_SHELL_LINE_MAX;
   int position = 0;
   char *buffer = malloc(sizeof(char) * bufsize);
