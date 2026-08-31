@@ -1726,6 +1726,17 @@
 				)
 			)
 		)
+		(property "MPN" "MT6701CT-STD"
+			(at 134.62 66.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "8"
 			(uuid "588b23ba-6fda-48a9-84f7-3ecf2a597bee")
 		)
@@ -1915,6 +1926,17 @@
 				)
 			)
 		)
+		(property "MPN" " SM07B-SRSS-TB(LF)(SN)"
+			(at 80.01 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "2"
 			(uuid "76cc8bec-50c0-49d2-bdcd-ff6889910111")
 		)
@@ -2002,6 +2024,17 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor, small symbol"
+			(at 134.62 39.37 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CL10B104KB8NNNC"
 			(at 134.62 39.37 0)
 			(hide yes)
 			(show_name no)
@@ -2394,6 +2427,17 @@
 			)
 		)
 		(property "Description" "Push button switch, generic, two pins"
+			(at 134.62 101.6 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" " KMR231NG LFS"
 			(at 134.62 101.6 0)
 			(hide yes)
 			(show_name no)

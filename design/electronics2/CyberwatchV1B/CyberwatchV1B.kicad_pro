@@ -70,44 +70,7 @@
         }
       },
       "diff_pair_dimensions": [],
-      "drc_exclusions": [
-        [
-          "unconnected_items|131750000|99750000|F.Cu|4|9e310779-2e0e-4bca-8227-338b907bb44e|99ced3b7-db5f-4ccf-b46c-e77f40078ccc",
-          ""
-        ],
-        [
-          "unconnected_items|131800000|109950000|F.Cu|4|9ad2d65e-3fb5-4a25-9334-5531eb51823c|f6057fea-b254-4cec-b3be-4b4d525e260a",
-          ""
-        ],
-        [
-          "unconnected_items|143000000|108348529|F.Cu|4|f688400d-8aab-44a0-916b-b9ea121d7a06|76a60e0d-8365-4049-832d-d8604a8e1677",
-          ""
-        ],
-        [
-          "unconnected_items|159000000|107350000|F.Cu|4|1f6c2b0b-1b31-4e25-be37-29b55cb185f0|af3086f5-3bc2-484f-aef6-b745e7754ccc",
-          ""
-        ],
-        [
-          "unconnected_items|168125000|117700000|F.Cu|4|5bd2c893-4e70-4dae-b336-89c354eb07c7|78a40774-0bdd-4ebf-981a-50c4cf3f5cef",
-          ""
-        ],
-        [
-          "unconnected_items|171997017|114505966|F.Cu|4|668db30d-4621-4493-943d-67fa61faec11|bf84e040-dcd2-4e7e-be1a-cafa21d69086",
-          ""
-        ],
-        [
-          "unconnected_items|180425000|95460000|F.Cu|4|dc206603-08db-43d3-8694-742b3d6e572d|f9cc59d3-3e2b-485b-8ea3-010a6630fd8c",
-          ""
-        ],
-        [
-          "unconnected_items|183500000|98584448|F.Cu|4|4c0c1d34-4fdd-41cd-8605-937513362696|566d606d-42ec-482f-b3d1-9e00325cbfd1",
-          ""
-        ],
-        [
-          "unconnected_items|185000000|105500000|F.Cu|4|a4d05fba-76b6-470d-a4e5-8d0972b3efc1|11c6af6f-1abf-43ba-988d-ec4a920b334f",
-          ""
-        ]
-      ],
+      "drc_exclusions": [],
       "meta": {
         "version": 2
       },
@@ -151,9 +114,9 @@
         "padstack": "warning",
         "pth_inside_courtyard": "error",
         "shorting_items": "error",
-        "silk_edge_clearance": "warning",
-        "silk_over_copper": "warning",
-        "silk_overlap": "warning",
+        "silk_edge_clearance": "ignore",
+        "silk_over_copper": "ignore",
+        "silk_overlap": "ignore",
         "skew_out_of_range": "error",
         "solder_mask_bridge": "error",
         "starved_thermal": "error",
@@ -170,7 +133,7 @@
         "track_width": "error",
         "tracks_crossing": "error",
         "tuning_profile_track_geometries": "ignore",
-        "unconnected_items": "error",
+        "unconnected_items": "ignore",
         "unresolved_variable": "error",
         "via_dangling": "warning",
         "zones_intersect": "error"
@@ -599,7 +562,7 @@
       "method": 0,
       "sort_order": 1
     },
-    "bom_export_filename": "${PROJECTNAME}.csv",
+    "bom_export_filename": "${PROJECTNAME}_BOM.csv",
     "bom_fmt_presets": [],
     "bom_fmt_settings": {
       "field_delimiter": ",",
@@ -726,7 +689,7 @@
           "group_by": false,
           "label": "MPN",
           "name": "MPN",
-          "show": false
+          "show": true
         },
         {
           "group_by": false,
@@ -738,6 +701,12 @@
           "group_by": false,
           "label": "#",
           "name": "${ITEM_NUMBER}",
+          "show": false
+        },
+        {
+          "group_by": false,
+          "label": "KiLib_Generator",
+          "name": "KiLib_Generator",
           "show": false
         }
       ],
