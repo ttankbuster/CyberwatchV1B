@@ -1,22 +1,22 @@
-"Reference","Qty","Value","DNP","Exclude from BOM","Exclude from Board","Footprint","Datasheet","MPN"
-"BT1","1","Battery_Cell","","","","Battery:BatteryHolder_Keystone_3000_1x12mm",""," Keystone 3000"
-"C1,C2,C3,C4","4","100nF","","","","Capacitor_SMD:C_0603_1608Metric","","CL10B104KB8NNNC"
-"J1","1","Conn_01x02_M_Battery","","","","Connector_JST:JST_PH_S2B-PH-SM4-TB_1x02-1MP_P2.00mm_Horizontal",""," S2B-PH-SM4-TB(LF)(SN)"
-"J2","1","Conn_01x03_M_input_left","","","","Connector_JST:JST_SH_SM03B-SRSS-TB_1x03-1MP_P1.00mm_Horizontal",""," SM03B-SRSS-TB(LF)(SN)"
-"J3","1","Conn_01x07_M_input_right","","","","Connector_JST:JST_SH_SM07B-SRSS-TB_1x07-1MP_P1.00mm_Horizontal",""," SM07B-SRSS-TB(LF)(SN)"
-"J4","1","Conn_01x08_M_Display","","","","Connector_JST:JST_GH_SM08B-GHS-TB_1x08-1MP_P1.25mm_Horizontal",""," SM08B-GHS-TB(LF)(SN)"
-"J5","1","Micro_SD_Card","","","","Connector_Card:microSD_HC_Molex_47219-2001","https://www.we-online.com/components/products/datasheet/693072010801.pdf","47219-2001"
-"J6","1","Conn_01x03_IL_main","","","","Connector_JST:JST_SH_SM03B-SRSS-TB_1x03-1MP_P1.00mm_Horizontal",""," SM03B-SRSS-TB(LF)(SN)"
-"J7","1","Conn_01x07_IR_main","","","","Connector_JST:JST_SH_SM07B-SRSS-TB_1x07-1MP_P1.00mm_Horizontal",""," SM07B-SRSS-TB(LF)(SN)"
-"Q1","1","AO3401A","","","","Package_TO_SOT_SMD:SOT-23","http://www.aosmd.com/pdfs/datasheet/AO3401A.pdf"," AO3401A"
-"R1","1","100k","","","","Resistor_SMD:R_0603_1608Metric","","RC0603FR-07100KL"
-"R2","1","33","","","","Resistor_SMD:R_0603_1608Metric","","RC0603FR-0733RL"
-"R3,R4,R5,R6,R7,R8","6","10k","","","","Resistor_SMD:R_0603_1608Metric","","RC0603FR-0710KL"
-"R9,R10","2","4.7k","","","","Resistor_SMD:R_0603_1608Metric","","RC0603FR-074K7L"
-"SW1","1","SW_power","","","","Button_Switch_SMD:SW_DIP_SPSTx01_Slide_Copal_CHS-01A_W5.08mm_P1.27mm_JPin","","CHS-01A"
-"SW2,SW3,SW4","3","SW_Push","","","","Button_Switch_SMD:SW_Push_1P1T_NO_CK_KMR2",""," KMR231NG LFS"
-"U1","1","MAX17048","","","","Package_DFN_QFN:TDFN-8-1EP_2x2mm_P0.5mm_EP0.8x1.2mm","https://www.analog.com/media/en/technical-documentation/data-sheets/MAX17048-MAX17049.pdf","MAX17048G+T10"
-"U2","1","DS3231MZ","","","","Package_SO:SOIC-8_3.9x4.9mm_P1.27mm","http://datasheets.maximintegrated.com/en/ds/DS3231M.pdf","DS3231MZ+"
-"U3","1","XIAO-ESP32-S3-Plus-SMD","","","","Seeed_Studio_XIAO_Series:XIAO-ESP32-S3-Plus-SMD","https://www.mouser.co.uk/datasheet/3/1361/1/esp32_s3_datasheet.pdf",""
-"U4","1","MCP23017x-x-ML","","","","Package_DFN_QFN:QFN-28-1EP_6x6mm_P0.65mm_EP4.25x4.25mm","https://ww1.microchip.com/downloads/aemDocuments/documents/APID/ProductDocuments/DataSheets/MCP23017-Data-Sheet-DS20001952.pdf","MCP23017-E/ML"
-"U5","1","MT6701CT","","","","Package_SO:SO-8_3.9x4.9mm_P1.27mm","https://www.scribd.com/document/932265028/MT6701-Rev-1-8","MT6701CT-STD"
+Reference,Qty,Value,DNP,Exclude from BOM,Exclude from Board,Footprint,Datasheet,MPN
+BT1,1,Battery_Cell,,,,Battery:BatteryHolder_Keystone_3000_1x12mm,,Keystone 3000
+"C1,C2,C3,C4",4,100nF,,,,Capacitor_SMD:C_0603_1608Metric,,CL10B104KB8NNNC
+J1,1,Conn_01x02_M_Battery,,,,Connector_JST:JST_PH_S2B-PH-SM4-TB_1x02-1MP_P2.00mm_Horizontal,,S2B-PH-SM4-TB(LF)(SN)
+J2,1,Conn_01x03_M_input_left,,,,Connector_JST:JST_SH_SM03B-SRSS-TB_1x03-1MP_P1.00mm_Horizontal,,SM03B-SRSS-TB(LF)(SN)
+J3,1,Conn_01x07_M_input_right,,,,Connector_JST:JST_SH_SM07B-SRSS-TB_1x07-1MP_P1.00mm_Horizontal,,SM07B-SRSS-TB(LF)(SN)
+J4,1,Conn_01x08_M_Display,,,,Connector_JST:JST_GH_SM08B-GHS-TB_1x08-1MP_P1.25mm_Horizontal,,SM08B-GHS-TB(LF)(SN)
+J5,1,Micro_SD_Card,,,,Connector_Card:microSD_HC_Molex_47219-2001,https://www.we-online.com/components/products/datasheet/693072010801.pdf,47219-2001
+J6,1,Conn_01x03_IL_main,,,,Connector_JST:JST_SH_SM03B-SRSS-TB_1x03-1MP_P1.00mm_Horizontal,,SM03B-SRSS-TB(LF)(SN)
+J7,1,Conn_01x07_IR_main,,,,Connector_JST:JST_SH_SM07B-SRSS-TB_1x07-1MP_P1.00mm_Horizontal,,SM07B-SRSS-TB(LF)(SN)
+Q1,1,AO3401A,,,,Package_TO_SOT_SMD:SOT-23,http://www.aosmd.com/pdfs/datasheet/AO3401A.pdf,AO3401A
+R1,1,100k,,,,Resistor_SMD:R_0603_1608Metric,,RC0603FR-07100KL
+R2,1,33,,,,Resistor_SMD:R_0603_1608Metric,,RC0603FR-0733RL
+"R3,R4,R5,R6,R7,R8",6,10k,,,,Resistor_SMD:R_0603_1608Metric,,RC0603FR-0710KL
+"R9,R10",2,4.7k,,,,Resistor_SMD:R_0603_1608Metric,,RC0603FR-074K7L
+SW1,1,SW_power,,,,Button_Switch_SMD:SW_DIP_SPSTx01_Slide_Copal_CHS-01A_W5.08mm_P1.27mm_JPin,,CHS-01A
+"SW2,SW3,SW4",3,SW_Push,,,,Button_Switch_SMD:SW_Push_1P1T_NO_CK_KMR2,,KMR231NG LFS
+U1,1,MAX17048,,,,Package_DFN_QFN:TDFN-8-1EP_2x2mm_P0.5mm_EP0.8x1.2mm,https://www.analog.com/media/en/technical-documentation/data-sheets/MAX17048-MAX17049.pdf,MAX17048G+T10
+U2,1,DS3231MZ,,,,Package_SO:SOIC-8_3.9x4.9mm_P1.27mm,http://datasheets.maximintegrated.com/en/ds/DS3231M.pdf,DS3231MZ+
+U3,1,XIAO-ESP32-S3-Plus-SMD,,,,Seeed_Studio_XIAO_Series:XIAO-ESP32-S3-Plus-SMD,https://www.mouser.co.uk/datasheet/3/1361/1/esp32_s3_datasheet.pdf,SEEED-113991114
+U4,1,MCP23017x-x-ML,,,,Package_DFN_QFN:QFN-28-1EP_6x6mm_P0.65mm_EP4.25x4.25mm,https://ww1.microchip.com/downloads/aemDocuments/documents/APID/ProductDocuments/DataSheets/MCP23017-Data-Sheet-DS20001952.pdf,MCP23017-E/ML
+U5,1,MT6701CT,,,,Package_SO:SO-8_3.9x4.9mm_P1.27mm,https://www.scribd.com/document/932265028/MT6701-Rev-1-8,MT6701CT-STD

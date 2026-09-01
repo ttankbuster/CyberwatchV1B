@@ -90,7 +90,7 @@
 		(capping no)
 		(filling no)
 		(pcbplotparams
-			(layerselection 0x00000000_00000000_55555555_5755f5ff)
+			(layerselection 0x00000000_00000000_55555555_f755ffff)
 			(plot_on_all_layers_selection 0x00000000_00000000_00000000_00000000)
 			(disableapertmacros no)
 			(usegerberextensions no)
@@ -121,9 +121,9 @@
 			(subtractmaskfromsilk no)
 			(outputformat 1)
 			(mirror no)
-			(drillshape 1)
+			(drillshape 0)
 			(scaleselection 1)
-			(outputdirectory "")
+			(outputdirectory "gbr/")
 		)
 	)
 	(footprint "Fiducial:Fiducial_0.5mm_Mask1.5mm"
@@ -132,7 +132,7 @@
 		(at 191.899999 115)
 		(descr "Fiducial, circular marking, 0.5mm bare copper, 1.5mm soldermask opening")
 		(tags "fiducial")
-		(property "Reference" "REF**"
+		(property "Reference" "FID9"
 			(at -1 1 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -1348,7 +1348,7 @@
 			(at 0 -3.05 0)
 			(layer "F.SilkS")
 			(hide yes)
-			(uuid "366b3dba-3330-45a3-8605-4ba999e88935")
+			(uuid "a829f816-cb2e-410d-ac46-2311fe688b08")
 			(effects
 				(font
 					(size 1 1)
@@ -1360,7 +1360,7 @@
 			(at 0 3.05 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "ae500291-2d52-4d09-b576-fc8b6e9ef2f4")
+			(uuid "1e52d73f-8887-4466-9fd8-259e3e4d3594")
 			(effects
 				(font
 					(size 1 1)
@@ -1372,7 +1372,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "5f8f4a7b-d2b9-4016-989a-031e7a7b9843")
+			(uuid "15740f70-8eb9-4b36-aec4-c6747ad097ac")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1383,7 +1383,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "f6a7c5fc-2d0e-43de-8c6b-c32e28d2e31f")
+			(uuid "2e61110b-90f8-4abe-9173-7295758c611b")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1452,7 +1452,7 @@
 		(at 118.75 90)
 		(descr "Fiducial, circular marking, 0.5mm bare copper, 1.5mm soldermask opening")
 		(tags "fiducial")
-		(property "Reference" "REF**"
+		(property "Reference" "FID1"
 			(at -1 1 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -2173,7 +2173,7 @@
 			(at 0 -3.05 0)
 			(layer "F.SilkS")
 			(hide yes)
-			(uuid "59d18328-3172-4166-8272-fc12a2150fba")
+			(uuid "ad65edd4-e2c0-47a7-911d-bb86315b0d10")
 			(effects
 				(font
 					(size 1 1)
@@ -2185,7 +2185,7 @@
 			(at 0 3.05 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "6e0d6b1d-b122-4f95-8a4a-24b8a6a12d9d")
+			(uuid "c03f2585-4a4e-4947-b337-be37e2561578")
 			(effects
 				(font
 					(size 1 1)
@@ -2197,7 +2197,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "32962e7a-93ae-4203-a507-b761753479cd")
+			(uuid "e9c7e92f-6b4f-4c7d-bfab-fd678d62d3f7")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -2208,7 +2208,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "ca566cf9-a66e-4fc7-834b-f4b081907be9")
+			(uuid "10684e9a-90d9-46dc-a888-83e4ecd95310")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4081,7 +4081,7 @@
 		(property "Reference" "REF**"
 			(at 0 -3.05 0)
 			(layer "F.SilkS")
-			(uuid "1fc83e43-86f9-4507-8b93-50d8a3b76397")
+			(uuid "08f90805-2919-400e-a6c9-69286daa1483")
 			(effects
 				(font
 					(size 1 1)
@@ -4093,7 +4093,7 @@
 			(at 0 3.05 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "8aaff4da-e9d7-4aca-87bc-20e9a40821eb")
+			(uuid "470fc113-7f55-4d3e-bdc6-1766691f18b5")
 			(effects
 				(font
 					(size 1 1)
@@ -4105,7 +4105,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "b0c449ef-865a-4e32-82e6-aa7b43b361d6")
+			(uuid "36ce8e8d-af5e-444e-98f5-cf21fd35c891")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4116,7 +4116,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "cf95a328-2a0d-4849-9b15-d3f4e2a14793")
+			(uuid "eb7a7c7f-0494-47af-9d9b-4e90247020ac")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5455,7 +5455,7 @@
 		(at 118.75 98.5)
 		(descr "Fiducial, circular marking, 0.5mm bare copper, 1.5mm soldermask opening")
 		(tags "fiducial")
-		(property "Reference" "REF**"
+		(property "Reference" "FID2"
 			(at -1 1 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -6585,7 +6585,7 @@
 		(at 186.899999 92)
 		(descr "Fiducial, circular marking, 0.5mm bare copper, 1.5mm soldermask opening")
 		(tags "fiducial")
-		(property "Reference" "REF**"
+		(property "Reference" "FID7"
 			(at -1 1 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -6694,7 +6694,7 @@
 		(at 160 92)
 		(descr "Fiducial, circular marking, 0.5mm bare copper, 1.5mm soldermask opening")
 		(tags "fiducial")
-		(property "Reference" "REF**"
+		(property "Reference" "FID4"
 			(at -1 1 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -7317,7 +7317,7 @@
 		(at 123.25 115.5)
 		(descr "Fiducial, circular marking, 0.5mm bare copper, 1.5mm soldermask opening")
 		(tags "fiducial")
-		(property "Reference" "REF**"
+		(property "Reference" "FID3"
 			(at -1 1 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -7426,7 +7426,7 @@
 		(at 173.5 95)
 		(descr "Fiducial, circular marking, 0.5mm bare copper, 1.5mm soldermask opening")
 		(tags "fiducial")
-		(property "Reference" "REF**"
+		(property "Reference" "FID5"
 			(at -1 1 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -7844,7 +7844,7 @@
 		(at 140.5 110.5)
 		(descr "Fiducial, circular marking, 0.5mm bare copper, 1.5mm soldermask opening")
 		(tags "fiducial")
-		(property "Reference" "REF**"
+		(property "Reference" "FID6"
 			(at -1 1 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -20052,7 +20052,7 @@
 		(at 191.899999 111.5)
 		(descr "Fiducial, circular marking, 0.5mm bare copper, 1.5mm soldermask opening")
 		(tags "fiducial")
-		(property "Reference" "REF**"
+		(property "Reference" "FID8"
 			(at -1 1 0)
 			(layer "F.SilkS")
 			(hide yes)
