@@ -1,17 +1,18 @@
-%TF.GenerationSoftware,KiCad,Pcbnew,10.0.5*%
-%TF.CreationDate,2026-09-01T10:50:11+01:00*%
-%TF.ProjectId,CyberwatchV1B,43796265-7277-4617-9463-685631422e6b,rev?*%
-%TF.SameCoordinates,Original*%
-%TF.FileFunction,Legend,Bot*%
-%TF.FilePolarity,Positive*%
+G04 #@! TF.GenerationSoftware,KiCad,Pcbnew,10.0.5*
+G04 #@! TF.CreationDate,2026-09-02T11:39:21+01:00*
+G04 #@! TF.ProjectId,CyberwatchV1B,43796265-7277-4617-9463-685631422e6b,rev?*
+G04 #@! TF.SameCoordinates,Original*
+G04 #@! TF.FileFunction,Legend,Bot*
+G04 #@! TF.FilePolarity,Positive*
 %FSLAX46Y46*%
 G04 Gerber Fmt 4.6, Leading zero omitted, Abs format (unit mm)*
-G04 Created by KiCad (PCBNEW 10.0.5) date 2026-09-01 10:50:11*
+G04 Created by KiCad (PCBNEW 10.0.5) date 2026-09-02 11:39:21*
 %MOMM*%
 %LPD*%
 G01*
 G04 APERTURE LIST*
 %ADD10C,0.200000*%
+%ADD11C,2.100000*%
 G04 APERTURE END LIST*
 D10*
 G36*
@@ -2309,4 +2310,11 @@ X151007300Y-90173746D01*
 X151007300Y-90745000D01*
 X151191764Y-90745000D01*
 G37*
+%LPC*%
+D11*
+X181750000Y-82500000D03*
+X134500000Y-82500000D03*
+X132000000Y-111000000D03*
+X180500000Y-112950000D03*
+%LPD*%
 M02*

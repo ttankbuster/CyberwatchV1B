@@ -1,0 +1,23 @@
+Drill report for CyberwatchV1B.kicad_pcb
+Created on 2026-09-01T23:54:20
+
+Copper Layer Stackup:
+    =============================================================
+    L1 :  F.Cu                      front
+    L2 :  B.Cu                      back
+
+
+Drill file 'CyberwatchV1B-PTH-drl.gbr' contains
+    plated through holes:
+    =============================================================
+    T1  0.300mm  0.0118"  (95 holes))
+
+    Total plated holes count 95
+
+
+Drill file 'CyberwatchV1B-NPTH-drl.gbr' contains
+    unplated through holes:
+    =============================================================
+    T1  2.100mm  0.0827"  (4 holes))
+
+    Total unplated holes count 4
