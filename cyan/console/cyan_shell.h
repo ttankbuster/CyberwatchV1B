@@ -1,10 +1,9 @@
 #ifndef CYAN_SHELL_H
 #define CYAN_SHELL_H
-
 #define CYAN_SHELL_LINE_MAX 1024
 #define CYAN_SHELL_MAX_ARGS 16
 #define CYAN_ESCAPE_CHAR '\\'
-
+#include <stdbool.h>
 
 typedef enum {
     SHELL_PARSE_OK,
@@ -13,6 +12,10 @@ typedef enum {
     SHELL_PARSE_TRAILING_ESCAPE,
     SHELL_PARSE_TOO_MANY_ARGS
 } ShellParseStatus;
+
+typedef enum { SHELL_VERBOSE_LOW, SHELL_VERBOSE_HIGH } ShellVerbosity;
+
+typedef enum { SHELL_OK = 0, SHELL_ERR_UNKNOWN = -1, SHELL_ERR_USAGE = -2 } ShellDispatchStatus;
 
 typedef struct {
     int argc;
@@ -25,18 +28,13 @@ typedef struct ShellCommand {
     const char* help;
     int (*handler)(int argc, char** argv);
     const struct ShellCommand* children;
-    int childCount;
+    const char* args;
 } ShellCommand;
 
-typedef struct {
-    char lineBuffer[CYAN_SHELL_LINE_MAX];
-    int lineLength;
-    ShellParse parse;
-    
-} CyanShell;
-
 bool cyan_shell_line_decompose(ShellParse* parse, char* line);
-bool cyan_shell_line_parse(char* line);
-bool cyan_shell_read_line();
+
+int cyan_shell_dispatch(const ShellCommand* table, int argc, char** argv);
+
+extern const ShellCommand CYAN_SHELL_ROOT_CMDS[];
 
 #endif // CYAN_SHELL_H

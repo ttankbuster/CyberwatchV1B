@@ -1,17 +1,17 @@
 // data_esp32.cpp
-#include <Arduino.h>
-#include <SD.h>
-#include <RTClib.h>
-#include <string.h>
-#include <stdlib.h>
 #include "esp32_hardware.h"
+#include <Arduino.h>
+#include <RTClib.h>
+#include <SD.h>
+#include <stdlib.h>
+#include <string.h>
 
 extern "C" {
-    #include "../../cyan/data/data.h"
+#include "../../cyan/data/data.h"
 }
 
 #define ENCODER_CLK_PIN D0
-#define ENCODER_DT_PIN  D2
+#define ENCODER_DT_PIN D2
 
 static RTC_DS3231 rtc;
 static bool rtcReady = false;
@@ -28,20 +28,23 @@ void IRAM_ATTR encoderISR() {
     uint8_t lsb = digitalRead(ENCODER_DT_PIN);
     uint8_t encoded = (msb << 1) | lsb;
     uint8_t sum = (lastEncoded << 2) | encoded;
-    if (sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == 0b1011) encoderDelta++;
-    else if (sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000) encoderDelta--;
+    if (sum == 0b1101 || sum == 0b0100 || sum == 0b0010 || sum == 0b1011)
+        encoderDelta++;
+    else if (sum == 0b1110 || sum == 0b0111 || sum == 0b0001 || sum == 0b1000)
+        encoderDelta--;
     lastEncoded = encoded;
 }
 
-static void appendEvent(CyanData *data, EventType type) {
+static void appendEvent(CyanData* data, EventType type) {
     if (data->eventQueue.len + 1 < MAX_EVENTS) {
         data->eventQueue.events[data->eventQueue.len].type = type;
         data->eventQueue.len += 1;
     }
 }
 
-static void pollButtons(CyanData *data) {
-    if (!mcpReady) return;
+static void pollButtons(CyanData* data) {
+    if (!mcpReady)
+        return;
 
     bool pressed1 = !mcp.digitalRead(MCP_BTN1);
     if (pressed1 != lastButton1Pressed) {
@@ -62,7 +65,7 @@ static void pollButtons(CyanData *data) {
     }
 }
 
-static void pollEncoder(CyanData *data) {
+static void pollEncoder(CyanData* data) {
     if (!encoderInitialized) {
         pinMode(ENCODER_CLK_PIN, INPUT_PULLUP);
         pinMode(ENCODER_DT_PIN, INPUT_PULLUP);
@@ -78,18 +81,25 @@ static void pollEncoder(CyanData *data) {
 
     static int accumulated = 0;
     accumulated += delta;
-    while (accumulated >= 4) { appendEvent(data, EVENT_SCROLL_UP); accumulated -= 4; }
-    while (accumulated <= -4) { appendEvent(data, EVENT_SCROLL_DOWN); accumulated += 4; }
+    while (accumulated >= 4) {
+        appendEvent(data, EVENT_SCROLL_UP);
+        accumulated -= 4;
+    }
+    while (accumulated <= -4) {
+        appendEvent(data, EVENT_SCROLL_DOWN);
+        accumulated += 4;
+    }
 }
 
-static void readRTC(CyanData *data) {
-    if (!rtcReady) return;
+static void readRTC(CyanData* data) {
+    if (!rtcReady)
+        return;
     DateTime now = rtc.now();
-    data->watchface.time.tm_sec  = now.second();
-    data->watchface.time.tm_min  = now.minute();
+    data->watchface.time.tm_sec = now.second();
+    data->watchface.time.tm_min = now.minute();
     data->watchface.time.tm_hour = now.hour();
     data->watchface.time.tm_mday = now.day();
-    data->watchface.time.tm_mon  = now.month() - 1;
+    data->watchface.time.tm_mon = now.month() - 1;
     data->watchface.time.tm_year = now.year() - 1900;
     data->watchface.time.tm_wday = now.dayOfTheWeek();
 }
@@ -97,19 +107,20 @@ static void readRTC(CyanData *data) {
 float get_delta(void) {
     static unsigned long lastMillis = 0;
     unsigned long now = millis();
-    float delta = (lastMillis == 0) ? 0.0f : (float) (now - lastMillis) / 1000.0f;
+    float delta = (lastMillis == 0) ? 0.0f : (float)(now - lastMillis) / 1000.0f;
     lastMillis = now;
     return delta;
 }
 
-void update_data(CyanData *data, Display *display, bool *running) {
-    (void) display;
+void update_data(CyanData* data, Display* display, bool* running) {
+    (void)display;
     *running = true;
     data->eventQueue.len = 0;
 
     if (!rtcReady) {
         rtcReady = rtc.begin();
-        if (rtcReady) cyan_log(VERBOSE_HIGH, "[Hardware] RTC OK");
+        if (rtcReady)
+            cyan_log(VERBOSE_HIGH, "[Hardware] RTC OK");
     }
 
     pollButtons(data);
@@ -117,7 +128,7 @@ void update_data(CyanData *data, Display *display, bool *running) {
     readRTC(data);
 }
 
-bool has_event_type(EventQueue *queue, EventType type) {
+bool has_event_type(EventQueue* queue, EventType type) {
     for (int i = 0; i < queue->len; i++) {
         if (queue->events[i].type == type) {
             return true;
@@ -126,17 +137,12 @@ bool has_event_type(EventQueue *queue, EventType type) {
     return false;
 }
 
-// Strips any leading slashes/path components, returning just the last
-// segment - Arduino's File::name() has returned either a bare filename or
-// a full path depending on core version, so this is defensive either way.
-static const char *baseName(const char *path) {
-    const char *lastSlash = strrchr(path, '/');
+static const char* baseName(const char* path) {
+    const char* lastSlash = strrchr(path, '/');
     return lastSlash ? lastSlash + 1 : path;
 }
 
-// Used by Arduino's own SD.* API - no mountpoint prefix needed, these
-// paths are relative to the card root.
-static void resolveSdApiPath(const char *relativePath, char *outBuffer, size_t bufferSize) {
+static void resolveSdApiPath(const char* relativePath, char* outBuffer, size_t bufferSize) {
     if (relativePath[0] == '/') {
         snprintf(outBuffer, bufferSize, "%s", relativePath);
     } else {
@@ -144,11 +150,7 @@ static void resolveSdApiPath(const char *relativePath, char *outBuffer, size_t b
     }
 }
 
-// Used for anything that ends up going through standard C fopen() (Lua's
-// stock luaL_dofile, in particular) - DOES need the "/sd" VFS mountpoint
-// prefix. See chat: this is the default mountpoint SD.begin() uses when
-// no explicit mountpoint argument is given.
-void platform_store_resolved_path(const char *relativePath, char *outBuffer, size_t bufferSize) {
+void platform_store_resolved_path(const char* relativePath, char* outBuffer, size_t bufferSize) {
     if (relativePath[0] == '/') {
         snprintf(outBuffer, bufferSize, "/sd%s", relativePath);
     } else {
@@ -156,7 +158,7 @@ void platform_store_resolved_path(const char *relativePath, char *outBuffer, siz
     }
 }
 
-FolderList scan_folder(char *path) {
+FolderList scan_folder(char* path) {
     FolderList result = {0};
     if (!sdReady) {
         cyan_log(VERBOSE_HIGH, "[Services/Memory] scan_folder: SD not ready");
@@ -175,7 +177,7 @@ FolderList scan_folder(char *path) {
     File entry;
     while ((entry = dir.openNextFile()) && result.count < MAX_FOLDERS) {
         if (entry.isDirectory()) {
-            const char *name = baseName(entry.name());
+            const char* name = baseName(entry.name());
             if (strcmp(name, ".") != 0 && strcmp(name, "..") != 0) {
                 snprintf(result.names[result.count], MAX_FILE_NAME, "%s", name);
                 result.count++;
@@ -187,9 +189,6 @@ FolderList scan_folder(char *path) {
     return result;
 }
 
-// --- Minimal uncompressed BMP -> RGB565 decoder, 24-bit or 32-bit ---
-// Same design discussed earlier for LittleFS - identical logic works
-// unchanged against SD, since both share Arduino's File/fs::FS interface.
 #pragma pack(push, 1)
 struct BmpHeader {
     uint16_t signature;
@@ -205,42 +204,42 @@ struct BmpHeader {
 };
 #pragma pack(pop)
 
-static uint16_t *loadBmpAsRgb565(File &file, int *outWidth, int *outHeight) {
+static uint16_t* loadBmpAsRgb565(File& file, int* outWidth, int* outHeight) {
     BmpHeader header;
-    file.read((uint8_t *) &header, sizeof(header));
+    file.read((uint8_t*)&header, sizeof(header));
 
     if (header.signature != 0x4D42) {
         cyan_log(VERBOSE_HIGH, "[Services/Memory] load_image: not a BMP file (bad signature)");
         return NULL;
     }
     if (header.bitsPerPixel != 24 && header.bitsPerPixel != 32) {
-        cyan_log(VERBOSE_HIGH, "[Services/Memory] load_image: unsupported bit depth %u (need 24 or 32)", header.bitsPerPixel);
+        cyan_log(
+            VERBOSE_HIGH, "[Services/Memory] load_image: unsupported bit depth %u (need 24 or 32)",
+            header.bitsPerPixel
+        );
         return NULL;
     }
     if (header.compression != 0) {
-        // BI_BITFIELDS (3) and others need explicit channel-mask parsing,
-        // not handled here - a straightforward uncompressed export is
-        // what this expects.
-        cyan_log(VERBOSE_HIGH, "[Services/Memory] load_image: unsupported compression (need uncompressed BI_RGB)");
+        cyan_log(
+            VERBOSE_HIGH,
+            "[Services/Memory] load_image: unsupported compression (need uncompressed BI_RGB)"
+        );
         return NULL;
     }
 
     int width = header.width;
     int height = abs(header.height);
     bool bottomUp = header.height > 0;
-    int bytesPerPixel = header.bitsPerPixel / 8; // 3 or 4
-    // 24-bit rows pad to 4-byte boundaries; 32-bit rows are already
-    // naturally aligned (width*4 is always a multiple of 4), so this
-    // formula correctly adds zero padding in that case.
+    int bytesPerPixel = header.bitsPerPixel / 8;
     int rowSize = ((width * bytesPerPixel + 3) / 4) * 4;
 
-    uint16_t *pixels = (uint16_t *) malloc(width * height * sizeof(uint16_t));
+    uint16_t* pixels = (uint16_t*)malloc(width * height * sizeof(uint16_t));
     if (!pixels) {
         cyan_log(VERBOSE_HIGH, "[Services/Memory] load_image: out of memory for pixel buffer");
         return NULL;
     }
 
-    uint8_t *rowBuf = (uint8_t *) malloc(rowSize);
+    uint8_t* rowBuf = (uint8_t*)malloc(rowSize);
     if (!rowBuf) {
         free(pixels);
         cyan_log(VERBOSE_HIGH, "[Services/Memory] load_image: out of memory for row buffer");
@@ -251,11 +250,9 @@ static uint16_t *loadBmpAsRgb565(File &file, int *outWidth, int *outHeight) {
         file.seek(header.dataOffset + (bottomUp ? (height - 1 - y) : y) * rowSize);
         file.read(rowBuf, rowSize);
         for (int x = 0; x < width; x++) {
-            uint8_t *px = &rowBuf[x * bytesPerPixel];
+            uint8_t* px = &rowBuf[x * bytesPerPixel];
             uint8_t b = px[0], g = px[1], r = px[2];
-            // px[3] (alpha, if 32-bit) is intentionally ignored - RGB565
-            // has no alpha channel and display_draw_image has no blending
-            // support, so any source transparency is lost here.
+
             pixels[y * width + x] = ((r >> 3) << 11) | ((g >> 2) << 5) | (b >> 3);
         }
     }
@@ -266,9 +263,10 @@ static uint16_t *loadBmpAsRgb565(File &file, int *outWidth, int *outHeight) {
     return pixels;
 }
 
-bool load_image(Display *display, const char *path, void *outHandle) {
-    (void) display;
-    if (!sdReady || outHandle == NULL) return false;
+bool load_image(Display* display, const char* path, void* outHandle) {
+    (void)display;
+    if (!sdReady || outHandle == NULL)
+        return false;
 
     char resolvedPath[256];
     resolveSdApiPath(path, resolvedPath, sizeof(resolvedPath));
@@ -280,12 +278,13 @@ bool load_image(Display *display, const char *path, void *outHandle) {
     }
 
     int width, height;
-    uint16_t *pixels = loadBmpAsRgb565(file, &width, &height);
+    uint16_t* pixels = loadBmpAsRgb565(file, &width, &height);
     file.close();
 
-    if (!pixels) return false;
+    if (!pixels)
+        return false;
 
-    IconHandle *handle = (IconHandle *) malloc(sizeof(IconHandle));
+    IconHandle* handle = (IconHandle*)malloc(sizeof(IconHandle));
     if (!handle) {
         free(pixels);
         return false;
@@ -294,10 +293,10 @@ bool load_image(Display *display, const char *path, void *outHandle) {
     handle->height = height;
     handle->pixels = pixels;
 
-    *(IconHandle **) outHandle = handle;
+    *(IconHandle**)outHandle = handle;
     return true;
 }
 
-void register_available_services(CyanData *data){
+void register_available_services(CyanData* data) {
     cyan_log(VERBOSE_HIGH, "[Services] Registering available services");
 }

@@ -1,20 +1,20 @@
-//esp32_hardware.cpp
-#include <Arduino.h>
-#include <Wire.h>
-#include <SPI.h>
-#include <SD.h>
+// esp32_hardware.cpp
 #include "esp32_hardware.h"
+#include "../../cyan/console/log.h"
 #include "secrets.h"
-#include "../../cyan/data/log.h"
+#include <Arduino.h>
+#include <SD.h>
+#include <SPI.h>
+#include <Wire.h>
 
 Adafruit_MCP23X17 mcp;
 bool mcpReady = false;
 bool sdReady = false;
 
-#define PIN_SD_SCK  D8  // shared with display
+#define PIN_SD_SCK D8   // shared with display
 #define PIN_SD_MOSI D10 // shared with display
 #define PIN_SD_MISO D7
-#define PIN_SD_CS   D9
+#define PIN_SD_CS D9
 
 static void scanI2C() {
     cyan_log(VERBOSE_LOW, "[Hardware/I2C] Scanning...");
@@ -35,7 +35,10 @@ static void connectWiFi() {
     int n = WiFi.scanNetworks();
     cyan_log(VERBOSE_LOW, "[Services/WiFi] OK: %d network(s) found.", n);
     for (int i = 0; i < n; i++) {
-        cyan_log(VERBOSE_HIGH, ">    %s (RSSI %d dBm, ch %d, %s)", WiFi.SSID(i).c_str(), WiFi.RSSI(i), WiFi.channel(i), WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? "open" : "secured");
+        cyan_log(
+            VERBOSE_HIGH, ">    %s (RSSI %d dBm, ch %d, %s)", WiFi.SSID(i).c_str(), WiFi.RSSI(i),
+            WiFi.channel(i), WiFi.encryptionType(i) == WIFI_AUTH_OPEN ? "open" : "secured"
+        );
     }
 
     WiFi.mode(WIFI_STA);
@@ -77,8 +80,8 @@ bool esp32_hardware_init(void) {
     return true;
 }
 
-// must run AFTER the display's own Arduino_ESP32SPI has configured the shared bus, called from display_init()
-// Calling this before display init caused hang
+// must run AFTER the display's own Arduino_ESP32SPI has configured the shared bus, called from
+// display_init() Calling this before display init caused hang
 bool esp32_sd_init(void) {
     SPI.begin(PIN_SD_SCK, PIN_SD_MISO, PIN_SD_MOSI, PIN_SD_CS);
     sdReady = SD.begin(PIN_SD_CS, SPI, 400000);

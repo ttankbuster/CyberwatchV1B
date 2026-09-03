@@ -5,3 +5,5 @@ PointerAlignment: Left
 BreakBeforeBraces: Attach
 SpaceBeforeParens: ControlStatements
 ColumnLimit: 100
+Cpp11BracedListStyle: true
+AlignAfterOpenBracket: BlockIndent
