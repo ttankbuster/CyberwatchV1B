@@ -25,6 +25,7 @@ typedef struct {
 
 typedef struct AppHandler {
     AppEntry apps[MAX_APPS];
+    int current_app;
     int appCount;
     lua_State* appLua;
     Surface surface;
@@ -37,5 +38,5 @@ void app_handler_unload(AppHandler* app_handler);
 void app_handler_run_frame(AppHandler* app_handler, Display* display, float dt);
 void app_handler_dispatch_events(AppHandler* app_handler, EventQueue* queue);
 void app_handler_shutdown(AppHandler* app_handler);
-void app_handler_show_apps(AppHandler* app_handler, bool show_apps);
+void app_handler_show_apps(AppHandler* app_handler, bool show_apps, bool force_show);
 #endif

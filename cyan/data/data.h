@@ -1,9 +1,9 @@
 #ifndef DATA_H
 #define DATA_H
-#include <time.h>
-#include <stdbool.h>
 #include "services.h"
 #include "surface.h"
+#include <stdbool.h>
+#include <time.h>
 
 #define MAX_EVENTS 32
 
@@ -34,7 +34,7 @@ typedef struct EventQueue {
 typedef enum {
     CYW_HOME,
     CYW_APP_RUNNING,
-} CyberwatchState;
+} CyanState;
 
 #define SHUTDOWN_HOLD_TIME_TRIGGER 1.5f // seconds
 #define SHUTDOWN_SHOW_PROGRESS 0.3f     // time it starts to show shutdown bar
@@ -84,7 +84,7 @@ typedef struct {
 } TabData;
 
 typedef struct CyanData {
-    CyberwatchState state;
+    CyanState state;
     ServiceRegistry services;
     EventQueue eventQueue;
     WatchfaceData watchface;
@@ -93,15 +93,16 @@ typedef struct CyanData {
     AppCatalogue appCatalogue;
     StopwatchData stopwatch;
     ShutdownData shutdown;
-    const void *batteryIcon;
+    const void* batteryIcon;
     float temperature;
     char temperatureChars[6]; // 23°C [000*C - 999*C]
+    int uptime;               // seconds
 } CyanData;
 
 typedef struct {
     uint16_t width;
     uint16_t height;
-    uint16_t *pixels;
+    uint16_t* pixels;
 } IconHandle;
 
 #define MAX_FOLDERS 32
@@ -113,23 +114,23 @@ typedef struct {
     int count;
 } FolderList;
 
-FolderList scan_folder(char *path);
+FolderList scan_folder(char* path);
 
+void update_data(CyanData* data, Display* display, bool* running);
+bool has_event_type(EventQueue* queue, EventType type);
 
-void update_data(CyanData *data, Display *display, bool *running);
-bool has_event_type(EventQueue *queue, EventType type);
+void platform_store_resolved_path(const char* relativePath, char* outBuffer, size_t bufferSize);
+bool load_image(Display* display, const char* path, void* outHandle);
 
-void platform_store_resolved_path(const char *relativePath, char *outBuffer, size_t bufferSize);
-bool load_image(Display *display, const char *path, void *outHandle);
+void timer_init(CyanData* data);
+void timer_cycle_element(CyanData* data);
+void timer_toggle(CyanData* data);
+void timer_spinbox_input(CyanData* data, int difference);
 
-void timer_init(CyanData *data);
-void timer_cycle_element(CyanData *data);
-void timer_toggle(CyanData *data);
-void timer_spinbox_input(CyanData *data, int difference);
-
-void stopwatch_toggle(CyanData *data);
-void stopwatch_reset(CyanData *data);
+void stopwatch_toggle(CyanData* data);
+void stopwatch_reset(CyanData* data);
 
 float get_delta(void);
+char* get_platform_name(void);
 
 #endif

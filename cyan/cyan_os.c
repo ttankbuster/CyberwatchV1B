@@ -21,6 +21,7 @@ AppHandler app_handler;
 bool cyan_launch_app_id(int id) {
     if (app_handler_launch(&app_handler, id, &display)) {
         data.state = CYW_APP_RUNNING;
+        app_handler.current_app = id;
         return true;
     } else {
         printf("Failed to launch app %i - falling back to catalogue\n", id);
@@ -81,14 +82,26 @@ bool cyan_is_app_running() {
     return (data.state == CYW_APP_RUNNING);
 }
 
+AppEntry* cyan_get_running_app() {
+    if (!cyan_is_app_running) {
+        printf("Catastrophic error: no app is curently running, but the current app was requested");
+    }
+    if (app_handler.current_app == -1) {
+        printf("Catastrophic error: current app not set");
+    }
+    return &app_handler.apps[app_handler.current_app];
+}
+
 bool cyan_exit_app() {
     app_handler_unload(&app_handler);
     data.state = CYW_HOME;
     data.tabs.tabIndex = 1;
+    app_handler.current_app = -1;
     return true;
 }
 
 AppHandler* cyan_get_app_handler() { return &app_handler; }
+int cyan_get_uptime() { return data.uptime; }
 
 static void check_shutdown(CyanData* data, float dt, bool* running) {
     ShutdownData* sd = &data->shutdown;
@@ -141,6 +154,7 @@ bool cyan_init(void) {
     data.tabs.tabCount = 4;
     data.tabs.tabIndex = 0;
     data.state = CYW_HOME;
+    data.uptime = 0;
     DisplaySize initialSize = display_get_size(&display);
     bool clayOk = clay_ui_init(
         MAXIMUM_ELEMENTS, display_measure_text, &display, initialSize.width, initialSize.height
@@ -168,6 +182,7 @@ bool cyan_init(void) {
 
 void cyan_update(float dt, bool* running) {
     update_data(&data, &display, running);
+
     check_shutdown(&data, dt, running);
     cyan_console_poll();
 

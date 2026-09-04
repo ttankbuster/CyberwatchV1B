@@ -193,18 +193,19 @@ static bool load_app_icon(AppEntry* app, Display* display) {
     return false;
 }
 
-void app_handler_show_apps(AppHandler* app_handler, bool show_apps) {
+void app_handler_show_apps(AppHandler* app_handler, bool show_apps, bool force_show) {
     cyan_log(
-        VERBOSE_MED, "[AppHandler] indexed %d app(s)%s", app_handler->appCount, show_apps ? ":" : ""
+        force_show ? VERBOSE_SHELL : VERBOSE_LOW, "[AppHandler] indexed %d app(s)%s",
+        app_handler->appCount, show_apps ? ":" : ""
     );
     if (!show_apps) {
         return;
     }
     for (int i = 0; i < app_handler->appCount; i++) {
         cyan_log(
-            VERBOSE_MED, ">    %d: %s (script: %s, icon: %s, path: %s)", i,
-            app_handler->apps[i].name, app_handler->apps[i].script, app_handler->apps[i].icon,
-            app_handler->apps[i].path
+            force_show ? VERBOSE_SHELL : VERBOSE_MED,
+            ">    %d: %s (script: %s, icon: %s, path: %s)", i, app_handler->apps[i].name,
+            app_handler->apps[i].script, app_handler->apps[i].icon, app_handler->apps[i].path
         );
     }
 }
@@ -230,13 +231,14 @@ static void app_handler_index(AppHandler* app_handler, char* path, Display* disp
             app_handler->appCount++;
         }
     }
-    app_handler_show_apps(app_handler, false);
+    app_handler_show_apps(app_handler, false, false);
 }
 
 bool app_handler_init(AppHandler* app_handler, Display* display) {
     app_handler->appCount = 0;
     app_handler->appLua = NULL;
     app_handler->devmode = true;
+    app_handler->current_app = -1;
     app_handler_index(app_handler, "apps", display);
 
     return true;

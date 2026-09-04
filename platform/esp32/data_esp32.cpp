@@ -300,3 +300,5 @@ bool load_image(Display* display, const char* path, void* outHandle) {
 void register_available_services(CyanData* data) {
     cyan_log(VERBOSE_HIGH, "[Services] Registering available services");
 }
+
+char* get_platform_name(void) { return "ESP32-S3"; }

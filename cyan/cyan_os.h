@@ -21,5 +21,7 @@ bool cyan_launch_app_name(char* name);
 bool cyan_is_app_running();
 bool cyan_exit_app();
 AppHandler* cyan_get_app_handler();
+AppEntry* cyan_get_running_app();
+int cyan_get_uptime();
 
 #endif

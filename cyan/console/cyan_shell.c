@@ -237,6 +237,37 @@ int cmd_version(int argc, char** argv) {
     return 0;
 }
 
+static int cmd_status(int argc, char** argv) {
+    (void)argc;
+    (void)argv;
+
+    char uptime_chars[] = "00:00:00";
+    int uptime_total = cyan_get_uptime();
+    int uptime_hours = uptime_total / 3600;
+    int uptime_minutes = (uptime_total % 3600) / 60;
+    int uptime_seconds = uptime_total % 60;
+    snprintf(
+        uptime_chars, sizeof(uptime_chars), "%02d:%02d:%02d", uptime_hours, uptime_minutes,
+        uptime_seconds
+    );
+
+    cyan_log(
+        VERBOSE_SHELL, "%s         %s\
+        \n%s        %s @%s",
+        CYAN_VERSION, uptime_chars, get_platform_name(), data.watchface.dateChars,
+        data.watchface.timeChars
+    );
+    app_handler_show_apps(cyan_get_app_handler(), false, true);
+    char state[64] = "Home";
+    if (data.state == CYW_APP_RUNNING) {
+        cyan_get_app_handler()->appCount;
+        char* app_name = cyan_get_running_app()->name;
+        snprintf(state, sizeof(state), "App running [%s]", app_name);
+    }
+    cyan_log(VERBOSE_SHELL, "state: %s", state);
+    return 0;
+}
+
 static int cmd_app_perm_add(int argc, char** argv) {
     (void)argc;
     (void)argv;
@@ -262,7 +293,7 @@ static int cmd_app_list(int argc, char** argv) {
     (void)argc;
     (void)argv;
     AppHandler* app_handler = cyan_get_app_handler();
-    app_handler_show_apps(app_handler, true);
+    app_handler_show_apps(app_handler, true, true);
     return 0;
 }
 
@@ -301,6 +332,8 @@ static int cmd_app_exit(int argc, char** argv) {
     }
 }
 
+// name, description, function, children, args
+
 static const ShellCommand APP_PERMISSION_CMDS[] = {
     {"add", "Add a permission", cmd_app_perm_add, NULL, "<permission>"},
     {"remove", "Remove a permission", cmd_app_perm_rm, NULL, "<permission>"},
@@ -317,8 +350,43 @@ static const ShellCommand APP_CMDS[] = {
 };
 
 const ShellCommand CYAN_SHELL_ROOT_CMDS[] = {
-    {"help", "Show commands", cmd_help, NULL, NULL},
-    {"version", "Show version", cmd_version, NULL, NULL},
+    {"help", "Show all commands (this page)", cmd_help, NULL, NULL},
+    {"version", "Show Cyan version", cmd_version, NULL, NULL},
+    {"status", "Show current Cyan status", cmd_status, NULL, NULL},
     {"app", "App management", NULL, APP_CMDS, NULL},
     {NULL}
 };
+
+// commands left to implement:
+//----------------------------
+// log
+
+// sleep
+
+// reboot
+
+// mem
+
+// i2c
+
+// ls [path]
+
+// cat <file>
+
+// touch <file>
+
+// rm <file> [-f]
+
+// service : list, status, start, stop, restart
+
+// app permissions
+
+// ui : tab <watchface|apps|timer|stopwatch>, cycle, elements
+
+// input : button, up, down, text
+
+// settings : get, set, list, save, reset
+
+// test : display, input, wifi, storage
+
+//----------------
