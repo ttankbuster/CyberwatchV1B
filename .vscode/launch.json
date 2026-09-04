@@ -9,6 +9,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "node-terminal",
+            "request": "launch",
+            "name": "Run native (upload)",
+            "command": "C:/Users/Teddy/.platformio/penv/Scripts/platformio.exe run --target upload --environment native",
+            "cwd": "${workspaceFolder}"
+        },
+        {
             "type": "cppdbg",
             "request": "launch",
             "name": "Run Native (external console)",

@@ -193,11 +193,27 @@ static bool load_app_icon(AppEntry* app, Display* display) {
     return false;
 }
 
-static void app_handler_index(AppHandler* AppHandler, char* path, Display* display) {
+void app_handler_show_apps(AppHandler* app_handler, bool show_apps) {
+    cyan_log(
+        VERBOSE_MED, "[AppHandler] indexed %d app(s)%s", app_handler->appCount, show_apps ? ":" : ""
+    );
+    if (!show_apps) {
+        return;
+    }
+    for (int i = 0; i < app_handler->appCount; i++) {
+        cyan_log(
+            VERBOSE_MED, ">    %d: %s (script: %s, icon: %s, path: %s)", i,
+            app_handler->apps[i].name, app_handler->apps[i].script, app_handler->apps[i].icon,
+            app_handler->apps[i].path
+        );
+    }
+}
+
+static void app_handler_index(AppHandler* app_handler, char* path, Display* display) {
     FolderList folders = scan_folder(path);
 
-    AppHandler->appCount = 0;
-    for (int i = 0; i < folders.count && AppHandler->appCount < MAX_APPS; i++) {
+    app_handler->appCount = 0;
+    for (int i = 0; i < folders.count && app_handler->appCount < MAX_APPS; i++) {
         AppEntry app = {0};
         snprintf(app.name, sizeof(app.name), "%s", folders.names[i]);
         int pathLen = snprintf(app.path, sizeof(app.path), "%s/%s", path, folders.names[i]);
@@ -208,60 +224,52 @@ static void app_handler_index(AppHandler* AppHandler, char* path, Display* displ
             continue;
         }
 
-        if (load_app_manifest(&app, AppHandler->devmode)) {
+        if (load_app_manifest(&app, app_handler->devmode)) {
             load_app_icon(&app, display);
-            AppHandler->apps[AppHandler->appCount] = app;
-            AppHandler->appCount++;
+            app_handler->apps[app_handler->appCount] = app;
+            app_handler->appCount++;
         }
     }
-
-    cyan_log(VERBOSE_MED, "[AppHandler] indexed %d app(s):", AppHandler->appCount);
-    for (int i = 0; i < AppHandler->appCount; i++) {
-        cyan_log(
-            VERBOSE_MED, ">    %d: %s (script: %s, icon: %s, path: %s)", i,
-            AppHandler->apps[i].name, AppHandler->apps[i].script, AppHandler->apps[i].icon,
-            AppHandler->apps[i].path
-        );
-    }
+    app_handler_show_apps(app_handler, false);
 }
 
-bool app_handler_init(AppHandler* AppHandler, Display* display) {
-    AppHandler->appCount = 0;
-    AppHandler->appLua = NULL;
-    AppHandler->devmode = true;
-    app_handler_index(AppHandler, "apps", display);
+bool app_handler_init(AppHandler* app_handler, Display* display) {
+    app_handler->appCount = 0;
+    app_handler->appLua = NULL;
+    app_handler->devmode = true;
+    app_handler_index(app_handler, "apps", display);
 
     return true;
 }
 
-bool app_handler_launch(AppHandler* AppHandler, int id, Display* display) {
+bool app_handler_launch(AppHandler* app_handler, int id, Display* display) {
 
-    if (id < 0 || id > AppHandler->appCount - 1) {
+    if (id < 0 || id > app_handler->appCount - 1) {
         cyan_log(VERBOSE_LOW, "[AppHandler] incorrect app ID.\n");
         return false;
     }
 
-    if (AppHandler->appLua) {
-        app_handler_unload(AppHandler);
+    if (app_handler->appLua) {
+        app_handler_unload(app_handler);
     }
-    AppEntry* app = &AppHandler->apps[id];
+    AppEntry* app = &app_handler->apps[id];
     cyan_log(VERBOSE_LOW, "[AppHandler] launching app [%d]: %s\n", id, app->name);
 
     // Create the runtime FIRST - L doesn't exist before this line.
-    AppHandler->appLua = luaL_newstate();
-    if (!AppHandler->appLua) {
+    app_handler->appLua = luaL_newstate();
+    if (!app_handler->appLua) {
         cyan_log(VERBOSE_LOW, "[AppHandler] failed to create runtime for '%s'\n", app->name);
         return false;
     }
-    lua_State* L = AppHandler->appLua;
+    lua_State* L = app_handler->appLua;
 
     DisplaySize size = display_get_size(display);
-    surface_init(&AppHandler->surface, 0, 0, size.width, size.height);
+    surface_init(&app_handler->surface, 0, 0, size.width, size.height);
 
     luaL_requiref(L, "_G", luaopen_base, 1);
     lua_pop(L, 1);
     register_sandbox_api(L, app->name);
-    register_draw_api(L, &AppHandler->surface, display);
+    register_draw_api(L, &app_handler->surface, display);
     char scriptRelPath[MAX_FILE_PATH];
     snprintf(scriptRelPath, sizeof(scriptRelPath), "%s/%s", app->path, app->script);
     char resolvedPath[512];
@@ -274,7 +282,7 @@ bool app_handler_launch(AppHandler* AppHandler, int id, Display* display) {
         );
         lua_pop(L, 1);
         lua_close(L);
-        AppHandler->appLua = NULL;
+        app_handler->appLua = NULL;
         return false;
     }
 
@@ -290,12 +298,12 @@ bool app_handler_launch(AppHandler* AppHandler, int id, Display* display) {
     return true;
 }
 
-void app_handler_run_frame(AppHandler* AppHandler, Display* display, float dt) {
-    if (!AppHandler->appLua) {
+void app_handler_run_frame(AppHandler* app_handler, Display* display, float dt) {
+    if (!app_handler->appLua) {
         cyan_log(VERBOSE_MED, "ERROR: no AppHandler app to run frame for.\n");
         return;
     }
-    lua_State* L = AppHandler->appLua;
+    lua_State* L = app_handler->appLua;
     lua_getglobal(L, "on_update");
     if (lua_isfunction(L, -1)) {
         lua_pushnumber(L, dt);
@@ -318,12 +326,12 @@ void app_handler_run_frame(AppHandler* AppHandler, Display* display, float dt) {
     }
 }
 
-void app_handler_dispatch_events(AppHandler* AppHandler, EventQueue* queue) {
-    if (!AppHandler->appLua) {
+void app_handler_dispatch_events(AppHandler* app_handler, EventQueue* queue) {
+    if (!app_handler->appLua) {
         printf("ERROR: no AppHandler app to dispatch events to.\n");
         return;
     }
-    lua_State* L = AppHandler->appLua;
+    lua_State* L = app_handler->appLua;
     for (int i = 0; i < queue->len; i++) {
         Event* ev = &queue->events[i];
         lua_getglobal(L, "on_event");
@@ -340,10 +348,10 @@ void app_handler_dispatch_events(AppHandler* AppHandler, EventQueue* queue) {
     }
 }
 
-void app_handler_unload(AppHandler* AppHandler) {
-    if (!AppHandler->appLua)
+void app_handler_unload(AppHandler* app_handler) {
+    if (!app_handler->appLua)
         return;
-    lua_State* L = AppHandler->appLua;
+    lua_State* L = app_handler->appLua;
 
     lua_getglobal(L, "on_unload");
     if (lua_isfunction(L, -1)) {
@@ -356,7 +364,7 @@ void app_handler_unload(AppHandler* AppHandler) {
     }
 
     lua_close(L);
-    AppHandler->appLua = NULL;
+    app_handler->appLua = NULL;
 }
 
 void app_handler_shutdown(AppHandler* AppHandler) {

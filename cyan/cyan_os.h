@@ -20,4 +20,6 @@ bool cyan_launch_app_id(int id);
 bool cyan_launch_app_name(char* name);
 bool cyan_is_app_running();
 bool cyan_exit_app();
+AppHandler* cyan_get_app_handler();
+
 #endif

@@ -1,5 +1,6 @@
 // cyan_shell.c
 #include "cyan_shell.h"
+#include "../app_handling/app_handler.h"
 #include "cyan_os.h"
 #include "log.h"
 #include <stdio.h>
@@ -260,7 +261,8 @@ static int cmd_app_perm_list(int argc, char** argv) {
 static int cmd_app_list(int argc, char** argv) {
     (void)argc;
     (void)argv;
-    printf("COMMAND: cmd_app_list\n");
+    AppHandler* app_handler = cyan_get_app_handler();
+    app_handler_show_apps(app_handler, true);
     return 0;
 }
 

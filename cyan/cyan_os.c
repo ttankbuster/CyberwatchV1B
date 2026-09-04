@@ -88,6 +88,8 @@ bool cyan_exit_app() {
     return true;
 }
 
+AppHandler* cyan_get_app_handler() { return &app_handler; }
+
 static void check_shutdown(CyanData* data, float dt, bool* running) {
     ShutdownData* sd = &data->shutdown;
 

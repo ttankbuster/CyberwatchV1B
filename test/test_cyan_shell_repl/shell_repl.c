@@ -43,7 +43,7 @@ static int cmd_app_launch(int argc, char** argv) {
 
 static const ShellCommand APP_CMDS[] = {
     {"list", "list installed apps", cmd_app_list, NULL, NULL},
-    {"launch", "launch an app", cmd_app_launch, NULL, "<name>"},
+    {"launch", "launch an app", cmd_app_launch, NULL, "<name / id>"},
     {NULL}
 };
 
