@@ -25,7 +25,7 @@ typedef struct {
 
 typedef struct AppHandler {
     AppEntry apps[MAX_APPS];
-    int current_app;
+    int currentApp;
     int appCount;
     lua_State* appLua;
     Surface surface;

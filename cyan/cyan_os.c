@@ -21,7 +21,7 @@ AppHandler app_handler;
 bool cyan_launch_app_id(int id) {
     if (app_handler_launch(&app_handler, id, &display)) {
         data.state = CYW_APP_RUNNING;
-        app_handler.current_app = id;
+        app_handler.currentApp = id;
         return true;
     } else {
         printf("Failed to launch app %i - falling back to catalogue\n", id);
@@ -37,7 +37,6 @@ void string_to_lowercase(char* str) {
 }
 
 bool cyan_launch_app_name(char* name) {
-    printf("attempting app name launch name: %s\n", name);
     if (name == NULL) {
         return false;
     }
@@ -57,14 +56,12 @@ bool cyan_launch_app_name(char* name) {
         snprintf(app_name, sizeof(app_name), "%s", app_entry.name);
         string_to_lowercase(app_name);
         string_to_lowercase(name);
-        cyan_log(VERBOSE_HIGH, "checking name '%s' against app '%s'\n", name, app_name);
         if (strcmp(app_name, name) == 0) {
             matched_ids[match] = i;
             match++;
         }
     }
 
-    printf("matches: %i\n", match);
     if (match == 1) {
         bool launched = cyan_launch_app_id(matched_ids[0]);
         free(matched_ids);
@@ -86,22 +83,31 @@ AppEntry* cyan_get_running_app() {
     if (!cyan_is_app_running) {
         printf("Catastrophic error: no app is curently running, but the current app was requested");
     }
-    if (app_handler.current_app == -1) {
+    if (app_handler.currentApp == -1) {
         printf("Catastrophic error: current app not set");
     }
-    return &app_handler.apps[app_handler.current_app];
+    return &app_handler.apps[app_handler.currentApp];
 }
 
 bool cyan_exit_app() {
     app_handler_unload(&app_handler);
     data.state = CYW_HOME;
     data.tabs.tabIndex = 1;
-    app_handler.current_app = -1;
+    app_handler.currentApp = -1;
     return true;
 }
 
 AppHandler* cyan_get_app_handler() { return &app_handler; }
 int cyan_get_uptime() { return data.uptime; }
+
+#define SCREENSHOT_PATH_MAX 1024
+static char pending_screenshot_path[SCREENSHOT_PATH_MAX];
+static bool screenshot_pending = false;
+
+void cyan_request_screenshot(const char* resolvedPath) {
+    snprintf(pending_screenshot_path, sizeof(pending_screenshot_path), "%s", resolvedPath);
+    screenshot_pending = true;
+}
 
 static void check_shutdown(CyanData* data, float dt, bool* running) {
     ShutdownData* sd = &data->shutdown;
@@ -155,6 +161,8 @@ bool cyan_init(void) {
     data.tabs.tabIndex = 0;
     data.state = CYW_HOME;
     data.uptime = 0;
+    data.watchface.numeralsShowAll = true; // change to settings after implemented
+    data.watchface.numeralsRoman = true;
     DisplaySize initialSize = display_get_size(&display);
     bool clayOk = clay_ui_init(
         MAXIMUM_ELEMENTS, display_measure_text, &display, initialSize.width, initialSize.height
@@ -195,7 +203,7 @@ void cyan_update(float dt, bool* running) {
             cyan_exit_app();
         }
         clay_commands =
-            clay_AppHandler_app(&data, &app_handler, size.width, size.height, false, false);
+            clay_app_handler_app(&data, &app_handler, size.width, size.height, false, false);
         break;
 
     case CYW_HOME:
@@ -209,12 +217,12 @@ void cyan_update(float dt, bool* running) {
             break;
         case 1:
             clay_commands =
-                clay_AppHandler_catalogue(&data, &app_handler, size.width, size.height, false);
+                clay_app_handler_catalogue(&data, &app_handler, size.width, size.height, false);
             if (has_event_type(&data.eventQueue, EVENT_SCROLL_UP)) {
-                AppHandler_catalogue_move(&data.appCatalogue, &app_handler, -1);
+                app_handler_catalogue_move(&data.appCatalogue, &app_handler, -1);
             }
             if (has_event_type(&data.eventQueue, EVENT_SCROLL_DOWN)) {
-                AppHandler_catalogue_move(&data.appCatalogue, &app_handler, 1);
+                app_handler_catalogue_move(&data.appCatalogue, &app_handler, 1);
             }
             if (has_event_type(&data.eventQueue, EVENT_BUTTON3_DOWN)) {
                 cyan_launch_app_id(data.appCatalogue.highlightedApp);
@@ -278,6 +286,15 @@ void cyan_update(float dt, bool* running) {
         surface_render(&display, &app_handler.surface);
     } else {
         surface_render(&display, &data.watchface.analogueSurface);
+    }
+
+    if (screenshot_pending) {
+        bool ok = display_capture_screenshot(&display, pending_screenshot_path);
+        cyan_log(
+            VERBOSE_SHELL, ok ? "Screenshot saved: %s" : "Screenshot failed: %s",
+            pending_screenshot_path
+        );
+        screenshot_pending = false;
     }
 
     display_present(&display);

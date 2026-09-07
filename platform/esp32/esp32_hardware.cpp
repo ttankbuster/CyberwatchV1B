@@ -16,7 +16,7 @@ bool sdReady = false;
 #define PIN_SD_MISO D7
 #define PIN_SD_CS D9
 
-static void scanI2C() {
+static void scan_i2c() {
     cyan_log(VERBOSE_LOW, "[Hardware/I2C] Scanning...");
     int found = 0;
     for (byte address = 1; address < 127; address++) {
@@ -30,7 +30,7 @@ static void scanI2C() {
     cyan_log(VERBOSE_LOW, "[Hardware/I2C] OK: %d device(s) found.", found);
 }
 
-static void connectWiFi() {
+static void connect_wifi() {
     cyan_log(VERBOSE_LOW, "[Services/WiFi] Scanning...");
     int n = WiFi.scanNetworks();
     cyan_log(VERBOSE_LOW, "[Services/WiFi] OK: %d network(s) found.", n);
@@ -62,8 +62,8 @@ static void connectWiFi() {
 
 bool esp32_hardware_init(void) {
     Wire.begin(D4, D5);
-    scanI2C();
-    connectWiFi();
+    scan_i2c();
+    connect_wifi();
     mcpReady = mcp.begin_I2C();
     if (!mcpReady) {
         cyan_log(VERBOSE_LOW, "[Hardware/MCP23017] FAILED: device not found.");

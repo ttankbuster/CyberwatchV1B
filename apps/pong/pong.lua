@@ -49,7 +49,6 @@ local function resetBall(direction)
 end
 
 function on_load()
-    print("on_load")
     resetLayout()
     resetBall(1)
 end
@@ -99,18 +98,15 @@ function on_update(dt)
 
     if ballX + halfBall < 0 then
         p2score = p2score + 1
-        print("p2 scores: " .. p1score .. " - " .. p2score)
         resetBall(-1)
     elseif ballX - halfBall > w then
         p1score = p1score + 1
-        print("p1 scores: " .. p1score .. " - " .. p2score)
         resetBall(1)
     end
 end
 
 function on_event(type)
     if type == Event.DISPLAY_ALTERED then
-        print("display altered")
         resetLayout()
     elseif type == Event.SCROLL_UP then
         paddleYp1 = clampPaddle(paddleYp1 - paddleSpeed)
@@ -150,5 +146,5 @@ function on_draw()
 end
 
 function on_unload()
-    print("on_unload")
+    
 end

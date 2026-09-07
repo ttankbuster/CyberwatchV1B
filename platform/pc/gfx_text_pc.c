@@ -8,13 +8,13 @@
 #include <SDL3/SDL.h>
 #include <stdbool.h>
 
-static const GFXfont *selectFont(int fontSize) {
+static const GFXfont *select_font(int fontSize) {
     if (fontSize >= 120) return &FreeSansBold24pt7b;
     if (fontSize >= 60)  return &FreeSansBold18pt7b;
     return &FreeSans9pt7b;
 }
 
-static void measureGfxText(const GFXfont *font, const char *text, int len, int *outWidth, int *outMinY, int *outMaxY) {
+static void measure_gfx_text(const GFXfont *font, const char *text, int len, int *outWidth, int *outMinY, int *outMaxY) {
     int minY = 0, maxY = 0, cursorX = 0;
     bool first = true;
     for (int i = 0; i < len; i++) {
@@ -37,17 +37,17 @@ static void measureGfxText(const GFXfont *font, const char *text, int len, int *
 }
 
 void gfx_text_measure(int fontSize, const char *text, int len, int *outWidth, int *outHeight) {
-    const GFXfont *font = selectFont(fontSize);
+    const GFXfont *font = select_font(fontSize);
     int width, minY, maxY;
-    measureGfxText(font, text, len, &width, &minY, &maxY);
+    measure_gfx_text(font, text, len, &width, &minY, &maxY);
     *outWidth = width;
     *outHeight = maxY - minY;
 }
 
 void gfx_text_draw(SDL_Renderer *renderer, int fontSize, const char *text, int len, int x, int y, SDL_Color color) {
-    const GFXfont *font = selectFont(fontSize);
+    const GFXfont *font = select_font(fontSize);
     int width, minY, maxY;
-    measureGfxText(font, text, len, &width, &minY, &maxY);
+    measure_gfx_text(font, text, len, &width, &minY, &maxY);
 
     int baselineY = y - minY;
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);

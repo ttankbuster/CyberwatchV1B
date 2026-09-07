@@ -2,7 +2,7 @@
 #define CLAY_IMPLEMENTATION
 #include "clay_ui.h"
 
-void handleClayErrors(Clay_ErrorData errorData) {
+void handle_clay_errors(Clay_ErrorData errorData) {
     if (errorData.errorText.chars) {
         printf("%.*s\n", (int) errorData.errorText.length, errorData.errorText.chars);
     }
@@ -18,7 +18,7 @@ bool clay_ui_init(uint32_t max_elems, Clay_Dimensions (*measureTextFunction)(Cla
         return false;
     }
     Clay_Arena clayMemory = (Clay_Arena) { .memory = memory, .capacity = clayRequiredMemory };
-    Clay_Initialize(clayMemory, (Clay_Dimensions) { (float) width, (float) height }, (Clay_ErrorHandler) { handleClayErrors });
+    Clay_Initialize(clayMemory, (Clay_Dimensions) { (float) width, (float) height }, (Clay_ErrorHandler) { handle_clay_errors });
     Clay_SetMeasureTextFunction(measureTextFunction, measureTextUserData);
     return true;
 }

@@ -3,6 +3,10 @@
 #define CYAN_SHELL_LINE_MAX 1024
 #define CYAN_SHELL_MAX_ARGS 16
 #define CYAN_ESCAPE_CHAR '\\'
+#include "../app_handling/app_handler.h"
+#include "../settings/cyan_settings.h"
+#include "cyan_os.h"
+#include "log.h"
 #include <stdbool.h>
 
 typedef enum {

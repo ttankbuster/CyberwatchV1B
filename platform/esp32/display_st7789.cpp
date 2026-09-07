@@ -73,7 +73,7 @@ static char logLines[MAX_LOG_LINES][MAX_LOG_LINE_LEN];
 static int logLineCount = 0;
 
 
-static uint16_t *convertRgb888ToRgb565(const uint32_t *src, int width, int height) {
+static uint16_t *convert_rgb888_to_rgb565(const uint32_t *src, int width, int height) {
     uint16_t *out = (uint16_t *) malloc(width * height * sizeof(uint16_t));
     if (!out) return NULL;
     for (int i = 0; i < width * height; i++) {
@@ -88,7 +88,7 @@ static IconHandle iconBatteryHandle;
 static IconHandle iconFullTab;
 static IconHandle iconEmptyTab;
 
-static const GFXfont *selectFont(int fontSize) {
+static const GFXfont *select_font(int fontSize) {
     if (fontSize >= 120) return &FreeSansBold24pt7b;
     if (fontSize >= 60)  return &FreeSansBold18pt7b;
     return &FreeSans9pt7b;
@@ -101,17 +101,17 @@ extern "C" bool display_init(Display *display, CyanData *data) {
 
     iconBatteryHandle.width = ICON_BATTERY_WIDTH;
     iconBatteryHandle.height = ICON_BATTERY_HEIGHT;
-    iconBatteryHandle.pixels = convertRgb888ToRgb565(ICON_BATTERY, ICON_BATTERY_WIDTH, ICON_BATTERY_HEIGHT);
+    iconBatteryHandle.pixels = convert_rgb888_to_rgb565(ICON_BATTERY, ICON_BATTERY_WIDTH, ICON_BATTERY_HEIGHT);
     data->batteryIcon = &iconBatteryHandle;
 
     iconEmptyTab.width = ICON_EMPTY_TAB_WIDTH;
     iconEmptyTab.height = ICON_EMPTY_TAB_HEIGHT;
-    iconEmptyTab.pixels = convertRgb888ToRgb565(ICON_EMPTY_TAB, ICON_EMPTY_TAB_WIDTH, ICON_EMPTY_TAB_HEIGHT);
+    iconEmptyTab.pixels = convert_rgb888_to_rgb565(ICON_EMPTY_TAB, ICON_EMPTY_TAB_WIDTH, ICON_EMPTY_TAB_HEIGHT);
     data->tabs.tabIcons[0] = &iconEmptyTab;
 
     iconFullTab.width = ICON_FULL_TAB_WIDTH;
     iconFullTab.height = ICON_FULL_TAB_HEIGHT;
-    iconFullTab.pixels = convertRgb888ToRgb565(ICON_FULL_TAB, ICON_FULL_TAB_WIDTH, ICON_FULL_TAB_HEIGHT);
+    iconFullTab.pixels = convert_rgb888_to_rgb565(ICON_FULL_TAB, ICON_FULL_TAB_WIDTH, ICON_FULL_TAB_HEIGHT);
     data->tabs.tabIcons[1] = &iconFullTab;
 
 #ifdef DISPLAY_RESET_VIA_MCP
@@ -163,30 +163,35 @@ extern "C" DisplaySize display_get_size(Display *display) {
     return (DisplaySize) { display->width, display->height };
 }
 
-static uint16_t toRgb565(Clay_Color colour) {
+static uint16_t to_rgb565(Clay_Color colour) {
     return gfx->color565((uint8_t) colour.r, (uint8_t) colour.g, (uint8_t) colour.b);
 }
 
 extern "C" void display_clear(Display *display, Clay_Color colour) {
     (void) display;
-    gfx->fillScreen(toRgb565(colour));
+    gfx->fillScreen(to_rgb565(colour));
 }
 
 extern "C" void display_fill_rect(Display *display, Clay_BoundingBox box, Clay_Color colour) {
     (void) display;
-    gfx->fillRect((int) box.x, (int) box.y, (int) box.width, (int) box.height, toRgb565(colour));
+    gfx->fillRect((int) box.x, (int) box.y, (int) box.width, (int) box.height, to_rgb565(colour));
 }
 
 extern "C" void display_fill_quad(Display *display, int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, Clay_Color colour) {
     (void) display;
-    uint16_t c = toRgb565(colour);
+    uint16_t c = to_rgb565(colour);
     gfx->fillTriangle(x1, y1, x2, y2, x3, y3, c);
     gfx->fillTriangle(x1, y1, x3, y3, x4, y4, c);
 }
 
+extern "C" void display_fill_circle(Display *display, int centre_x, int centre_y, int radius, Clay_Color colour) {
+    (void) display;
+    gfx->fillCircle(centre_x, centre_y, radius, to_rgb565(colour));
+}
+
 extern "C" void display_draw_border(Display *display, Clay_BoundingBox box, Clay_BorderRenderData border) {
     (void) display;
-    uint16_t colour = toRgb565(border.color);
+    uint16_t colour = to_rgb565(border.color);
     if (border.width.top > 0)    gfx->fillRect((int) box.x, (int) box.y, (int) box.width, (int) border.width.top, colour);
     if (border.width.bottom > 0) gfx->fillRect((int) box.x, (int) (box.y + box.height - border.width.bottom), (int) box.width, (int) border.width.bottom, colour);
     if (border.width.left > 0)   gfx->fillRect((int) box.x, (int) box.y, (int) border.width.left, (int) box.height, colour);
@@ -202,8 +207,8 @@ extern "C" void display_draw_text(Display *display, Clay_BoundingBox box, Clay_T
     memcpy(buffer, text.stringContents.chars, len);
     buffer[len] = '\0';
 
-    gfx->setFont(selectFont(text.fontSize));
-    gfx->setTextColor(toRgb565(text.textColor));
+    gfx->setFont(select_font(text.fontSize));
+    gfx->setTextColor(to_rgb565(text.textColor));
 
     int16_t x1, y1;
     uint16_t w, h;
@@ -255,7 +260,7 @@ extern "C" Clay_Dimensions display_measure_text(Clay_StringSlice text, Clay_Text
     memcpy(buffer, text.chars, len);
     buffer[len] = '\0';
 
-    gfx->setFont(selectFont(config->fontSize));
+    gfx->setFont(select_font(config->fontSize));
     int16_t x1, y1;
     uint16_t width, height;
     gfx->getTextBounds(buffer, 0, 0, &x1, &y1, &width, &height);
@@ -276,7 +281,7 @@ void display_loading_log_listener(VerbosityLevel level, const char *message) {
     }
 }
 
-static void drawScaledIcon(int destX, int destY, int destW, int destH) {
+static void draw_scaled_icon(int destX, int destY, int destW, int destH) {
     for (int y = 0; y < destH; y++) {
         int srcY = (y * ICON_CYAN1_HEIGHT) / destH;
         for (int x = 0; x < destW; x++) {
@@ -290,7 +295,7 @@ static void drawScaledIcon(int destX, int destY, int destW, int destH) {
         }
     }
 }
-static int countWrappedLines(Display *display, const char *text, int availableWidth, int fontSize) {
+static int count_wrapped_lines(Display *display, const char *text, int availableWidth, int fontSize) {
     Clay_StringSlice slice = { .length = (int32_t) strlen(text), .chars = text };
     Clay_TextElementConfig config = { .fontSize = fontSize };
     Clay_Dimensions dims = display_measure_text(slice, &config, display);
@@ -323,7 +328,7 @@ extern "C" void display_loading_screen(Display *display, float progress) {
         if (y < 0) break;
         char *line = logLines[i];
 
-        int linesUsed = countWrappedLines(display, line, availableWidth, 20);
+        int linesUsed = count_wrapped_lines(display, line, availableWidth, 20);
 
         // This entry needs `linesUsed` rows total — move up first to make
         // room for the extra wrapped rows below the point we draw at,
@@ -340,7 +345,7 @@ extern "C" void display_loading_screen(Display *display, float progress) {
 
         y -= lineHeight; // advance for the next (older) entry
     }
-    drawScaledIcon(drawX, drawY, drawWidth, drawHeight);
+    draw_scaled_icon(drawX, drawY, drawWidth, drawHeight);
 
     // TODO: draw a progress bar/text here using progress (0.0 - 1.0)
 

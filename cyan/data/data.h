@@ -1,5 +1,6 @@
 #ifndef DATA_H
 #define DATA_H
+#include "../settings/cyan_settings.h"
 #include "services.h"
 #include "surface.h"
 #include <stdbool.h>
@@ -67,10 +68,12 @@ typedef struct {
     char timeChars[6];
     char dateChars[13];
     Surface analogueSurface;
+    bool numeralsShowAll; // false = only 12/3/6/9, true = every hour
+    bool numeralsRoman;   // false = arabic (1, 2, 3...), true = roman (I, II, III...)
 } WatchfaceData;
 
 typedef struct {
-    int selected_app;
+    int selectedApp;
     float catalogueScrollY;
     float contentHeight;
     int highlightedApp;
@@ -97,6 +100,7 @@ typedef struct CyanData {
     float temperature;
     char temperatureChars[6]; // 23°C [000*C - 999*C]
     int uptime;               // seconds
+    // CyanSettings cyanSettings;
 } CyanData;
 
 typedef struct {
@@ -120,6 +124,7 @@ void update_data(CyanData* data, Display* display, bool* running);
 bool has_event_type(EventQueue* queue, EventType type);
 
 void platform_store_resolved_path(const char* relativePath, char* outBuffer, size_t bufferSize);
+void platform_ensure_directory(const char* relativePath);
 bool load_image(Display* display, const char* path, void* outHandle);
 
 void timer_init(CyanData* data);

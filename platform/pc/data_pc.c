@@ -139,6 +139,12 @@ void platform_store_resolved_path(const char* relativePath, char* outBuffer, siz
     SDL_snprintf(outBuffer, bufferSize, "%s..\\..\\%s", basePath ? basePath : "", relativePath);
 }
 
+void platform_ensure_directory(const char* relativePath) {
+    char resolvedPath[1024];
+    platform_store_resolved_path(relativePath, resolvedPath, sizeof(resolvedPath));
+    SDL_CreateDirectory(resolvedPath);
+}
+
 bool load_image(Display* display, const char* path, void* outHandle) {
     if (outHandle == NULL) {
         printf("load_image: outHandle is NULL\n");

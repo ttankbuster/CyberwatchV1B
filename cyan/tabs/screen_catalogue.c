@@ -5,7 +5,7 @@
 
 
 
-void render_AppHandler_catalogue(AppCatalogue *catalogue, AppHandler *app_handler, int width, int height, bool show_debug) {
+void render_app_handler_catalogue(AppCatalogue *catalogue, AppHandler *app_handler, int width, int height, bool show_debug) {
     int debugOpacity = show_debug ? 255 : 0;
 
     const int targetCardSize = 100; // rough desired size - actual size is derived below
@@ -87,7 +87,7 @@ void render_AppHandler_catalogue(AppCatalogue *catalogue, AppHandler *app_handle
     }
 }
 
-Clay_RenderCommandArray clay_AppHandler_catalogue(CyanData* data, AppHandler *app_handler,int width, int height, bool show_debug) {
+Clay_RenderCommandArray clay_app_handler_catalogue(CyanData* data, AppHandler *app_handler,int width, int height, bool show_debug) {
     float deltaTime = get_delta();
     int debugOpacity = show_debug ? 100 : 0;
 
@@ -106,14 +106,14 @@ Clay_RenderCommandArray clay_AppHandler_catalogue(CyanData* data, AppHandler *ap
         }
     }) {
         render_header_bar(data, debugOpacity, width, headerHeight);
-        render_AppHandler_catalogue(&data->appCatalogue, app_handler, width, height, show_debug);
+        render_app_handler_catalogue(&data->appCatalogue, app_handler, width, height, show_debug);
         render_footer(data, debugOpacity, footerHeight);
     }
 
     return Clay_EndLayout(deltaTime);
 }
 
-void AppHandler_catalogue_move(AppCatalogue *catalogue, AppHandler *app_handler, int delta) {
+void app_handler_catalogue_move(AppCatalogue *catalogue, AppHandler *app_handler, int delta) {
     if (app_handler->appCount == 0) return;
     catalogue->highlightedApp = (catalogue->highlightedApp - delta + app_handler->appCount) % app_handler->appCount;
 }

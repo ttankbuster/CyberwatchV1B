@@ -23,7 +23,7 @@ static int encoderDelta = 0;
 static uint8_t lastEncoded = 0;
 static bool encoderInitialized = false;
 
-void IRAM_ATTR encoderISR() {
+void IRAM_ATTR encoder_isr() {
     uint8_t msb = digitalRead(ENCODER_CLK_PIN);
     uint8_t lsb = digitalRead(ENCODER_DT_PIN);
     uint8_t encoded = (msb << 1) | lsb;
@@ -35,42 +35,42 @@ void IRAM_ATTR encoderISR() {
     lastEncoded = encoded;
 }
 
-static void appendEvent(CyanData* data, EventType type) {
+static void append_event(CyanData* data, EventType type) {
     if (data->eventQueue.len + 1 < MAX_EVENTS) {
         data->eventQueue.events[data->eventQueue.len].type = type;
         data->eventQueue.len += 1;
     }
 }
 
-static void pollButtons(CyanData* data) {
+static void poll_buttons(CyanData* data) {
     if (!mcpReady)
         return;
 
     bool pressed1 = !mcp.digitalRead(MCP_BTN1);
     if (pressed1 != lastButton1Pressed) {
-        appendEvent(data, pressed1 ? EVENT_BUTTON1_DOWN : EVENT_BUTTON1_UP);
+        append_event(data, pressed1 ? EVENT_BUTTON1_DOWN : EVENT_BUTTON1_UP);
         lastButton1Pressed = pressed1;
     }
 
     bool pressed2 = !mcp.digitalRead(MCP_BTN2);
     if (pressed2 != lastButton2Pressed) {
-        appendEvent(data, pressed2 ? EVENT_BUTTON2_DOWN : EVENT_BUTTON2_UP);
+        append_event(data, pressed2 ? EVENT_BUTTON2_DOWN : EVENT_BUTTON2_UP);
         lastButton2Pressed = pressed2;
     }
 
     bool pressedDial = !mcp.digitalRead(MCP_DIAL_SW);
     if (pressedDial != lastDialPressed) {
-        appendEvent(data, pressedDial ? EVENT_BUTTON3_DOWN : EVENT_BUTTON3_UP);
+        append_event(data, pressedDial ? EVENT_BUTTON3_DOWN : EVENT_BUTTON3_UP);
         lastDialPressed = pressedDial;
     }
 }
 
-static void pollEncoder(CyanData* data) {
+static void poll_encoder(CyanData* data) {
     if (!encoderInitialized) {
         pinMode(ENCODER_CLK_PIN, INPUT_PULLUP);
         pinMode(ENCODER_DT_PIN, INPUT_PULLUP);
-        attachInterrupt(digitalPinToInterrupt(ENCODER_CLK_PIN), encoderISR, CHANGE);
-        attachInterrupt(digitalPinToInterrupt(ENCODER_DT_PIN), encoderISR, CHANGE);
+        attachInterrupt(digitalPinToInterrupt(ENCODER_CLK_PIN), encoder_isr, CHANGE);
+        attachInterrupt(digitalPinToInterrupt(ENCODER_DT_PIN), encoder_isr, CHANGE);
         encoderInitialized = true;
     }
 
@@ -82,16 +82,16 @@ static void pollEncoder(CyanData* data) {
     static int accumulated = 0;
     accumulated += delta;
     while (accumulated >= 4) {
-        appendEvent(data, EVENT_SCROLL_UP);
+        append_event(data, EVENT_SCROLL_UP);
         accumulated -= 4;
     }
     while (accumulated <= -4) {
-        appendEvent(data, EVENT_SCROLL_DOWN);
+        append_event(data, EVENT_SCROLL_DOWN);
         accumulated += 4;
     }
 }
 
-static void readRTC(CyanData* data) {
+static void read_rtc(CyanData* data) {
     if (!rtcReady)
         return;
     DateTime now = rtc.now();
@@ -123,9 +123,9 @@ void update_data(CyanData* data, Display* display, bool* running) {
             cyan_log(VERBOSE_HIGH, "[Hardware] RTC OK");
     }
 
-    pollButtons(data);
-    pollEncoder(data);
-    readRTC(data);
+    poll_buttons(data);
+    poll_encoder(data);
+    read_rtc(data);
 }
 
 bool has_event_type(EventQueue* queue, EventType type) {
@@ -137,12 +137,12 @@ bool has_event_type(EventQueue* queue, EventType type) {
     return false;
 }
 
-static const char* baseName(const char* path) {
+static const char* base_name(const char* path) {
     const char* lastSlash = strrchr(path, '/');
     return lastSlash ? lastSlash + 1 : path;
 }
 
-static void resolveSdApiPath(const char* relativePath, char* outBuffer, size_t bufferSize) {
+static void resolve_sd_api_path(const char* relativePath, char* outBuffer, size_t bufferSize) {
     if (relativePath[0] == '/') {
         snprintf(outBuffer, bufferSize, "%s", relativePath);
     } else {
@@ -166,7 +166,7 @@ FolderList scan_folder(char* path) {
     }
 
     char resolvedPath[256];
-    resolveSdApiPath(path, resolvedPath, sizeof(resolvedPath));
+    resolve_sd_api_path(path, resolvedPath, sizeof(resolvedPath));
 
     File dir = SD.open(resolvedPath);
     if (!dir || !dir.isDirectory()) {
@@ -177,7 +177,7 @@ FolderList scan_folder(char* path) {
     File entry;
     while ((entry = dir.openNextFile()) && result.count < MAX_FOLDERS) {
         if (entry.isDirectory()) {
-            const char* name = baseName(entry.name());
+            const char* name = base_name(entry.name());
             if (strcmp(name, ".") != 0 && strcmp(name, "..") != 0) {
                 snprintf(result.names[result.count], MAX_FILE_NAME, "%s", name);
                 result.count++;
@@ -204,7 +204,7 @@ struct BmpHeader {
 };
 #pragma pack(pop)
 
-static uint16_t* loadBmpAsRgb565(File& file, int* outWidth, int* outHeight) {
+static uint16_t* load_bmp_as_rgb565(File& file, int* outWidth, int* outHeight) {
     BmpHeader header;
     file.read((uint8_t*)&header, sizeof(header));
 
@@ -269,7 +269,7 @@ bool load_image(Display* display, const char* path, void* outHandle) {
         return false;
 
     char resolvedPath[256];
-    resolveSdApiPath(path, resolvedPath, sizeof(resolvedPath));
+    resolve_sd_api_path(path, resolvedPath, sizeof(resolvedPath));
 
     File file = SD.open(resolvedPath);
     if (!file) {
@@ -278,7 +278,7 @@ bool load_image(Display* display, const char* path, void* outHandle) {
     }
 
     int width, height;
-    uint16_t* pixels = loadBmpAsRgb565(file, &width, &height);
+    uint16_t* pixels = load_bmp_as_rgb565(file, &width, &height);
     file.close();
 
     if (!pixels)

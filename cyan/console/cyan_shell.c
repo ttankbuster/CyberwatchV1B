@@ -1,11 +1,10 @@
 // cyan_shell.c
 #include "cyan_shell.h"
-#include "../app_handling/app_handler.h"
-#include "cyan_os.h"
-#include "log.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 // https://brennan.io/2015/01/16/write-a-shell-in-c/
 // http://kblomqvist.github.io/2013/03/21/creating-beatiful-command-line-interfaces-for-embedded-systems-part1
@@ -332,6 +331,71 @@ static int cmd_app_exit(int argc, char** argv) {
     }
 }
 
+static int cmd_screenshot(int argc, char** argv) {
+    (void)argc;
+    (void)argv;
+
+    char label[MAX_FILE_NAME + 8];
+    if (data.state == CYW_APP_RUNNING) {
+        snprintf(label, sizeof(label), "app(%s)", cyan_get_running_app()->name);
+    } else {
+        switch (data.tabs.tabIndex) {
+        case 0:
+            snprintf(label, sizeof(label), "watchface");
+            break;
+        case 1:
+            snprintf(label, sizeof(label), "apps");
+            break;
+        case 2:
+            snprintf(label, sizeof(label), "timer");
+            break;
+        case 3:
+            snprintf(label, sizeof(label), "stopwatch");
+            break;
+        default:
+            snprintf(label, sizeof(label), "watchface");
+            break;
+        }
+    }
+
+    char timestamp[20];
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d@%H-%M", &data.watchface.time);
+
+    char relativePath[600];
+    snprintf(relativePath, sizeof(relativePath), "screenshots/%s%s.png", label, timestamp);
+
+    platform_ensure_directory("screenshots");
+
+    char resolvedPath[1024];
+    platform_store_resolved_path(relativePath, resolvedPath, sizeof(resolvedPath));
+
+    cyan_request_screenshot(resolvedPath);
+    cyan_log(VERBOSE_SHELL, "Capturing screenshot -> %s", relativePath);
+    return SHELL_OK;
+}
+
+static int cmd_settings_list(int argc, char** argv) {
+    (void)argc;
+    (void)argv;
+
+    return SHELL_OK;
+}
+
+static int cmd_settings_get(int argc, char** argv) {
+    (void)argc;
+    (void)argv;
+
+    return SHELL_OK;
+}
+static int cmd_settings_set(int argc, char** argv) {
+    (void)argc;
+    (void)argv;
+
+    return SHELL_OK;
+}
+
+static int cmd_settings_test(int argc, char** argv) { return settings_tester(argc, argv); }
+
 // name, description, function, children, args
 
 static const ShellCommand APP_PERMISSION_CMDS[] = {
@@ -349,16 +413,30 @@ static const ShellCommand APP_CMDS[] = {
     {NULL}
 };
 
+static const ShellCommand SETTINGS_CMDS[] = {
+    {"test", "temporary", cmd_settings_test, NULL, NULL},
+    {"list", "List installed settings", cmd_settings_list, NULL, NULL},
+    {"get", "Get specific setting", cmd_settings_get, NULL, "<setting>"},
+    {"set", "Get specific setting", cmd_settings_set, NULL, "<setting> <value>"},
+    {NULL},
+};
+
 const ShellCommand CYAN_SHELL_ROOT_CMDS[] = {
     {"help", "Show all commands (this page)", cmd_help, NULL, NULL},
     {"version", "Show Cyan version", cmd_version, NULL, NULL},
     {"status", "Show current Cyan status", cmd_status, NULL, NULL},
     {"app", "App management", NULL, APP_CMDS, NULL},
+    {"screenshot", "Takes a screenshot of the current display", cmd_screenshot, NULL, NULL},
+    {"settings", "Settings management", NULL, SETTINGS_CMDS, NULL},
+
     {NULL}
 };
 
 // commands left to implement:
 //----------------------------
+
+// settings : get, set, list, save, reset
+
 // log
 
 // sleep
@@ -384,8 +462,6 @@ const ShellCommand CYAN_SHELL_ROOT_CMDS[] = {
 // ui : tab <watchface|apps|timer|stopwatch>, cycle, elements
 
 // input : button, up, down, text
-
-// settings : get, set, list, save, reset
 
 // test : display, input, wifi, storage
 

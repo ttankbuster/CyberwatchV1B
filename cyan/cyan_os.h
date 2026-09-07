@@ -5,6 +5,7 @@
 #include "app_handling/app_handler.h"
 #include "data/data.h"
 #include "data/display.h"
+#include "settings/cyan_settings.h"
 #include <stdbool.h>
 
 #define CYAN_VERSION "Cyan V1B"
@@ -23,5 +24,6 @@ bool cyan_exit_app();
 AppHandler* cyan_get_app_handler();
 AppEntry* cyan_get_running_app();
 int cyan_get_uptime();
+void cyan_request_screenshot(const char* resolvedPath);
 
 #endif
