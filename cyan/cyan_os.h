@@ -25,5 +25,6 @@ AppHandler* cyan_get_app_handler();
 AppEntry* cyan_get_running_app();
 int cyan_get_uptime();
 void cyan_request_screenshot(const char* resolvedPath);
+int cyan_screenshot(char* path_override);
 
 #endif

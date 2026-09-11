@@ -1,4 +1,5 @@
 #include "cyan_settings.h"
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -32,9 +33,60 @@ analogue_roman=false; analogue_all_numerals=true; analogue=true;  // multiple st
 
 */
 
-int cyan_interpret_key(char* str) {}
+static int interpret_settings_key(char* str, bool reserved) {
+    printf("INTERPRETING KEY: {%s}\n", str);
+}
 
-int cyan_interpret_value(char* str) {}
+static int interpret_settings_value(char* str) {
+    printf("INTERPRETING VALUE: {%s}\n", str);
+    if (str == NULL || str[0] == '\0') {
+        return CYAN_SETTINGS_INTERPRET_EMPTY_VALUE;
+    }
+    switch (str[0]) {
+    case '"':
+        printf("value {%s} is string\n", str);
+        break;
+    case '[':
+        printf("value {%s} is array\n", str);
+        break;
+    case '#':
+        printf("value {%s} is hex\n", str);
+        break;
+    case '$':
+        printf("value {%s} is inbuilt\n", str);
+        break;
+    default:
+        if (isdigit(str[0])) {
+            bool is_num = true;
+            for (size_t i = 0; i < strlen(str); i++) {
+                if (!isdigit(str[i])) {
+                    is_num = false;
+                }
+            }
+            if (is_num) {
+                printf("value {%s} is number\n", str);
+            } else {
+                printf("error value {%s} is unknown\n", str);
+            }
+        } else if (strcmp(str, "false") == 0) {
+            printf("value {%s} is false bool\n", str);
+        } else if (strcmp(str, "true") == 0) {
+            printf("value {%s} is true bool\n", str);
+        } else {
+            printf("error: value {%s} is unknown\n", str);
+        }
+        break;
+    }
+    return CYAN_SETTINGS_INTERPRET_OK;
+}
+
+static int interpret_pairs(int pair_count, SettingPair* pairs) {
+    for (size_t i = 0; i < pair_count; i++) {
+        SettingPair pair = pairs[i];
+        interpret_settings_key(pair.key, pair.reserved);
+        interpret_settings_value(pair.value);
+    }
+}
 
 static bool range_is_blank(const char* line, size_t begin, size_t end) {
     for (size_t i = begin; i < end; i++) {
@@ -197,9 +249,16 @@ SettingParseError cyan_read_line(char* line) {
     size_t pair_count = 0;
     SettingParseError error = CYAN_SETTINGS_PARSE_OK;
     SettingPair* pairs = cyan_decompose_settings_line(line, &pair_count, &error);
+    for (size_t i = 0; i < pair_count; i++) {
+        printf(
+            "  [%zu] key='%s' value='%s' reserved=%d\n", i, pairs[i].key, pairs[i].value,
+            pairs[i].reserved
+        );
+    }
     if (pairs == NULL) {
         return error;
     }
+    interpret_pairs(pair_count, pairs);
     free_pairs(pairs, pair_count);
     return CYAN_SETTINGS_PARSE_OK;
 }
@@ -207,16 +266,7 @@ SettingParseError cyan_read_line(char* line) {
 int settings_tester(int argc, char** argv) {
     (void)argc;
     (void)argv;
-    char line[] = "analogue_roman=false; $analogue_all_numerals=true; analogue=true";
+    char line[] = "font_override=\"fonts/GFX_Arial\"";
     size_t pair_count = 0;
-    SettingParseError error = CYAN_SETTINGS_PARSE_OK;
-    SettingPair* pairs = cyan_decompose_settings_line(line, &pair_count, &error);
-    printf("LINE DECOMP RETURNED %zu PAIRS (status=%d)\n", pair_count, error);
-    for (size_t i = 0; i < pair_count; i++) {
-        printf(
-            "  [%zu] key='%s' value='%s' reserved=%d\n", i, pairs[i].key, pairs[i].value,
-            pairs[i].reserved
-        );
-    }
-    free_pairs(pairs, pair_count);
+    cyan_read_line(line);
 }

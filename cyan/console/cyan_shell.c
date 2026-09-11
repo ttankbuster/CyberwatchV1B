@@ -334,43 +334,7 @@ static int cmd_app_exit(int argc, char** argv) {
 static int cmd_screenshot(int argc, char** argv) {
     (void)argc;
     (void)argv;
-
-    char label[MAX_FILE_NAME + 8];
-    if (data.state == CYW_APP_RUNNING) {
-        snprintf(label, sizeof(label), "app(%s)", cyan_get_running_app()->name);
-    } else {
-        switch (data.tabs.tabIndex) {
-        case 0:
-            snprintf(label, sizeof(label), "watchface");
-            break;
-        case 1:
-            snprintf(label, sizeof(label), "apps");
-            break;
-        case 2:
-            snprintf(label, sizeof(label), "timer");
-            break;
-        case 3:
-            snprintf(label, sizeof(label), "stopwatch");
-            break;
-        default:
-            snprintf(label, sizeof(label), "watchface");
-            break;
-        }
-    }
-
-    char timestamp[20];
-    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d@%H-%M", &data.watchface.time);
-
-    char relativePath[600];
-    snprintf(relativePath, sizeof(relativePath), "screenshots/%s%s.png", label, timestamp);
-
-    platform_ensure_directory("screenshots");
-
-    char resolvedPath[1024];
-    platform_store_resolved_path(relativePath, resolvedPath, sizeof(resolvedPath));
-
-    cyan_request_screenshot(resolvedPath);
-    cyan_log(VERBOSE_SHELL, "Capturing screenshot -> %s", relativePath);
+    cyan_screenshot("");
     return SHELL_OK;
 }
 

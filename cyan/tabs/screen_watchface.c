@@ -130,13 +130,19 @@ static void render_time_analogue(
         // fixed-pixel look (14px/10px/6px hands, 15px/10px pivot) at the native launch size
         // (hand_length ~316px there) - this way everything stays the same relative size as
         // the face grows/shrinks with the window.
-        draw_hand(surface, centre_x, centre_y, H, hand_length * 0.5f, hand_length * 0.0443f, INFO_COLOUR);
-        draw_hand(surface, centre_x, centre_y, M, hand_length * 0.75f, hand_length * 0.0316f, INFO_COLOUR);
+        draw_hand(
+            surface, centre_x, centre_y, H, hand_length * 0.5f, hand_length * 0.0443f, INFO_COLOUR
+        );
+        draw_hand(
+            surface, centre_x, centre_y, M, hand_length * 0.75f, hand_length * 0.0316f, INFO_COLOUR
+        );
         int pivot_outer_radius = (int)lroundf(hand_length * 0.0475f);
         int pivot_inner_radius = (int)lroundf(hand_length * 0.0316f);
         surface_push_circle(surface, centre_x, centre_y, pivot_outer_radius, INFO_COLOUR);
         surface_push_circle(surface, centre_x, centre_y, pivot_inner_radius, ACCENT_COLOUR);
-        draw_hand(surface, centre_x, centre_y, S, hand_length * 0.9f, hand_length * 0.019f, ACCENT_COLOUR);
+        draw_hand(
+            surface, centre_x, centre_y, S, hand_length * 0.9f, hand_length * 0.019f, ACCENT_COLOUR
+        );
     }
 }
 

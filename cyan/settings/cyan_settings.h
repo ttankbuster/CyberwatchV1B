@@ -43,6 +43,11 @@ typedef enum {
     CYAN_SETTINGS_PARSE_ERROR_OUT_OF_MEMORY = -5
 } SettingParseError;
 
+typedef enum {
+    CYAN_SETTINGS_INTERPRET_OK,
+    CYAN_SETTINGS_INTERPRET_EMPTY_VALUE
+} SettingInterpretError;
+
 typedef enum { DATE_DMY, DATE_MDY, DATE_YMD } DateFormat;
 
 typedef struct {

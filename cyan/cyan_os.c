@@ -2,6 +2,7 @@
 #include "app_handling/app_handler.h"
 #include "clay_ui.h"
 #include "console/cyan_console.h"
+#include "console/cyan_shell.h"
 #include "console/log.h"
 #include "data/display.h"
 #include "data/services.h"
@@ -28,6 +29,65 @@ bool cyan_launch_app_id(int id) {
         data.state = CYW_HOME;
         return false;
     }
+}
+
+static bool screenshot_path_is_literal(const char* path) {
+    if (path == NULL || path[0] == '\0') {
+        return false;
+    }
+    if (strchr(path, '/') != NULL || strchr(path, '\\') != NULL) {
+        return true;
+    }
+    if (isalpha((unsigned char)path[0]) && path[1] == ':') {
+        return true;
+    }
+    return false;
+}
+
+int cyan_screenshot(char* path_override) {
+    char resolvedPath[1024];
+    char logPath[1024];
+    if (screenshot_path_is_literal(path_override)) {
+        snprintf(resolvedPath, sizeof(resolvedPath), "%s", path_override);
+        snprintf(logPath, sizeof(logPath), "%s", path_override);
+    } else {
+        char label[MAX_FILE_NAME + 8];
+        if (path_override != NULL && path_override[0] != '\0') {
+            snprintf(label, sizeof(label), "%s", path_override);
+        } else if (data.state == CYW_APP_RUNNING) {
+            snprintf(label, sizeof(label), "app(%s)", cyan_get_running_app()->name);
+        } else {
+            switch (data.tabs.tabIndex) {
+            case 0:
+                snprintf(label, sizeof(label), "watchface");
+                break;
+            case 1:
+                snprintf(label, sizeof(label), "apps");
+                break;
+            case 2:
+                snprintf(label, sizeof(label), "timer");
+                break;
+            case 3:
+                snprintf(label, sizeof(label), "stopwatch");
+                break;
+            default:
+                snprintf(label, sizeof(label), "cyan");
+                break;
+            }
+        }
+
+        char timestamp[20];
+        strftime(timestamp, sizeof(timestamp), "%Y-%m-%d@%H-%M", &data.watchface.time);
+
+        char relativePath[600];
+        snprintf(relativePath, sizeof(relativePath), "screenshots/%s%s.png", label, timestamp);
+        platform_ensure_directory("screenshots");
+        platform_store_resolved_path(relativePath, resolvedPath, sizeof(resolvedPath));
+        snprintf(logPath, sizeof(logPath), "%s", relativePath);
+    }
+    cyan_request_screenshot(resolvedPath);
+    cyan_log(VERBOSE_SHELL, "Capturing screenshot -> %s", logPath);
+    return 0;
 }
 
 void string_to_lowercase(char* str) {
@@ -109,6 +169,21 @@ void cyan_request_screenshot(const char* resolvedPath) {
     screenshot_pending = true;
 }
 
+/* Write out any queued screenshot against whatever is currently on the renderer.
+ * Called at the end of each cyan_update frame, and once during init so the
+ * loading splash is captured before the main loop replaces it. */
+static void cyan_capture_pending_screenshot(void) {
+    if (!screenshot_pending) {
+        return;
+    }
+    bool ok = display_capture_screenshot(&display, pending_screenshot_path);
+    cyan_log(
+        VERBOSE_SHELL, ok ? "Screenshot saved: %s" : "Screenshot failed: %s",
+        pending_screenshot_path
+    );
+    screenshot_pending = false;
+}
+
 static void check_shutdown(CyanData* data, float dt, bool* running) {
     ShutdownData* sd = &data->shutdown;
 
@@ -172,12 +247,14 @@ bool cyan_init(void) {
 
     bool appHandlerOk = app_handler_init(&app_handler, &display);
     cyan_log(VERBOSE_LOW, "[AppHandler]=%s", appHandlerOk ? "OK" : "FAILED");
-    display_loading_screen(&display, 0.2);
+    display_loading_screen(&display, 0.4);
 
     timer_init(&data);
     register_available_services(&data);
     cyan_log(VERBOSE_LOW, "[CyanOS]=OK");
-    display_loading_screen(&display, 0.2);
+    display_loading_screen(&display, 0.8);
+    // cyan_screenshot("cyan-loading");
+    // cyan_capture_pending_screenshot(); /* grab the splash before the main loop redraws */
     if (DEBUG_MODE) {
         bool run_splashscreen = true;
         while (run_splashscreen) {
@@ -213,7 +290,7 @@ void cyan_update(float dt, bool* running) {
         }
         switch (data.tabs.tabIndex) {
         case 0:
-            clay_commands = clay_watchface(&data, size.width, size.height, true, false);
+            clay_commands = clay_watchface(&data, size.width, size.height, false, false);
             break;
         case 1:
             clay_commands =
@@ -288,14 +365,7 @@ void cyan_update(float dt, bool* running) {
         surface_render(&display, &data.watchface.analogueSurface);
     }
 
-    if (screenshot_pending) {
-        bool ok = display_capture_screenshot(&display, pending_screenshot_path);
-        cyan_log(
-            VERBOSE_SHELL, ok ? "Screenshot saved: %s" : "Screenshot failed: %s",
-            pending_screenshot_path
-        );
-        screenshot_pending = false;
-    }
+    cyan_capture_pending_screenshot();
 
     display_present(&display);
 }
