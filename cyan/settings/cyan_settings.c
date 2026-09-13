@@ -33,11 +33,117 @@ analogue_roman=false; analogue_all_numerals=true; analogue=true;  // multiple st
 
 */
 
-static int interpret_settings_key(char* str, bool reserved) {
-    printf("INTERPRETING KEY: {%s}\n", str);
+
+bool is_integer(const char* str) {
+    if (str == NULL || *str == '\0') {
+        return false;
+    }
+    if (*str == '-' || *str == '+') {
+        str++;
+    }
+    while (*str != '\0') {
+        if (!isdigit((unsigned char)*str)) {
+            return false;
+        }
+        str++;
+    }
+    return true;
 }
 
-static int interpret_settings_value(char* str) {
+bool is_string(const char* str) {
+    if (str == NULL || *str == '\0') {
+        return false;
+    }
+    if (*str == '"') {
+        size_t len = strlen(str);
+        return len > 1 && str[len - 1] == '"';
+    }
+    return false;
+}
+
+bool is_hex(const char* str) {
+    if (str == NULL || *str == '\0') {
+        return false;
+    }
+    if (*str == '#') {
+        str++;
+    }
+    while (*str != '\0') {
+        if (!isxdigit((unsigned char)*str)) {
+            return false;
+        }
+        str++;
+    }
+    return true;
+}
+
+bool is_bool(const char* str) {
+    return str != NULL && (strcmp(str, "true") == 0 || strcmp(str, "false") == 0);
+}
+
+bool is_array(const char* str) {
+    if (str == NULL || *str == '\0') {
+        return false;
+    }
+    if (str[0] == '[') {
+        size_t len = strlen(str);
+        return len > 1 && str[len - 1] == ']';
+    }
+    return false;
+}
+
+
+static int lookup_setting_key(const char* key, bool reserved, SettingSpec* out_spec) {
+
+    return CYAN_SETTINGS_INTERPRET_UNKNOWN_KEY;
+}
+
+static int interpret_settings_key(const char* str, bool reserved, SettingSpec* out_spec) {
+    printf("INTERPRETING KEY: {%s}\n", str);
+    bool type_valid = true;
+    switch (str[0]) {
+    case '"':
+        type_valid = false;
+        break;
+    case '[':
+        type_valid = false;
+        break;
+    case '#':
+        type_valid = false;
+        break;
+    case '$':
+        if (!reserved) {
+            printf("error: key {%s} is reserved but not marked as such\n", str);
+            return CYAN_SETTINGS_INTERPRET_RESERVATION_VIOLATION;
+        } else {
+            printf("key {%s} is reserved\n", str);
+        }
+        break;
+    default:
+        if (isdigit(str[0])) {
+            type_valid = false;
+        } else if (is_bool(str)) {
+            printf("error: key {%s} cannot be boolean\n", str);
+            return CYAN_SETTINGS_INTERPRET_CONFLICTING_KEY;
+        } else if (is_string(str)) {
+            printf("error: key {%s} cannot be string\n", str);
+            return CYAN_SETTINGS_INTERPRET_CONFLICTING_KEY;
+        } else {
+            printf("error: key {%s} is unknown\n", str);
+            return CYAN_SETTINGS_INTERPRET_UNKNOWN_KEY;
+        }
+        break;
+    }
+    if (!type_valid) {
+        printf("error: key {%s} is invalid\n", str);
+        return CYAN_SETTINGS_INTERPRET_INVALID_KEY;
+    }
+    lookup_setting_key(str, reserved, out_spec);
+
+    return 0;
+}
+
+int interpret_settings_value(const char* str) {
     printf("INTERPRETING VALUE: {%s}\n", str);
     if (str == NULL || str[0] == '\0') {
         return CYAN_SETTINGS_INTERPRET_EMPTY_VALUE;
@@ -80,12 +186,14 @@ static int interpret_settings_value(char* str) {
     return CYAN_SETTINGS_INTERPRET_OK;
 }
 
-static int interpret_pairs(int pair_count, SettingPair* pairs) {
+static int interpret_pairs(size_t pair_count, SettingPair* pairs) {
     for (size_t i = 0; i < pair_count; i++) {
         SettingPair pair = pairs[i];
-        interpret_settings_key(pair.key, pair.reserved);
+        SettingSpec spec;
+        interpret_settings_key(pair.key, pair.reserved, &spec);
         interpret_settings_value(pair.value);
     }
+    return CYAN_SETTINGS_INTERPRET_OK;
 }
 
 static bool range_is_blank(const char* line, size_t begin, size_t end) {
@@ -195,6 +303,15 @@ SettingPair*
 cyan_decompose_settings_line(char* line, size_t* out_count, SettingParseError* out_error) {
     *out_count = 0;
     *out_error = CYAN_SETTINGS_PARSE_OK;
+    bool comment_inside_quote = false;
+    for (size_t i = 0; line[i] != '\0'; i++) {
+        if (line[i] == '"') {
+            comment_inside_quote = !comment_inside_quote;
+        } else if (!comment_inside_quote && line[i] == '/' && line[i + 1] == '/') {
+            line[i] = '\0';
+            break;
+        }
+    }
     size_t max_pairs = 1;
     bool counting_inside_quote = false;
     for (size_t i = 0; line[i] != '\0'; i++) {
@@ -247,6 +364,15 @@ cyan_decompose_settings_line(char* line, size_t* out_count, SettingParseError* o
 
 SettingParseError cyan_read_line(char* line) {
     size_t pair_count = 0;
+    if (line == NULL || line[0] == '\0') {
+        return CYAN_SETTINGS_PARSE_OK;
+    }
+    if (strlen(line) > 1) {
+        if (line[0] == '/' && line[1] == '/') {
+            // ignore, the line is a comment
+            return CYAN_SETTINGS_PARSE_OK;
+        }
+    }
     SettingParseError error = CYAN_SETTINGS_PARSE_OK;
     SettingPair* pairs = cyan_decompose_settings_line(line, &pair_count, &error);
     for (size_t i = 0; i < pair_count; i++) {

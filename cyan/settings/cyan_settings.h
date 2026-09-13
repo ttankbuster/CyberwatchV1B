@@ -19,17 +19,20 @@ typedef enum {
 typedef struct {
     const char* key;
     SettingType type;
-    size_t offset; // into CyanSettings
-    int minValue;
-    int maxValue;
-    int arrayLength;         // exact length required
-    const char** enumValues; // NULL-terminated
+    void* (*getter)(void);
+    void* (*setter)(void* value);    
+} Setting;
+
+typedef struct {
+    const char* key;
+    void* value;
+    SettingType type;
 } SettingSpec;
 
 typedef struct {
-    const char* key;   /* or char key[N] */
-    const char* value; /* raw, unconverted */
-    bool reserved;     /* was there a $ prefix */
+    const char* key;
+    const char* value;
+    bool reserved;
 } SettingPair;
 
 typedef enum {
@@ -45,8 +48,14 @@ typedef enum {
 
 typedef enum {
     CYAN_SETTINGS_INTERPRET_OK,
-    CYAN_SETTINGS_INTERPRET_EMPTY_VALUE
+    CYAN_SETTINGS_INTERPRET_EMPTY_VALUE,
+    CYAN_SETTINGS_INTERPRET_INVALID_KEY,
+    CYAN_SETTINGS_INTERPRET_CONFLICTING_KEY,
+    CYAN_SETTINGS_INTERPRET_RESERVATION_VIOLATION,
+    CYAN_SETTINGS_INTERPRET_UNKNOWN_KEY,
 } SettingInterpretError;
+
+
 
 typedef enum { DATE_DMY, DATE_MDY, DATE_YMD } DateFormat;
 
