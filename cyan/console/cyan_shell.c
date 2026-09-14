@@ -341,20 +341,51 @@ static int cmd_screenshot(int argc, char** argv) {
 static int cmd_settings_list(int argc, char** argv) {
     (void)argc;
     (void)argv;
-
+    cyan_settings_print_all();
     return SHELL_OK;
 }
 
 static int cmd_settings_get(int argc, char** argv) {
-    (void)argc;
-    (void)argv;
-
+    if (argc < 2) {
+        return SHELL_ERR_USAGE;
+    }
+    char value[CYAN_SETTINGS_LINE_MAX];
+    if (!cyan_settings_format_value(argv[1], value, sizeof(value))) {
+        cyan_log(VERBOSE_SHELL, "unknown setting '%s'", argv[1]);
+        return SHELL_ERR_UNKNOWN;
+    }
+    cyan_log(VERBOSE_SHELL, "%s = %s", argv[1], value);
     return SHELL_OK;
 }
+
 static int cmd_settings_set(int argc, char** argv) {
+    if (argc < 3) {
+        return SHELL_ERR_USAGE;
+    }
+    if (!cyan_settings_set_from_string(argv[1], argv[2])) {
+        cyan_log(VERBOSE_SHELL, "failed to set '%s' to '%s'", argv[1], argv[2]);
+        return SHELL_ERR_UNKNOWN;
+    }
+    cyan_log(VERBOSE_SHELL, "%s = %s", argv[1], argv[2]);
+    return SHELL_OK;
+}
+
+static int cmd_settings_save(int argc, char** argv) {
     (void)argc;
     (void)argv;
+    if (!cyan_settings_save()) {
+        cyan_log(VERBOSE_SHELL, "failed to save settings");
+        return SHELL_ERR_UNKNOWN;
+    }
+    cyan_log(VERBOSE_SHELL, "settings saved");
+    return SHELL_OK;
+}
 
+static int cmd_settings_reset(int argc, char** argv) {
+    (void)argc;
+    (void)argv;
+    cyan_settings_set_defaults();
+    cyan_log(VERBOSE_SHELL, "settings reset to defaults (not yet saved)");
     return SHELL_OK;
 }
 
@@ -379,9 +410,11 @@ static const ShellCommand APP_CMDS[] = {
 
 static const ShellCommand SETTINGS_CMDS[] = {
     {"test", "temporary", cmd_settings_test, NULL, NULL},
-    {"list", "List installed settings", cmd_settings_list, NULL, NULL},
-    {"get", "Get specific setting", cmd_settings_get, NULL, "<setting>"},
-    {"set", "Get specific setting", cmd_settings_set, NULL, "<setting> <value>"},
+    {"list", "List all settings and their current values", cmd_settings_list, NULL, NULL},
+    {"get", "Get a specific setting", cmd_settings_get, NULL, "<setting>"},
+    {"set", "Set a specific setting", cmd_settings_set, NULL, "<setting> <value>"},
+    {"save", "Write current settings to disk", cmd_settings_save, NULL, NULL},
+    {"reset", "Reset settings to defaults (not yet saved)", cmd_settings_reset, NULL, NULL},
     {NULL},
 };
 
@@ -398,8 +431,6 @@ const ShellCommand CYAN_SHELL_ROOT_CMDS[] = {
 
 // commands left to implement:
 //----------------------------
-
-// settings : get, set, list, save, reset
 
 // log
 

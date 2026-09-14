@@ -69,6 +69,18 @@ static void update_events(CyanData* data, Display* display, bool* running, bool 
                     event.type = EVENT_BUTTON3_DOWN;
                     append_event(&data->eventQueue, event);
                 }
+                if (sdl_event.key.key == SDLK_4) {
+                    event.type = EVENT_BUTTON4_DOWN;
+                    append_event(&data->eventQueue, event);
+                }
+                if (sdl_event.key.key == SDLK_UP) {
+                    event.type = EVENT_BUTTON3_UP;
+                    append_event(&data->eventQueue, event);
+                }
+                if (sdl_event.key.key == SDLK_DOWN) {
+                    event.type = EVENT_BUTTON3_DOWN;
+                    append_event(&data->eventQueue, event);
+                }
                 if (debug) {
                     printf(
                         "[EVENT] SDL_EVENT_KEY_DOWN: Key: %u | key: %d\n", sdl_event.key.key,
@@ -87,6 +99,10 @@ static void update_events(CyanData* data, Display* display, bool* running, bool 
                 append_event(&data->eventQueue, event);
             } else if (sdl_event.key.key == SDLK_3) {
                 event.type = EVENT_BUTTON3_UP;
+                append_event(&data->eventQueue, event);
+            }
+            if (sdl_event.key.key == SDLK_4) {
+                event.type = EVENT_BUTTON4_UP;
                 append_event(&data->eventQueue, event);
             }
             if (debug) {

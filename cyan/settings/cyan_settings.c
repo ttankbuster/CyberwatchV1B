@@ -33,6 +33,37 @@ analogue_roman=false; analogue_all_numerals=true; analogue=true;  // multiple st
 
 */
 
+// Implemented per platform (native: platform/pc/data_pc.c). Declared directly rather than pulling
+// in data.h, since the settings module is meant to stay independent of the rest of CyanData.
+void platform_store_resolved_path(const char* relativePath, char* outBuffer, size_t bufferSize);
+void platform_ensure_directory(const char* relativePath);
+
+#define SETTINGS_DIR ".cyanos"
+#define SETTINGS_FILE_RELATIVE SETTINGS_DIR "/settings.txt"
+#define SETTINGS_FILE_TMP_RELATIVE SETTINGS_DIR "/settings.txt.tmp"
+#define SETTINGS_RESOLVED_PATH_MAX 512
+
+static CyanSettings g_settings;
+
+typedef struct {
+    const char* key;
+    SettingType type;
+    void* field;
+    bool reserved;
+} SettingRegistryEntry;
+
+static const SettingRegistryEntry SETTINGS_REGISTRY[] = {
+    {"CYAN_SETTINGS_VERSION", SETTING_INT, &g_settings.version, true},
+    {"date_format", SETTING_ENUM, &g_settings.dateFormat, false},
+    {"tab_order", SETTING_INT_ARRAY, &g_settings.tabOrder, false},
+    {"font_override", SETTING_STRING, &g_settings.fontOverride, false},
+    {"dev_mode", SETTING_BOOL, &g_settings.devMode, false},
+    {"accent_color", SETTING_HEX, &g_settings.accentColor, false},
+    {"analogue", SETTING_BOOL, &g_settings.analogue, false},
+    {"analogue_roman", SETTING_BOOL, &g_settings.analogueRoman, false},
+    {"analogue_all_numerals", SETTING_BOOL, &g_settings.analogueAllNumerals, false},
+};
+#define SETTINGS_REGISTRY_COUNT (sizeof(SETTINGS_REGISTRY) / sizeof(SETTINGS_REGISTRY[0]))
 
 bool is_integer(const char* str) {
     if (str == NULL || *str == '\0') {
@@ -68,6 +99,9 @@ bool is_hex(const char* str) {
     if (*str == '#') {
         str++;
     }
+    if (*str == '\0') {
+        return false;
+    }
     while (*str != '\0') {
         if (!isxdigit((unsigned char)*str)) {
             return false;
@@ -92,108 +126,285 @@ bool is_array(const char* str) {
     return false;
 }
 
+static const char* interpret_error_string(int error) {
+    switch (error) {
+    case CYAN_SETTINGS_INTERPRET_OK:
+        return "ok";
+    case CYAN_SETTINGS_INTERPRET_EMPTY_VALUE:
+        return "empty value";
+    case CYAN_SETTINGS_INTERPRET_INVALID_KEY:
+        return "invalid key";
+    case CYAN_SETTINGS_INTERPRET_CONFLICTING_KEY:
+        return "key conflicts with a value literal or reserved status";
+    case CYAN_SETTINGS_INTERPRET_RESERVATION_VIOLATION:
+        return "key is reserved but wasn't marked with '$'";
+    case CYAN_SETTINGS_INTERPRET_UNKNOWN_KEY:
+        return "unknown key";
+    case CYAN_SETTINGS_INTERPRET_INVALID_VALUE:
+        return "value doesn't match the key's type";
+    default:
+        return "unknown error";
+    }
+}
+
+static const char* parse_error_string(SettingParseError error) {
+    switch (error) {
+    case CYAN_SETTINGS_PARSE_OK:
+        return "ok";
+    case CYAN_SETTINGS_PARSE_ERROR_KEY_QUOTED:
+        return "key cannot be quoted";
+    case CYAN_SETTINGS_PARSE_ERROR_UNTERMINATED_QUOTE:
+        return "unterminated quote";
+    case CYAN_SETTINGS_PARSE_ERROR_MISSING_EQUALS:
+        return "missing '='";
+    case CYAN_SETTINGS_PARSE_ERROR_EMPTY_KEY:
+        return "empty key";
+    case CYAN_SETTINGS_PARSE_ERROR_KEY_TOO_LONG:
+        return "key too long";
+    case CYAN_SETTINGS_PARSE_ERROR_VALUE_TOO_LONG:
+        return "value too long";
+    case CYAN_SETTINGS_PARSE_ERROR_OUT_OF_MEMORY:
+        return "out of memory";
+    default:
+        return "unknown error";
+    }
+}
 
 static int lookup_setting_key(const char* key, bool reserved, SettingSpec* out_spec) {
-
+    for (size_t i = 0; i < SETTINGS_REGISTRY_COUNT; i++) {
+        const SettingRegistryEntry* entry = &SETTINGS_REGISTRY[i];
+        if (strcmp(entry->key, key) != 0) {
+            continue;
+        }
+        if (entry->reserved && !reserved) {
+            return CYAN_SETTINGS_INTERPRET_RESERVATION_VIOLATION;
+        }
+        if (!entry->reserved && reserved) {
+            return CYAN_SETTINGS_INTERPRET_CONFLICTING_KEY;
+        }
+        out_spec->key = entry->key;
+        out_spec->type = entry->type;
+        out_spec->value = entry->field;
+        return CYAN_SETTINGS_INTERPRET_OK;
+    }
     return CYAN_SETTINGS_INTERPRET_UNKNOWN_KEY;
 }
 
 static int interpret_settings_key(const char* str, bool reserved, SettingSpec* out_spec) {
-    printf("INTERPRETING KEY: {%s}\n", str);
-    bool type_valid = true;
     switch (str[0]) {
     case '"':
-        type_valid = false;
-        break;
     case '[':
-        type_valid = false;
-        break;
     case '#':
-        type_valid = false;
-        break;
-    case '$':
-        if (!reserved) {
-            printf("error: key {%s} is reserved but not marked as such\n", str);
-            return CYAN_SETTINGS_INTERPRET_RESERVATION_VIOLATION;
-        } else {
-            printf("key {%s} is reserved\n", str);
-        }
-        break;
+        return CYAN_SETTINGS_INTERPRET_INVALID_KEY;
     default:
-        if (isdigit(str[0])) {
-            type_valid = false;
-        } else if (is_bool(str)) {
-            printf("error: key {%s} cannot be boolean\n", str);
-            return CYAN_SETTINGS_INTERPRET_CONFLICTING_KEY;
-        } else if (is_string(str)) {
-            printf("error: key {%s} cannot be string\n", str);
-            return CYAN_SETTINGS_INTERPRET_CONFLICTING_KEY;
-        } else {
-            printf("error: key {%s} is unknown\n", str);
-            return CYAN_SETTINGS_INTERPRET_UNKNOWN_KEY;
-        }
         break;
     }
-    if (!type_valid) {
-        printf("error: key {%s} is invalid\n", str);
+    if (isdigit((unsigned char)str[0])) {
         return CYAN_SETTINGS_INTERPRET_INVALID_KEY;
     }
-    lookup_setting_key(str, reserved, out_spec);
-
-    return 0;
+    if (is_bool(str) || is_string(str)) {
+        return CYAN_SETTINGS_INTERPRET_CONFLICTING_KEY;
+    }
+    return lookup_setting_key(str, reserved, out_spec);
 }
 
-int interpret_settings_value(const char* str) {
-    printf("INTERPRETING VALUE: {%s}\n", str);
-    if (str == NULL || str[0] == '\0') {
+// Parses "[<int>,<int>,...]" into `out`, up to `capacity` entries. Extra entries are ignored;
+// missing entries keep whatever was already in `out`. Returns false if any entry isn't an integer.
+static bool parse_int_array(const char* str, int* out, size_t capacity) {
+    size_t len = strlen(str);
+    if (len < 2 || str[0] != '[' || str[len - 1] != ']') {
+        return false;
+    }
+    char body[CYAN_SETTINGS_LINE_MAX];
+    size_t bodyLen = len - 2;
+    if (bodyLen >= sizeof(body)) {
+        return false;
+    }
+    memcpy(body, str + 1, bodyLen);
+    body[bodyLen] = '\0';
+
+    size_t index = 0;
+    char* cursor = body;
+    while (*cursor != '\0' && index < capacity) {
+        char* comma = strchr(cursor, ',');
+        if (comma != NULL) {
+            *comma = '\0';
+        }
+        while (*cursor == ' ' || *cursor == '\t') {
+            cursor++;
+        }
+        if (!is_integer(cursor)) {
+            return false;
+        }
+        out[index++] = (int)strtol(cursor, NULL, 10);
+        if (comma == NULL) {
+            break;
+        }
+        cursor = comma + 1;
+    }
+    return true;
+}
+
+static bool parse_hex_color(const char* str, uint8_t* out) {
+    const char* digits = (str[0] == '#') ? str + 1 : str;
+    if (strlen(digits) != 6) {
+        return false;
+    }
+    for (int i = 0; i < 6; i++) {
+        if (!isxdigit((unsigned char)digits[i])) {
+            return false;
+        }
+    }
+    unsigned long value = strtoul(digits, NULL, 16);
+    out[0] = (uint8_t)((value >> 16) & 0xFF);
+    out[1] = (uint8_t)((value >> 8) & 0xFF);
+    out[2] = (uint8_t)(value & 0xFF);
+    return true;
+}
+
+static bool parse_date_format(const char* str, DateFormat* out) {
+    if (strcmp(str, "$DATE_DMY") == 0) {
+        *out = DATE_DMY;
+    } else if (strcmp(str, "$DATE_MDY") == 0) {
+        *out = DATE_MDY;
+    } else if (strcmp(str, "$DATE_YMD") == 0) {
+        *out = DATE_YMD;
+    } else {
+        return false;
+    }
+    return true;
+}
+
+static const char* date_format_string(DateFormat format) {
+    switch (format) {
+    case DATE_DMY:
+        return "$DATE_DMY";
+    case DATE_MDY:
+        return "$DATE_MDY";
+    case DATE_YMD:
+        return "$DATE_YMD";
+    default:
+        return "$DATE_DMY";
+    }
+}
+
+// Validates `rawValue` against `spec->type` and, if it matches, writes it into the live field
+// `spec->value` points at.
+static int apply_setting_value(const SettingSpec* spec, const char* rawValue) {
+    if (rawValue == NULL || rawValue[0] == '\0') {
         return CYAN_SETTINGS_INTERPRET_EMPTY_VALUE;
     }
-    switch (str[0]) {
-    case '"':
-        printf("value {%s} is string\n", str);
-        break;
-    case '[':
-        printf("value {%s} is array\n", str);
-        break;
-    case '#':
-        printf("value {%s} is hex\n", str);
-        break;
-    case '$':
-        printf("value {%s} is inbuilt\n", str);
-        break;
-    default:
-        if (isdigit(str[0])) {
-            bool is_num = true;
-            for (size_t i = 0; i < strlen(str); i++) {
-                if (!isdigit(str[i])) {
-                    is_num = false;
-                }
-            }
-            if (is_num) {
-                printf("value {%s} is number\n", str);
-            } else {
-                printf("error value {%s} is unknown\n", str);
-            }
-        } else if (strcmp(str, "false") == 0) {
-            printf("value {%s} is false bool\n", str);
-        } else if (strcmp(str, "true") == 0) {
-            printf("value {%s} is true bool\n", str);
-        } else {
-            printf("error: value {%s} is unknown\n", str);
+    switch (spec->type) {
+    case SETTING_BOOL:
+        if (!is_bool(rawValue)) {
+            return CYAN_SETTINGS_INTERPRET_INVALID_VALUE;
         }
-        break;
+        *(bool*)spec->value = (strcmp(rawValue, "true") == 0);
+        return CYAN_SETTINGS_INTERPRET_OK;
+    case SETTING_INT:
+        if (!is_integer(rawValue)) {
+            return CYAN_SETTINGS_INTERPRET_INVALID_VALUE;
+        }
+        *(int*)spec->value = (int)strtol(rawValue, NULL, 10);
+        return CYAN_SETTINGS_INTERPRET_OK;
+    case SETTING_HEX:
+        if (!is_hex(rawValue) || !parse_hex_color(rawValue, (uint8_t*)spec->value)) {
+            return CYAN_SETTINGS_INTERPRET_INVALID_VALUE;
+        }
+        return CYAN_SETTINGS_INTERPRET_OK;
+    case SETTING_ENUM:
+        if (!parse_date_format(rawValue, (DateFormat*)spec->value)) {
+            return CYAN_SETTINGS_INTERPRET_INVALID_VALUE;
+        }
+        return CYAN_SETTINGS_INTERPRET_OK;
+    case SETTING_STRING: {
+        if (!is_string(rawValue)) {
+            return CYAN_SETTINGS_INTERPRET_INVALID_VALUE;
+        }
+        size_t len = strlen(rawValue);
+        size_t innerLen = len - 2; // strip the surrounding quotes
+        if (innerLen >= sizeof(g_settings.fontOverride)) {
+            return CYAN_SETTINGS_INTERPRET_INVALID_VALUE;
+        }
+        snprintf((char*)spec->value, sizeof(g_settings.fontOverride), "%.*s", (int)innerLen,
+                 rawValue + 1);
+        return CYAN_SETTINGS_INTERPRET_OK;
     }
-    return CYAN_SETTINGS_INTERPRET_OK;
+    case SETTING_INT_ARRAY:
+        if (!is_array(rawValue) ||
+            !parse_int_array(rawValue, (int*)spec->value, sizeof(g_settings.tabOrder) / sizeof(int))) {
+            return CYAN_SETTINGS_INTERPRET_INVALID_VALUE;
+        }
+        return CYAN_SETTINGS_INTERPRET_OK;
+    case SETTING_STRING_ARRAY:
+    default:
+        return CYAN_SETTINGS_INTERPRET_INVALID_VALUE;
+    }
 }
 
-static int interpret_pairs(size_t pair_count, SettingPair* pairs) {
+static bool format_setting_value(const SettingSpec* spec, char* out, size_t outSize) {
+    switch (spec->type) {
+    case SETTING_BOOL:
+        snprintf(out, outSize, "%s", *(bool*)spec->value ? "true" : "false");
+        return true;
+    case SETTING_INT:
+        snprintf(out, outSize, "%d", *(int*)spec->value);
+        return true;
+    case SETTING_HEX: {
+        uint8_t* color = (uint8_t*)spec->value;
+        snprintf(out, outSize, "#%02X%02X%02X", color[0], color[1], color[2]);
+        return true;
+    }
+    case SETTING_ENUM:
+        snprintf(out, outSize, "%s", date_format_string(*(DateFormat*)spec->value));
+        return true;
+    case SETTING_STRING:
+        snprintf(out, outSize, "\"%s\"", (char*)spec->value);
+        return true;
+    case SETTING_INT_ARRAY: {
+        int* values = (int*)spec->value;
+        size_t count = sizeof(g_settings.tabOrder) / sizeof(int);
+        size_t written = 0;
+        written += snprintf(out + written, outSize - written, "[");
+        for (size_t i = 0; i < count && written < outSize; i++) {
+            written += snprintf(
+                out + written, outSize - written, "%s%d", i == 0 ? "" : ",", values[i]
+            );
+        }
+        if (written < outSize) {
+            snprintf(out + written, outSize - written, "]");
+        }
+        return true;
+    }
+    case SETTING_STRING_ARRAY:
+    default:
+        return false;
+    }
+}
+
+static void interpret_pairs(size_t pair_count, SettingPair* pairs) {
     for (size_t i = 0; i < pair_count; i++) {
         SettingPair pair = pairs[i];
         SettingSpec spec;
-        interpret_settings_key(pair.key, pair.reserved, &spec);
-        interpret_settings_value(pair.value);
+        int keyResult = interpret_settings_key(pair.key, pair.reserved, &spec);
+        if (keyResult != CYAN_SETTINGS_INTERPRET_OK) {
+            cyan_log(
+                VERBOSE_MED, "[Settings] skipping '%s': %s", pair.key,
+                interpret_error_string(keyResult)
+            );
+            continue;
+        }
+        int applyResult = apply_setting_value(&spec, pair.value);
+        if (applyResult != CYAN_SETTINGS_INTERPRET_OK) {
+            cyan_log(
+                VERBOSE_MED, "[Settings] skipping '%s': %s", pair.key,
+                interpret_error_string(applyResult)
+            );
+            continue;
+        }
+        cyan_log(VERBOSE_HIGH, "[Settings] %s%s = %s", pair.reserved ? "$" : "", pair.key,
+                 pair.value);
     }
-    return CYAN_SETTINGS_INTERPRET_OK;
 }
 
 static bool range_is_blank(const char* line, size_t begin, size_t end) {
@@ -263,10 +474,9 @@ parse_statement(const char* line, size_t begin, size_t end, SettingPair* pair) {
     while (i < end) {
         char c = line[i];
         i++;
-        if (c == '$') {
-            reserved = true;
-            continue;
-        }
+        // Note: '$' is only a reserved-key marker in the key portion above. In the value
+        // portion it's a literal character - e.g. the enum-constant syntax "$DATE_YMD" - so it
+        // must not be stripped or flip `reserved` here.
         if (c == '"') {
             inside_quote = !inside_quote;
         } else if (c == ' ') {
@@ -299,7 +509,7 @@ parse_statement(const char* line, size_t begin, size_t end, SettingPair* pair) {
     return CYAN_SETTINGS_PARSE_OK;
 }
 
-SettingPair*
+static SettingPair*
 cyan_decompose_settings_line(char* line, size_t* out_count, SettingParseError* out_error) {
     *out_count = 0;
     *out_error = CYAN_SETTINGS_PARSE_OK;
@@ -375,13 +585,10 @@ SettingParseError cyan_read_line(char* line) {
     }
     SettingParseError error = CYAN_SETTINGS_PARSE_OK;
     SettingPair* pairs = cyan_decompose_settings_line(line, &pair_count, &error);
-    for (size_t i = 0; i < pair_count; i++) {
-        printf(
-            "  [%zu] key='%s' value='%s' reserved=%d\n", i, pairs[i].key, pairs[i].value,
-            pairs[i].reserved
-        );
-    }
     if (pairs == NULL) {
+        if (error != CYAN_SETTINGS_PARSE_OK) {
+            cyan_log(VERBOSE_MED, "[Settings] failed to parse line: %s", parse_error_string(error));
+        }
         return error;
     }
     interpret_pairs(pair_count, pairs);
@@ -389,10 +596,135 @@ SettingParseError cyan_read_line(char* line) {
     return CYAN_SETTINGS_PARSE_OK;
 }
 
+CyanSettings* cyan_settings_get(void) { return &g_settings; }
+
+void cyan_settings_set_defaults(void) {
+    memset(&g_settings, 0, sizeof(g_settings));
+    g_settings.version = 1;
+    g_settings.shell_verbosity = VERBOSE_HIGH;
+    g_settings.dateFormat = DATE_DMY;
+    g_settings.tabOrder[0] = 0;
+    g_settings.tabOrder[1] = 1;
+    g_settings.tabOrder[2] = 2;
+    g_settings.tabOrder[3] = 3;
+    g_settings.fontOverride[0] = '\0';
+    g_settings.devMode = false;
+    g_settings.accentColor[0] = 0x34;
+    g_settings.accentColor[1] = 0xA5;
+    g_settings.accentColor[2] = 0xB4;
+    g_settings.analogue = false;
+    g_settings.analogueRoman = false;
+    g_settings.analogueAllNumerals = true;
+}
+
+bool cyan_settings_load(void) {
+    char resolvedPath[SETTINGS_RESOLVED_PATH_MAX];
+    platform_store_resolved_path(SETTINGS_FILE_RELATIVE, resolvedPath, sizeof(resolvedPath));
+
+    FILE* file = fopen(resolvedPath, "r");
+    if (file == NULL) {
+        cyan_log(VERBOSE_LOW, "[Settings] no settings file at '%s', using defaults", resolvedPath);
+        return false;
+    }
+
+    char line[CYAN_SETTINGS_LINE_MAX];
+    while (fgets(line, sizeof(line), file) != NULL) {
+        size_t len = strlen(line);
+        while (len > 0 && (line[len - 1] == '\n' || line[len - 1] == '\r')) {
+            line[--len] = '\0';
+        }
+        cyan_read_line(line);
+    }
+    fclose(file);
+    cyan_log(VERBOSE_LOW, "[Settings] loaded '%s'", resolvedPath);
+    return true;
+}
+
+bool cyan_settings_save(void) {
+    platform_ensure_directory(SETTINGS_DIR);
+
+    char tmpResolvedPath[SETTINGS_RESOLVED_PATH_MAX];
+    char finalResolvedPath[SETTINGS_RESOLVED_PATH_MAX];
+    platform_store_resolved_path(SETTINGS_FILE_TMP_RELATIVE, tmpResolvedPath, sizeof(tmpResolvedPath));
+    platform_store_resolved_path(SETTINGS_FILE_RELATIVE, finalResolvedPath, sizeof(finalResolvedPath));
+
+    FILE* file = fopen(tmpResolvedPath, "w");
+    if (file == NULL) {
+        cyan_log(VERBOSE_LOW, "[Settings] failed to open '%s' for writing", tmpResolvedPath);
+        return false;
+    }
+
+    fprintf(file, "$CYAN_SETTINGS_VERSION=%d;\n", g_settings.version);
+    char formatted[CYAN_SETTINGS_LINE_MAX];
+    for (size_t i = 0; i < SETTINGS_REGISTRY_COUNT; i++) {
+        const SettingRegistryEntry* entry = &SETTINGS_REGISTRY[i];
+        if (entry->reserved) {
+            continue; // version already written above
+        }
+        SettingSpec spec = {entry->key, entry->field, entry->type};
+        if (!format_setting_value(&spec, formatted, sizeof(formatted))) {
+            continue;
+        }
+        fprintf(file, "%s=%s;\n", entry->key, formatted);
+    }
+
+    if (fclose(file) != 0) {
+        cyan_log(VERBOSE_LOW, "[Settings] failed to finish writing '%s'", tmpResolvedPath);
+        return false;
+    }
+
+    remove(finalResolvedPath); // fine if this doesn't exist yet
+    if (rename(tmpResolvedPath, finalResolvedPath) != 0) {
+        cyan_log(VERBOSE_LOW, "[Settings] failed to replace '%s'", finalResolvedPath);
+        return false;
+    }
+
+    cyan_log(VERBOSE_LOW, "[Settings] saved '%s'", finalResolvedPath);
+    return true;
+}
+
+bool cyan_settings_format_value(const char* key, char* out, size_t outSize) {
+    for (size_t i = 0; i < SETTINGS_REGISTRY_COUNT; i++) {
+        const SettingRegistryEntry* entry = &SETTINGS_REGISTRY[i];
+        if (strcmp(entry->key, key) != 0) {
+            continue;
+        }
+        SettingSpec spec = {entry->key, entry->field, entry->type};
+        return format_setting_value(&spec, out, outSize);
+    }
+    snprintf(out, outSize, "<unset>");
+    return false;
+}
+
+bool cyan_settings_set_from_string(const char* key, const char* value) {
+    for (size_t i = 0; i < SETTINGS_REGISTRY_COUNT; i++) {
+        const SettingRegistryEntry* entry = &SETTINGS_REGISTRY[i];
+        if (strcmp(entry->key, key) != 0) {
+            continue;
+        }
+        SettingSpec spec = {entry->key, entry->field, entry->type};
+        return apply_setting_value(&spec, value) == CYAN_SETTINGS_INTERPRET_OK;
+    }
+    return false;
+}
+
+void cyan_settings_print_all(void) {
+    char formatted[CYAN_SETTINGS_LINE_MAX];
+    for (size_t i = 0; i < SETTINGS_REGISTRY_COUNT; i++) {
+        const SettingRegistryEntry* entry = &SETTINGS_REGISTRY[i];
+        SettingSpec spec = {entry->key, entry->field, entry->type};
+        if (!format_setting_value(&spec, formatted, sizeof(formatted))) {
+            continue;
+        }
+        cyan_log(VERBOSE_SHELL, "%-22s = %s", entry->key, formatted);
+    }
+}
+
 int settings_tester(int argc, char** argv) {
     (void)argc;
     (void)argv;
-    char line[] = "font_override=\"fonts/GFX_Arial\"";
-    size_t pair_count = 0;
+    char line[] = "dev_mode=true; accent_color=#34A5B4; tab_order=[3,2,1,0]";
     cyan_read_line(line);
+    cyan_settings_print_all();
+    return 0;
 }

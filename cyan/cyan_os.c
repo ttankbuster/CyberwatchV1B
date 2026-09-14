@@ -226,6 +226,9 @@ bool cyan_init(void) {
     cyan_console_init(); /* interactive shell; also the VERBOSE_HIGH console log sink */
     cyan_log(VERBOSE_LOW, "[CyanOS] Starting...");
 
+    cyan_settings_set_defaults();
+    cyan_settings_load();
+
     if (!display_init(&display, &data)) {
         cyan_log(VERBOSE_LOW, "[Display]=FAILED");
         return false;
