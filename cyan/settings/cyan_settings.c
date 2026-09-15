@@ -41,7 +41,6 @@ void platform_ensure_directory(const char* relativePath);
 #define SETTINGS_FILE_TMP_RELATIVE SETTINGS_DIR "/settings.txt.tmp"
 #define SETTINGS_RESOLVED_PATH_MAX 512
 
-static CyanSettings g_settings;
 
 typedef struct {
     const char* key;

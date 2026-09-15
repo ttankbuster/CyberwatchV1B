@@ -3,6 +3,7 @@
 #include "clay_ui.h"
 #include "console/cyan_console.h"
 #include "console/cyan_shell.h"
+#include "settings/cyan_settings.h"
 #include "console/log.h"
 #include "data/display.h"
 #include "data/services.h"
@@ -88,6 +89,13 @@ int cyan_screenshot(char* path_override) {
     cyan_request_screenshot(resolvedPath);
     cyan_log(VERBOSE_SHELL, "Capturing screenshot -> %s", logPath);
     return 0;
+}
+
+bool load_settings() {
+    data.accentColor.r = g_settings.accentColor[0];
+    data.accentColor.g = g_settings.accentColor[1];
+    data.accentColor.b = g_settings.accentColor[2];
+    return true;
 }
 
 void string_to_lowercase(char* str) {

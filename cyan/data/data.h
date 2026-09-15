@@ -102,6 +102,7 @@ typedef struct CyanData {
     float temperature;
     char temperatureChars[6]; // 23°C [000*C - 999*C]
     int uptime;               // seconds
+    Clay_Color accentColor;
     // CyanSettings cyanSettings;
 } CyanData;
 

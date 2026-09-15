@@ -97,4 +97,6 @@ void cyan_settings_print_all(void);
 
 int settings_tester(int argc, char** argv);
 
+CyanSettings g_settings;
+
 #endif
