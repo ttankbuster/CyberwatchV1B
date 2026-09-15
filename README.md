@@ -1,4 +1,4 @@
-![banner](docs/images/banner.png) 
+![banner2](docs/images/banner.png) 
 # CyberwatchV1B
 The Cyberwatch is an extensible smartwatch built from scratch, targeting ESP32 hardware. It's current version is V1B.
 Cyberwatch runs **Cyan**, a small operating system written in C with an embedded Lua runtime for app handling. Cyan is platform agnostic and can run on the watch and as a native desktop application, so the interface can be developed faster, without hardware in the loop by utilising [Clay](<https://github.com/nicbarker/clay>), a lightweight single header UI layout library. Apps are loaded at runtime from an SD card. 
