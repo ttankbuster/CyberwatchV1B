@@ -33,8 +33,6 @@ analogue_roman=false; analogue_all_numerals=true; analogue=true;  // multiple st
 
 */
 
-// Implemented per platform (native: platform/pc/data_pc.c). Declared directly rather than pulling
-// in data.h, since the settings module is meant to stay independent of the rest of CyanData.
 void platform_store_resolved_path(const char* relativePath, char* outBuffer, size_t bufferSize);
 void platform_ensure_directory(const char* relativePath);
 
@@ -53,6 +51,7 @@ typedef struct {
 } SettingRegistryEntry;
 
 static const SettingRegistryEntry SETTINGS_REGISTRY[] = {
+    //{key,                  type,         field,              reserved }
     {"CYAN_SETTINGS_VERSION", SETTING_INT, &g_settings.version, true},
     {"date_format", SETTING_ENUM, &g_settings.dateFormat, false},
     {"tab_order", SETTING_INT_ARRAY, &g_settings.tabOrder, false},
@@ -208,8 +207,6 @@ static int interpret_settings_key(const char* str, bool reserved, SettingSpec* o
     return lookup_setting_key(str, reserved, out_spec);
 }
 
-// Parses "[<int>,<int>,...]" into `out`, up to `capacity` entries. Extra entries are ignored;
-// missing entries keep whatever was already in `out`. Returns false if any entry isn't an integer.
 static bool parse_int_array(const char* str, int* out, size_t capacity) {
     size_t len = strlen(str);
     if (len < 2 || str[0] != '[' || str[len - 1] != ']') {
@@ -288,8 +285,6 @@ static const char* date_format_string(DateFormat format) {
     }
 }
 
-// Validates `rawValue` against `spec->type` and, if it matches, writes it into the live field
-// `spec->value` points at.
 static int apply_setting_value(const SettingSpec* spec, const char* rawValue) {
     if (rawValue == NULL || rawValue[0] == '\0') {
         return CYAN_SETTINGS_INTERPRET_EMPTY_VALUE;
@@ -326,13 +321,16 @@ static int apply_setting_value(const SettingSpec* spec, const char* rawValue) {
         if (innerLen >= sizeof(g_settings.fontOverride)) {
             return CYAN_SETTINGS_INTERPRET_INVALID_VALUE;
         }
-        snprintf((char*)spec->value, sizeof(g_settings.fontOverride), "%.*s", (int)innerLen,
-                 rawValue + 1);
+        snprintf(
+            (char*)spec->value, sizeof(g_settings.fontOverride), "%.*s", (int)innerLen, rawValue + 1
+        );
         return CYAN_SETTINGS_INTERPRET_OK;
     }
     case SETTING_INT_ARRAY:
         if (!is_array(rawValue) ||
-            !parse_int_array(rawValue, (int*)spec->value, sizeof(g_settings.tabOrder) / sizeof(int))) {
+            !parse_int_array(
+                rawValue, (int*)spec->value, sizeof(g_settings.tabOrder) / sizeof(int)
+            )) {
             return CYAN_SETTINGS_INTERPRET_INVALID_VALUE;
         }
         return CYAN_SETTINGS_INTERPRET_OK;
@@ -367,9 +365,8 @@ static bool format_setting_value(const SettingSpec* spec, char* out, size_t outS
         size_t written = 0;
         written += snprintf(out + written, outSize - written, "[");
         for (size_t i = 0; i < count && written < outSize; i++) {
-            written += snprintf(
-                out + written, outSize - written, "%s%d", i == 0 ? "" : ",", values[i]
-            );
+            written +=
+                snprintf(out + written, outSize - written, "%s%d", i == 0 ? "" : ",", values[i]);
         }
         if (written < outSize) {
             snprintf(out + written, outSize - written, "]");
@@ -402,8 +399,9 @@ static void interpret_pairs(size_t pair_count, SettingPair* pairs) {
             );
             continue;
         }
-        cyan_log(VERBOSE_HIGH, "[Settings] %s%s = %s", pair.reserved ? "$" : "", pair.key,
-                 pair.value);
+        cyan_log(
+            VERBOSE_HIGH, "[Settings] %s%s = %s", pair.reserved ? "$" : "", pair.key, pair.value
+        );
     }
 }
 
@@ -474,9 +472,6 @@ parse_statement(const char* line, size_t begin, size_t end, SettingPair* pair) {
     while (i < end) {
         char c = line[i];
         i++;
-        // Note: '$' is only a reserved-key marker in the key portion above. In the value
-        // portion it's a literal character - e.g. the enum-constant syntax "$DATE_YMD" - so it
-        // must not be stripped or flip `reserved` here.
         if (c == '"') {
             inside_quote = !inside_quote;
         } else if (c == ' ') {
@@ -645,8 +640,12 @@ bool cyan_settings_save(void) {
 
     char tmpResolvedPath[SETTINGS_RESOLVED_PATH_MAX];
     char finalResolvedPath[SETTINGS_RESOLVED_PATH_MAX];
-    platform_store_resolved_path(SETTINGS_FILE_TMP_RELATIVE, tmpResolvedPath, sizeof(tmpResolvedPath));
-    platform_store_resolved_path(SETTINGS_FILE_RELATIVE, finalResolvedPath, sizeof(finalResolvedPath));
+    platform_store_resolved_path(
+        SETTINGS_FILE_TMP_RELATIVE, tmpResolvedPath, sizeof(tmpResolvedPath)
+    );
+    platform_store_resolved_path(
+        SETTINGS_FILE_RELATIVE, finalResolvedPath, sizeof(finalResolvedPath)
+    );
 
     FILE* file = fopen(tmpResolvedPath, "w");
     if (file == NULL) {

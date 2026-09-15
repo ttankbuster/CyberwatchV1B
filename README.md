@@ -51,7 +51,13 @@ The software follows a strict naming convention for all source code for the firm
 | **functions** | `snake_case`           |
 | **constants** | `SCREAMING_SNAKE_CASE` |
 
+`design/` holds the KiCad schematic and PCB, a FreeCAD case, component datasheets, and BOM spreadsheets for the hardware.
 
+New public symbols should also take a `cyan_*` prefix. Styling is defined in `.clang-format` (stored at root).
+
+Tests live under `test/`:
+- `test/test_cyan_shell/` - Unity-style unit test for the shell command parser.
+- `test/test_cyan_shell_repl/` - a Python-driven interactive REPL test, run via `pio test -e shell_repl`.
 
 **PlatformIO Environments**
 
@@ -143,22 +149,3 @@ Apps run sandboxed in their own Lua state and only see the API Cyan registers fo
 - **Platform backend split** - each platform implements its own `display_*` (rendering) and `data_*` (input/event) backends: `platform/pc/` (SDL3) and `platform/esp32/` (ST7789V2 over SPI via Arduino_GFX, MCP23017 I/O expansion).
 
 The MCP23017 must finish initializing before the display's `RST` pulse, and the SD card's SPI setup must run after the display's own SPI init - reversing either hangs the board.
-## Physical build
-
-`design/` holds the KiCad schematic and PCB, a FreeCAD case, component datasheets, and BOM spreadsheets for the hardware.
-
-## Styling & Structure
-
-Naming conventions (also documented in the integrity plan):
-| For           | Naming Convention      |
-| ------------- | ----------------------- |
-| **types**     | `PascalCase`            |
-| **fields**    | `camelCase`             |
-| **functions** | `snake_case`            |
-| **constants** | `SCREAMING_SNAKE_CASE`  |
-
-New public symbols should also take a `cyan_*` prefix. Styling is defined in `.clang-format` (present at the repo root) run before committing.
-
-Tests live under `test/`:
-- `test/test_cyan_shell/` - Unity-style unit test for the shell command parser.
-- `test/test_cyan_shell_repl/` - a Python-driven interactive REPL test, run via `pio test -e shell_repl`.
