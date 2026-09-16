@@ -26,7 +26,9 @@ static void render_time_digital(
         ) {
             CLAY_TEXT(
                 timeString, CLAY_TEXT_CONFIG(
-                                {.fontId = FONT_LARGE, .fontSize = 190, .textColor = ACCENT_COLOUR}
+                                {.fontId = FONT_LARGE,
+                                 .fontSize = 190,
+                                 .textColor = data->accentColor}
                             )
             );
         }
@@ -139,9 +141,10 @@ static void render_time_analogue(
         int pivot_outer_radius = (int)lroundf(hand_length * 0.0475f);
         int pivot_inner_radius = (int)lroundf(hand_length * 0.0316f);
         surface_push_circle(surface, centre_x, centre_y, pivot_outer_radius, INFO_COLOUR);
-        surface_push_circle(surface, centre_x, centre_y, pivot_inner_radius, ACCENT_COLOUR);
+        surface_push_circle(surface, centre_x, centre_y, pivot_inner_radius, data->accentColor);
         draw_hand(
-            surface, centre_x, centre_y, S, hand_length * 0.9f, hand_length * 0.019f, ACCENT_COLOUR
+            surface, centre_x, centre_y, S, hand_length * 0.9f, hand_length * 0.019f,
+            data->accentColor
         );
     }
 }
@@ -149,9 +152,32 @@ static void render_time_analogue(
 void read_time_date(CyanData* data) {
     WatchfaceData* wf = &data->watchface;
     snprintf(wf->timeChars, sizeof(wf->timeChars), "%02d:%02d", wf->time.tm_hour, wf->time.tm_min);
+
+    int day = wf->time.tm_mday;
+    int month = wf->time.tm_mon;
+    int year = wf->time.tm_year % 100;
+    int first, second, third;
+    switch (g_settings.dateFormat) {
+    case DATE_MDY:
+        first = month;
+        second = day;
+        third = year;
+        break;
+    case DATE_YMD:
+        first = year;
+        second = month;
+        third = day;
+        break;
+    case DATE_DMY:
+    default:
+        first = day;
+        second = month;
+        third = year;
+        break;
+    }
     snprintf(
-        wf->dateChars, sizeof(wf->dateChars), "%02d/%02d/%02d %.3s", wf->time.tm_mday,
-        wf->time.tm_mon, wf->time.tm_year % 100, WEEKDAYS[wf->time.tm_wday]
+        wf->dateChars, sizeof(wf->dateChars), "%02d/%02d/%02d %.3s", first, second, third,
+        WEEKDAYS[wf->time.tm_wday]
     );
 }
 

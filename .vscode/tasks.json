@@ -4,7 +4,7 @@
     {
       "label": "pio-build-native",
       "type": "shell",
-      "command": "C:/Users/Teddy/.platformio/penv/Scripts/platformio.exe",
+      "command": "pio",
       "args": ["run", "-e", "native"],
       "options": {
         "cwd": "${workspaceFolder}"
@@ -13,6 +13,17 @@
         "kind": "build",
         "isDefault": true
       },
+      "problemMatcher": []
+    },
+    {
+      "label": "Upload (native)",
+      "type": "shell",
+      "command": "pio",
+      "args": ["run", "--target", "upload", "--environment", "native"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
       "problemMatcher": []
     }
   ]
