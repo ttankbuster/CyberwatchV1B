@@ -72,6 +72,7 @@ typedef struct {
     Surface analogueSurface;
     bool numeralsShowAll; // false = only 12/3/6/9, true = every hour
     bool numeralsRoman;   // false = arabic (1, 2, 3...), true = roman (I, II, III...)
+    bool analogueMode;    // mirrors the "analogue" setting: false = digital face, true = analogue
 } WatchfaceData;
 
 typedef struct {

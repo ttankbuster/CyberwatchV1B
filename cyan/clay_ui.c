@@ -2,6 +2,8 @@
 #define CLAY_IMPLEMENTATION
 #include "clay_ui.h"
 
+Clay_Color ACCENT_COLOUR = {215, 125, 69, 255};
+
 void handle_clay_errors(Clay_ErrorData errorData) {
     if (errorData.errorText.chars) {
         printf("%.*s\n", (int) errorData.errorText.length, errorData.errorText.chars);

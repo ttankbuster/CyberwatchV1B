@@ -18,7 +18,8 @@ static const uint32_t FONT_INFO = 1;
 static const uint32_t FONT_MED = 2;
 static const uint32_t FONT_SMALL = 3;
 
-static const Clay_Color ACCENT_COLOUR = {215, 125, 69, 255};
+// Not const: accent_color is a user setting, applied at runtime by cyan_settings_apply().
+extern Clay_Color ACCENT_COLOUR;
 static const Clay_Color INFO_COLOUR = {255, 255, 255, 255};
 static const Clay_Color SECONDARY_COLOUR = {150, 150, 150, 255};
 static const Clay_Color BG_COLOR = {4, 15, 24, 255};

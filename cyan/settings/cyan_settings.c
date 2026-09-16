@@ -719,6 +719,22 @@ void cyan_settings_print_all(void) {
     }
 }
 
+int cyan_settings_resolve_tab_screen(int position) {
+    size_t tabCount = sizeof(g_settings.tabOrder) / sizeof(int);
+    if (position < 0 || (size_t)position >= tabCount) {
+        return 0;
+    }
+    bool seen[sizeof(g_settings.tabOrder) / sizeof(int)] = {0};
+    for (size_t i = 0; i < tabCount; i++) {
+        int screen = g_settings.tabOrder[i];
+        if (screen < 0 || (size_t)screen >= tabCount || seen[screen]) {
+            return position; // not a valid permutation
+        }
+        seen[screen] = true;
+    }
+    return g_settings.tabOrder[position];
+}
+
 int settings_tester(int argc, char** argv) {
     (void)argc;
     (void)argv;

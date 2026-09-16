@@ -169,9 +169,6 @@ void cyan_request_screenshot(const char* resolvedPath) {
     screenshot_pending = true;
 }
 
-/* Write out any queued screenshot against whatever is currently on the renderer.
- * Called at the end of each cyan_update frame, and once during init so the
- * loading splash is captured before the main loop replaces it. */
 static void cyan_capture_pending_screenshot(void) {
     if (!screenshot_pending) {
         return;
@@ -221,9 +218,23 @@ static void cycle_tab(CyanData* data) {
     data->tabs.tabIndex = (data->tabs.tabIndex + 1) % data->tabs.tabCount;
 }
 
+void cyan_settings_apply(CyanData* data) {
+    CyanSettings* settings = cyan_settings_get();
+
+    ACCENT_COLOUR = (Clay_Color){
+        settings->accentColor[0], settings->accentColor[1], settings->accentColor[2], 255
+    };
+
+    data->watchface.analogueMode = settings->analogue;
+    data->watchface.numeralsShowAll = settings->analogueAllNumerals;
+    data->watchface.numeralsRoman = settings->analogueRoman;
+
+    cyan_log(VERBOSE_LOW, "[Settings] applied to running OS");
+}
+
 bool cyan_init(void) {
     log_add_listener(display_loading_log_listener, VERBOSE_LOW);
-    cyan_console_init(); /* interactive shell; also the VERBOSE_HIGH console log sink */
+    cyan_console_init();
     cyan_log(VERBOSE_LOW, "[CyanOS] Starting...");
 
     cyan_settings_set_defaults();
@@ -239,8 +250,7 @@ bool cyan_init(void) {
     data.tabs.tabIndex = 0;
     data.state = CYW_HOME;
     data.uptime = 0;
-    data.watchface.numeralsShowAll = true; // change to settings after implemented
-    data.watchface.numeralsRoman = true;
+    cyan_settings_apply(&data);
     DisplaySize initialSize = display_get_size(&display);
     bool clayOk = clay_ui_init(
         MAXIMUM_ELEMENTS, display_measure_text, &display, initialSize.width, initialSize.height
@@ -257,7 +267,7 @@ bool cyan_init(void) {
     cyan_log(VERBOSE_LOW, "[CyanOS]=OK");
     display_loading_screen(&display, 0.8);
     // cyan_screenshot("cyan-loading");
-    // cyan_capture_pending_screenshot(); /* grab the splash before the main loop redraws */
+    // cyan_capture_pending_screenshot();
     if (DEBUG_MODE) {
         bool run_splashscreen = true;
         while (run_splashscreen) {
@@ -276,6 +286,7 @@ void cyan_update(float dt, bool* running) {
 
     DisplaySize size = display_get_size(&display);
     Clay_RenderCommandArray clay_commands;
+    bool devMode = cyan_settings_get()->devMode;
 
     switch (data.state) {
     case CYW_APP_RUNNING:
@@ -283,7 +294,7 @@ void cyan_update(float dt, bool* running) {
             cyan_exit_app();
         }
         clay_commands =
-            clay_app_handler_app(&data, &app_handler, size.width, size.height, false, false);
+            clay_app_handler_app(&data, &app_handler, size.width, size.height, devMode, false);
         break;
 
     case CYW_HOME:
@@ -291,13 +302,15 @@ void cyan_update(float dt, bool* running) {
         if (has_event_type(&data.eventQueue, EVENT_BUTTON1_DOWN)) {
             cycle_tab(&data);
         }
-        switch (data.tabs.tabIndex) {
+        switch (cyan_settings_resolve_tab_screen(data.tabs.tabIndex)) {
         case 0:
-            clay_commands = clay_watchface(&data, size.width, size.height, false, false);
+            clay_commands = clay_watchface(
+                &data, size.width, size.height, data.watchface.analogueMode, devMode
+            );
             break;
         case 1:
             clay_commands =
-                clay_app_handler_catalogue(&data, &app_handler, size.width, size.height, false);
+                clay_app_handler_catalogue(&data, &app_handler, size.width, size.height, devMode);
             if (has_event_type(&data.eventQueue, EVENT_SCROLL_UP)) {
                 app_handler_catalogue_move(&data.appCatalogue, &app_handler, -1);
             }
@@ -309,7 +322,7 @@ void cyan_update(float dt, bool* running) {
             }
             break;
         case 2:
-            clay_commands = clay_timer(&data, size.width, size.height, false);
+            clay_commands = clay_timer(&data, size.width, size.height, devMode);
             if (data.timer.active) {
                 data.timer.selectedElement = -1;
             } else {
@@ -328,7 +341,7 @@ void cyan_update(float dt, bool* running) {
             }
             break;
         case 3:
-            clay_commands = clay_stopwatch(&data, size.width, size.height, false);
+            clay_commands = clay_stopwatch(&data, size.width, size.height, devMode);
             if (has_event_type(&data.eventQueue, EVENT_BUTTON2_DOWN)) {
                 stopwatch_reset(&data);
             }
@@ -337,7 +350,9 @@ void cyan_update(float dt, bool* running) {
             }
             break;
         default:
-            clay_commands = clay_watchface(&data, size.width, size.height, false, false);
+            clay_commands = clay_watchface(
+                &data, size.width, size.height, data.watchface.analogueMode, devMode
+            );
             break;
         }
         break;

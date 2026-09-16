@@ -149,10 +149,29 @@ static void render_time_analogue(
 void read_time_date(CyanData* data) {
     WatchfaceData* wf = &data->watchface;
     snprintf(wf->timeChars, sizeof(wf->timeChars), "%02d:%02d", wf->time.tm_hour, wf->time.tm_min);
-    snprintf(
-        wf->dateChars, sizeof(wf->dateChars), "%02d/%02d/%02d %.3s", wf->time.tm_mday,
-        wf->time.tm_mon, wf->time.tm_year % 100, WEEKDAYS[wf->time.tm_wday]
-    );
+
+    const char* weekday = WEEKDAYS[wf->time.tm_wday];
+    switch (cyan_settings_get()->dateFormat) {
+    case DATE_MDY:
+        snprintf(
+            wf->dateChars, sizeof(wf->dateChars), "%02d/%02d/%02d %.3s", wf->time.tm_mon,
+            wf->time.tm_mday, wf->time.tm_year % 100, weekday
+        );
+        break;
+    case DATE_YMD:
+        snprintf(
+            wf->dateChars, sizeof(wf->dateChars), "%02d/%02d/%02d %.3s", wf->time.tm_year % 100,
+            wf->time.tm_mon, wf->time.tm_mday, weekday
+        );
+        break;
+    case DATE_DMY:
+    default:
+        snprintf(
+            wf->dateChars, sizeof(wf->dateChars), "%02d/%02d/%02d %.3s", wf->time.tm_mday,
+            wf->time.tm_mon, wf->time.tm_year % 100, weekday
+        );
+        break;
+    }
 }
 
 Clay_RenderCommandArray

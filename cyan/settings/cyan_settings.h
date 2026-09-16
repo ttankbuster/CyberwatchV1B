@@ -95,6 +95,11 @@ bool cyan_settings_set_from_string(const char* key, const char* value);
 // Logs every known setting and its current value via cyan_log(VERBOSE_SHELL, ...).
 void cyan_settings_print_all(void);
 
+// Resolves which screen id should render at a given tab position, per the tab_order setting.
+// Falls back to identity (position == screen id) if tab_order isn't a valid permutation of
+// [0, tab_order length).
+int cyan_settings_resolve_tab_screen(int position);
+
 int settings_tester(int argc, char** argv);
 
 #endif

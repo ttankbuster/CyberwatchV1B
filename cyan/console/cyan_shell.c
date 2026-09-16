@@ -366,6 +366,7 @@ static int cmd_settings_set(int argc, char** argv) {
         cyan_log(VERBOSE_SHELL, "failed to set '%s' to '%s'", argv[1], argv[2]);
         return SHELL_ERR_UNKNOWN;
     }
+    cyan_settings_apply(&data);
     cyan_log(VERBOSE_SHELL, "%s = %s", argv[1], argv[2]);
     return SHELL_OK;
 }
@@ -385,6 +386,7 @@ static int cmd_settings_reset(int argc, char** argv) {
     (void)argc;
     (void)argv;
     cyan_settings_set_defaults();
+    cyan_settings_apply(&data);
     cyan_log(VERBOSE_SHELL, "settings reset to defaults (not yet saved)");
     return SHELL_OK;
 }

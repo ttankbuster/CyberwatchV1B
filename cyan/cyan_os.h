@@ -16,6 +16,7 @@ extern Display display;
 bool cyan_init(void);
 void cyan_update(float dt, bool* running);
 void cyan_shutdown(void);
+void cyan_settings_apply(CyanData* data);
 
 bool cyan_launch_app_id(int id);
 bool cyan_launch_app_name(char* name);
