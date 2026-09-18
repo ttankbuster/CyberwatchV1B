@@ -3,6 +3,7 @@
 #include "clay_ui.h"
 #include "console/cyan_console.h"
 #include "console/cyan_shell.h"
+#include "settings/cyan_settings.h"
 #include "console/log.h"
 #include "data/display.h"
 #include "data/services.h"
@@ -57,7 +58,7 @@ int cyan_screenshot(char* path_override) {
         } else if (data.state == CYW_APP_RUNNING) {
             snprintf(label, sizeof(label), "app(%s)", cyan_get_running_app()->name);
         } else {
-            switch (data.tabs.tabIndex) {
+            switch (g_settings.tabOrder[data.tabs.tabIndex]) {
             case 0:
                 snprintf(label, sizeof(label), "watchface");
                 break;
@@ -88,6 +89,16 @@ int cyan_screenshot(char* path_override) {
     cyan_request_screenshot(resolvedPath);
     cyan_log(VERBOSE_SHELL, "Capturing screenshot -> %s", logPath);
     return 0;
+}
+
+bool load_settings() {
+    data.accentColor.r = g_settings.accentColor[0];
+    data.accentColor.g = g_settings.accentColor[1];
+    data.accentColor.b = g_settings.accentColor[2];
+    data.accentColor.a = 255;
+    data.watchface.numeralsShowAll = g_settings.analogueAllNumerals;
+    data.watchface.numeralsRoman = g_settings.analogueRoman;
+    return true;
 }
 
 void string_to_lowercase(char* str) {
@@ -153,6 +164,12 @@ bool cyan_exit_app() {
     app_handler_unload(&app_handler);
     data.state = CYW_HOME;
     data.tabs.tabIndex = 1;
+    for (int i = 0; i < data.tabs.tabCount; i++) {
+        if (g_settings.tabOrder[i] == 1) {
+            data.tabs.tabIndex = i;
+            break;
+        }
+    }
     app_handler.currentApp = -1;
     return true;
 }
@@ -239,6 +256,7 @@ bool cyan_init(void) {
 
     cyan_settings_set_defaults();
     cyan_settings_load();
+    load_settings();
 
     if (!display_init(&display, &data)) {
         cyan_log(VERBOSE_LOW, "[Display]=FAILED");
@@ -250,7 +268,10 @@ bool cyan_init(void) {
     data.tabs.tabIndex = 0;
     data.state = CYW_HOME;
     data.uptime = 0;
+<<<<<<< HEAD
     cyan_settings_apply(&data);
+=======
+>>>>>>> 46ae89490506ea908522b11788f50b8e0f273993
     DisplaySize initialSize = display_get_size(&display);
     bool clayOk = clay_ui_init(
         MAXIMUM_ELEMENTS, display_measure_text, &display, initialSize.width, initialSize.height
@@ -280,6 +301,7 @@ bool cyan_init(void) {
 
 void cyan_update(float dt, bool* running) {
     update_data(&data, &display, running);
+    load_settings();
 
     check_shutdown(&data, dt, running);
     cyan_console_poll();
@@ -293,8 +315,14 @@ void cyan_update(float dt, bool* running) {
         if (has_event_type(&data.eventQueue, EVENT_BUTTON1_DOWN)) {
             cyan_exit_app();
         }
+<<<<<<< HEAD
         clay_commands =
             clay_app_handler_app(&data, &app_handler, size.width, size.height, devMode, false);
+=======
+        clay_commands = clay_app_handler_app(
+            &data, &app_handler, size.width, size.height, g_settings.devMode, false
+        );
+>>>>>>> 46ae89490506ea908522b11788f50b8e0f273993
         break;
 
     case CYW_HOME:
@@ -302,6 +330,7 @@ void cyan_update(float dt, bool* running) {
         if (has_event_type(&data.eventQueue, EVENT_BUTTON1_DOWN)) {
             cycle_tab(&data);
         }
+<<<<<<< HEAD
         switch (cyan_settings_resolve_tab_screen(data.tabs.tabIndex)) {
         case 0:
             clay_commands = clay_watchface(
@@ -311,6 +340,18 @@ void cyan_update(float dt, bool* running) {
         case 1:
             clay_commands =
                 clay_app_handler_catalogue(&data, &app_handler, size.width, size.height, devMode);
+=======
+        switch (g_settings.tabOrder[data.tabs.tabIndex]) {
+        case 0:
+            clay_commands = clay_watchface(
+                &data, size.width, size.height, g_settings.analogue, g_settings.devMode
+            );
+            break;
+        case 1:
+            clay_commands = clay_app_handler_catalogue(
+                &data, &app_handler, size.width, size.height, g_settings.devMode
+            );
+>>>>>>> 46ae89490506ea908522b11788f50b8e0f273993
             if (has_event_type(&data.eventQueue, EVENT_SCROLL_UP)) {
                 app_handler_catalogue_move(&data.appCatalogue, &app_handler, -1);
             }
@@ -322,7 +363,11 @@ void cyan_update(float dt, bool* running) {
             }
             break;
         case 2:
+<<<<<<< HEAD
             clay_commands = clay_timer(&data, size.width, size.height, devMode);
+=======
+            clay_commands = clay_timer(&data, size.width, size.height, g_settings.devMode);
+>>>>>>> 46ae89490506ea908522b11788f50b8e0f273993
             if (data.timer.active) {
                 data.timer.selectedElement = -1;
             } else {
@@ -341,7 +386,11 @@ void cyan_update(float dt, bool* running) {
             }
             break;
         case 3:
+<<<<<<< HEAD
             clay_commands = clay_stopwatch(&data, size.width, size.height, devMode);
+=======
+            clay_commands = clay_stopwatch(&data, size.width, size.height, g_settings.devMode);
+>>>>>>> 46ae89490506ea908522b11788f50b8e0f273993
             if (has_event_type(&data.eventQueue, EVENT_BUTTON2_DOWN)) {
                 stopwatch_reset(&data);
             }
@@ -351,7 +400,11 @@ void cyan_update(float dt, bool* running) {
             break;
         default:
             clay_commands = clay_watchface(
+<<<<<<< HEAD
                 &data, size.width, size.height, data.watchface.analogueMode, devMode
+=======
+                &data, size.width, size.height, g_settings.analogue, g_settings.devMode
+>>>>>>> 46ae89490506ea908522b11788f50b8e0f273993
             );
             break;
         }

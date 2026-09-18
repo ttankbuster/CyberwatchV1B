@@ -550,7 +550,7 @@
       "plot": "gbr/",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "",
+      "step": "model/CyberwatchV1B-PCB-right.step",
       "svg": "",
       "vrml": ""
     },

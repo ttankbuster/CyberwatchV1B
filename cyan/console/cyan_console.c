@@ -3,6 +3,7 @@
 #include "cyan_console_io.h"
 #include "cyan_shell.h"
 #include "log.h"
+#include <ctype.h>
 #include <string.h>
 
 #define CYAN_CONSOLE_PROMPT "cyan> "
@@ -15,6 +16,8 @@ typedef struct {
     bool dispatching;
     bool sawCR;
     bool started;
+    bool awaitingConfirmation;
+    void (*confirmCallback)(void);
 } CyanConsole;
 
 static CyanConsole g_console;
@@ -54,9 +57,35 @@ static void console_log_listener(VerbosityLevel level, const char* message) {
         draw_input_line();
 }
 
+static bool strcasecmp_ascii(const char* a, const char* b) {
+    while (*a != '\0' && *b != '\0') {
+        if (tolower((unsigned char)*a) != tolower((unsigned char)*b)) {
+            return false;
+        }
+        a++;
+        b++;
+    }
+    return *a == '\0' && *b == '\0';
+}
+
 static void run_line(void) {
-    ShellParse parse;
     g_console.line[g_console.len] = '\0';
+
+    if (g_console.awaitingConfirmation) {
+        void (*callback)(void) = g_console.confirmCallback;
+        bool confirmed = strcasecmp_ascii(g_console.line, "y") ||
+                          strcasecmp_ascii(g_console.line, "yes");
+        g_console.awaitingConfirmation = false;
+        g_console.confirmCallback = NULL;
+        if (confirmed && callback != NULL) {
+            callback();
+        } else {
+            cyan_log(VERBOSE_SHELL, "cancelled");
+        }
+        return;
+    }
+
+    ShellParse parse;
     cyan_shell_line_decompose(&parse, g_console.line);
 
     switch (parse.status) {
@@ -146,4 +175,10 @@ void cyan_console_shutdown(void) {
         return;
     console_io_close();
     g_console.started = false;
+}
+
+void cyan_console_request_confirmation(const char* prompt, void (*onConfirm)(void)) {
+    g_console.awaitingConfirmation = true;
+    g_console.confirmCallback = onConfirm;
+    cyan_log(VERBOSE_SHELL, "%s (y/n)", prompt);
 }

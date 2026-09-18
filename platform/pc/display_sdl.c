@@ -53,6 +53,9 @@ bool display_init(Display* display, CyanData* data) {
         return false;
     }
 
+    SDL_Surface* cyberwatchIcon = IMG_Load("icon.png");
+    bool iconSet = cyberwatchIcon != NULL && SDL_SetWindowIcon(backend->window, cyberwatchIcon);
+    SDL_DestroySurface(cyberwatchIcon);
     SDL_Texture* battery_tex = SDL_CreateTexture(
         backend->renderer, SDL_PIXELFORMAT_XRGB8888, SDL_TEXTUREACCESS_STATIC, ICON_BATTERY_WIDTH,
         ICON_BATTERY_HEIGHT

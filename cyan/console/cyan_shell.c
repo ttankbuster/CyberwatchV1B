@@ -1,6 +1,7 @@
 // cyan_shell.c
 #include "cyan_shell.h"
 
+#include "cyan_console.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -207,7 +208,7 @@ int cmd_help(int argc, char** argv) {
     (void)argc;
     (void)argv;
 
-    char output[1024];
+    char output[2048];
     output[0] = '\0';
     size_t length = 0;
 
@@ -382,12 +383,21 @@ static int cmd_settings_save(int argc, char** argv) {
     return SHELL_OK;
 }
 
+static void do_settings_reset(void) {
+    cyan_settings_set_defaults();
+    cyan_log(VERBOSE_SHELL, "settings reset to defaults (not yet saved)");
+}
+
 static int cmd_settings_reset(int argc, char** argv) {
     (void)argc;
     (void)argv;
+<<<<<<< HEAD
     cyan_settings_set_defaults();
     cyan_settings_apply(&data);
     cyan_log(VERBOSE_SHELL, "settings reset to defaults (not yet saved)");
+=======
+    cyan_console_request_confirmation("Reset all settings to defaults?", do_settings_reset);
+>>>>>>> 46ae89490506ea908522b11788f50b8e0f273993
     return SHELL_OK;
 }
 
@@ -414,9 +424,11 @@ static const ShellCommand SETTINGS_CMDS[] = {
     {"test", "temporary", cmd_settings_test, NULL, NULL},
     {"list", "List all settings and their current values", cmd_settings_list, NULL, NULL},
     {"get", "Get a specific setting", cmd_settings_get, NULL, "<setting>"},
-    {"set", "Set a specific setting", cmd_settings_set, NULL, "<setting> <value>"},
+    {"set", "Set a specific setting (value $default resets it)", cmd_settings_set, NULL,
+     "<setting> <value>"},
     {"save", "Write current settings to disk", cmd_settings_save, NULL, NULL},
-    {"reset", "Reset settings to defaults (not yet saved)", cmd_settings_reset, NULL, NULL},
+    {"reset", "Reset all settings to defaults, after confirmation (not yet saved)",
+     cmd_settings_reset, NULL, NULL},
     {NULL},
 };
 

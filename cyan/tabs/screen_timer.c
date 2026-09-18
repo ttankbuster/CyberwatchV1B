@@ -107,7 +107,7 @@ static void render_timer(CyanData *data, int debugOpacity, Clay_String timerStri
                 CLAY_TEXT(timerString, CLAY_TEXT_CONFIG({
                     .fontId = FONT_LARGE,
                     .fontSize = 140,
-                    .textColor = data->timer.active ? ACCENT_COLOUR : (Clay_Color){80,80,80,255},
+                    .textColor = data->timer.active ? data->accentColor : (Clay_Color){80,80,80,255},
                 }));
             } else {
                 CLAY_TEXT(timerString, CLAY_TEXT_CONFIG({

@@ -1,0 +1,9 @@
+$CYAN_SETTINGS_VERSION=1;
+date_format=$DATE_DMY;
+tab_order=[0,1,2,3];
+font_override="";
+dev_mode=false;
+accent_color=#34A5B4;
+analogue=false;
+analogue_roman=false;
+analogue_all_numerals=true;

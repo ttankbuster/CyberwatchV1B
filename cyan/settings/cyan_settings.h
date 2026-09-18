@@ -18,7 +18,7 @@ typedef enum {
 
 typedef struct {
     const char* key;
-    void* value; // points at the live field inside the global CyanSettings instance
+    void* value;
     SettingType type;
 } SettingSpec;
 
@@ -68,38 +68,24 @@ typedef struct {
     bool analogueAllNumerals;
 } CyanSettings;
 
-// Parses one settings-file line (possibly several ';'-separated statements) and applies any
-// recognized keys directly onto the global settings instance returned by cyan_settings_get().
 SettingParseError cyan_read_line(char* line);
-
-// The single live settings instance. Never NULL.
 CyanSettings* cyan_settings_get(void);
-
-// Resets the live settings instance to its built-in defaults, without touching disk.
 void cyan_settings_set_defaults(void);
-
-// Loads settings from `.cyanos/settings.txt` (relative to the app's storage root) on top of
-// whatever the live instance currently holds. Returns false if the file doesn't exist or couldn't
-// be read; missing/invalid individual lines are skipped rather than treated as fatal.
 bool cyan_settings_load(void);
-
-// Writes the live settings instance out to `.cyanos/settings.txt`, via a .tmp file that only
-// replaces the real file once it's been written in full. Returns false on any I/O failure.
 bool cyan_settings_save(void);
-
-// Shell-facing helpers: format/apply a single setting by name. Both return false for an unknown
-// key. cyan_settings_format_value writes "<unset>" for a key that isn't currently valid.
 bool cyan_settings_format_value(const char* key, char* out, size_t outSize);
 bool cyan_settings_set_from_string(const char* key, const char* value);
-
-// Logs every known setting and its current value via cyan_log(VERBOSE_SHELL, ...).
 void cyan_settings_print_all(void);
+<<<<<<< HEAD
 
 // Resolves which screen id should render at a given tab position, per the tab_order setting.
 // Falls back to identity (position == screen id) if tab_order isn't a valid permutation of
 // [0, tab_order length).
 int cyan_settings_resolve_tab_screen(int position);
 
+=======
+>>>>>>> 46ae89490506ea908522b11788f50b8e0f273993
 int settings_tester(int argc, char** argv);
+extern CyanSettings g_settings;
 
 #endif

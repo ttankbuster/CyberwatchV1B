@@ -4,7 +4,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+CyanSettings g_settings;
+
 /* Exemplar settings file
+
+// $default token used to reset a setting to its built-in default value. For example, `settings set accent_color $default` will reset the accent color to its default.
 
 $CYAN_SETTINGS_VERSION=1;                   // special character for reserved settings - the user
                                             // can write CYAN_VERSION if they want as their own
@@ -41,28 +45,55 @@ void platform_ensure_directory(const char* relativePath);
 #define SETTINGS_FILE_TMP_RELATIVE SETTINGS_DIR "/settings.txt.tmp"
 #define SETTINGS_RESOLVED_PATH_MAX 512
 
-static CyanSettings g_settings;
 
 typedef struct {
     const char* key;
     SettingType type;
     void* field;
+    size_t size;
     bool reserved;
 } SettingRegistryEntry;
 
 static const SettingRegistryEntry SETTINGS_REGISTRY[] = {
-    //{key,                  type,         field,              reserved }
-    {"CYAN_SETTINGS_VERSION", SETTING_INT, &g_settings.version, true},
-    {"date_format", SETTING_ENUM, &g_settings.dateFormat, false},
-    {"tab_order", SETTING_INT_ARRAY, &g_settings.tabOrder, false},
-    {"font_override", SETTING_STRING, &g_settings.fontOverride, false},
-    {"dev_mode", SETTING_BOOL, &g_settings.devMode, false},
-    {"accent_color", SETTING_HEX, &g_settings.accentColor, false},
-    {"analogue", SETTING_BOOL, &g_settings.analogue, false},
-    {"analogue_roman", SETTING_BOOL, &g_settings.analogueRoman, false},
-    {"analogue_all_numerals", SETTING_BOOL, &g_settings.analogueAllNumerals, false},
+    //{key,                  type,         field,              size,                            reserved }
+    {"CYAN_SETTINGS_VERSION", SETTING_INT, &g_settings.version, sizeof(g_settings.version), true},
+    {"date_format", SETTING_ENUM, &g_settings.dateFormat, sizeof(g_settings.dateFormat), false},
+    {"tab_order", SETTING_INT_ARRAY, &g_settings.tabOrder, sizeof(g_settings.tabOrder), false},
+    {"font_override", SETTING_STRING, &g_settings.fontOverride, sizeof(g_settings.fontOverride), false},
+    {"dev_mode", SETTING_BOOL, &g_settings.devMode, sizeof(g_settings.devMode), false},
+    {"accent_color", SETTING_HEX, &g_settings.accentColor, sizeof(g_settings.accentColor), false},
+    {"analogue", SETTING_BOOL, &g_settings.analogue, sizeof(g_settings.analogue), false},
+    {"analogue_roman", SETTING_BOOL, &g_settings.analogueRoman, sizeof(g_settings.analogueRoman), false},
+    {"analogue_all_numerals", SETTING_BOOL, &g_settings.analogueAllNumerals,
+     sizeof(g_settings.analogueAllNumerals), false},
 };
 #define SETTINGS_REGISTRY_COUNT (sizeof(SETTINGS_REGISTRY) / sizeof(SETTINGS_REGISTRY[0]))
+
+static const SettingRegistryEntry* find_registry_entry(const char* key) {
+    for (size_t i = 0; i < SETTINGS_REGISTRY_COUNT; i++) {
+        if (strcmp(SETTINGS_REGISTRY[i].key, key) == 0) {
+            return &SETTINGS_REGISTRY[i];
+        }
+    }
+    return NULL;
+}
+
+// Case-insensitive match for the "$default" value token, which resets a single setting to its
+// built-in default (e.g. `settings set accent_color $default`, `$DEFAULT`, `$Default`, ...).
+static bool is_default_token(const char* value) {
+    static const char* TOKEN = "$default";
+    if (value == NULL) {
+        return false;
+    }
+    for (size_t i = 0; TOKEN[i] != '\0'; i++) {
+        if (value[i] == '\0' || tolower((unsigned char)value[i]) != TOKEN[i]) {
+            return false;
+        }
+    }
+    return value[strlen(TOKEN)] == '\0';
+}
+
+static void reset_entry_to_default(const SettingRegistryEntry* entry);
 
 bool is_integer(const char* str) {
     if (str == NULL || *str == '\0') {
@@ -391,6 +422,16 @@ static void interpret_pairs(size_t pair_count, SettingPair* pairs) {
             );
             continue;
         }
+        if (is_default_token(pair.value)) {
+            const SettingRegistryEntry* entry = find_registry_entry(spec.key);
+            if (entry != NULL) {
+                reset_entry_to_default(entry);
+                cyan_log(
+                    VERBOSE_HIGH, "[Settings] %s%s = <default>", pair.reserved ? "$" : "", pair.key
+                );
+            }
+            continue;
+        }
         int applyResult = apply_setting_value(&spec, pair.value);
         if (applyResult != CYAN_SETTINGS_INTERPRET_OK) {
             cyan_log(
@@ -593,23 +634,33 @@ SettingParseError cyan_read_line(char* line) {
 
 CyanSettings* cyan_settings_get(void) { return &g_settings; }
 
-void cyan_settings_set_defaults(void) {
-    memset(&g_settings, 0, sizeof(g_settings));
-    g_settings.version = 1;
-    g_settings.shell_verbosity = VERBOSE_HIGH;
-    g_settings.dateFormat = DATE_DMY;
-    g_settings.tabOrder[0] = 0;
-    g_settings.tabOrder[1] = 1;
-    g_settings.tabOrder[2] = 2;
-    g_settings.tabOrder[3] = 3;
-    g_settings.fontOverride[0] = '\0';
-    g_settings.devMode = false;
-    g_settings.accentColor[0] = 0x34;
-    g_settings.accentColor[1] = 0xA5;
-    g_settings.accentColor[2] = 0xB4;
-    g_settings.analogue = false;
-    g_settings.analogueRoman = false;
-    g_settings.analogueAllNumerals = true;
+static void fill_defaults(CyanSettings* s) {
+    memset(s, 0, sizeof(*s));
+    s->version = 1;
+    s->shell_verbosity = VERBOSE_HIGH;
+    s->dateFormat = DATE_DMY;
+    s->tabOrder[0] = 0;
+    s->tabOrder[1] = 1;
+    s->tabOrder[2] = 2;
+    s->tabOrder[3] = 3;
+    s->fontOverride[0] = '\0';
+    s->devMode = false;
+    s->accentColor[0] = 0x34;
+    s->accentColor[1] = 0xA5;
+    s->accentColor[2] = 0xB4;
+    s->analogue = false;
+    s->analogueRoman = false;
+    s->analogueAllNumerals = true;
+}
+
+void cyan_settings_set_defaults(void) { fill_defaults(&g_settings); }
+
+// Resets just this one entry's field to its built-in default, leaving every other setting alone.
+static void reset_entry_to_default(const SettingRegistryEntry* entry) {
+    CyanSettings defaults;
+    fill_defaults(&defaults);
+    size_t offset = (size_t)((char*)entry->field - (char*)&g_settings);
+    memcpy((char*)&g_settings + offset, (char*)&defaults + offset, entry->size);
 }
 
 bool cyan_settings_load(void) {
@@ -683,28 +734,26 @@ bool cyan_settings_save(void) {
 }
 
 bool cyan_settings_format_value(const char* key, char* out, size_t outSize) {
-    for (size_t i = 0; i < SETTINGS_REGISTRY_COUNT; i++) {
-        const SettingRegistryEntry* entry = &SETTINGS_REGISTRY[i];
-        if (strcmp(entry->key, key) != 0) {
-            continue;
-        }
-        SettingSpec spec = {entry->key, entry->field, entry->type};
-        return format_setting_value(&spec, out, outSize);
+    const SettingRegistryEntry* entry = find_registry_entry(key);
+    if (entry == NULL) {
+        snprintf(out, outSize, "<unset>");
+        return false;
     }
-    snprintf(out, outSize, "<unset>");
-    return false;
+    SettingSpec spec = {entry->key, entry->field, entry->type};
+    return format_setting_value(&spec, out, outSize);
 }
 
 bool cyan_settings_set_from_string(const char* key, const char* value) {
-    for (size_t i = 0; i < SETTINGS_REGISTRY_COUNT; i++) {
-        const SettingRegistryEntry* entry = &SETTINGS_REGISTRY[i];
-        if (strcmp(entry->key, key) != 0) {
-            continue;
-        }
-        SettingSpec spec = {entry->key, entry->field, entry->type};
-        return apply_setting_value(&spec, value) == CYAN_SETTINGS_INTERPRET_OK;
+    const SettingRegistryEntry* entry = find_registry_entry(key);
+    if (entry == NULL) {
+        return false;
     }
-    return false;
+    if (is_default_token(value)) {
+        reset_entry_to_default(entry);
+        return true;
+    }
+    SettingSpec spec = {entry->key, entry->field, entry->type};
+    return apply_setting_value(&spec, value) == CYAN_SETTINGS_INTERPRET_OK;
 }
 
 void cyan_settings_print_all(void) {

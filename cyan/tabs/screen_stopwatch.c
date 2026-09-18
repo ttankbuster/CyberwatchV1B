@@ -27,7 +27,7 @@ static void render_stopwatch(CyanData *data, int debugOpacity, Clay_String stopw
                 CLAY_TEXT(stopwatchString, CLAY_TEXT_CONFIG({
                     .fontId = FONT_LARGE,
                     .fontSize = 140,
-                    .textColor = ACCENT_COLOUR
+                    .textColor = data->accentColor
                 }));
             } else {
                 CLAY_TEXT(stopwatchString, CLAY_TEXT_CONFIG({
